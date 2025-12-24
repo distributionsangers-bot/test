@@ -1,4 +1,6 @@
 import { APP_CONFIG } from '../../core/constants.js';
+import { AuthService } from '../../services/auth.js';
+import { store } from '../../core/store.js';
 
 export function Sidebar(user, currentView, adminMode) {
     // const LOGO_URL = APP_CONFIG.LOGO_URL; // Not used here directly in renderSidebar, actually Sidebar function is unused/skeleton
@@ -98,5 +100,32 @@ export function updateActiveNavLink(path) {
 
     if (targetBtn) {
         targetBtn.className = "w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition bg-brand-600 text-white shadow-lg";
+    }
+}
+
+/**
+ * Initialise les événements de la sidebar (Déconnexion, Toggle Admin).
+ * À appeler APRES avoir injecté le HTML de la sidebar dans le DOM.
+ */
+export function initSidebar() {
+    // 1. Gestion Déconnexion
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+                await AuthService.logout();
+                window.location.reload(); // Recharge pour renvoyer vers Login
+            }
+        });
+    }
+
+    // 2. Gestion du Toggle Admin (si présent)
+    const btnToggle = document.getElementById('btn-toggle-admin');
+    if (btnToggle) {
+        btnToggle.addEventListener('click', () => {
+            store.state.adminMode = !store.state.adminMode;
+            localStorage.setItem('cop1_admin_mode', store.state.adminMode);
+            window.location.reload(); // Recharge pour appliquer le changement de mode
+        });
     }
 }

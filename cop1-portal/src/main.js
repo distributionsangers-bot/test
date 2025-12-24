@@ -3,9 +3,9 @@ import './style.css';
 import { supabase } from './services/supabase.js';
 import { store } from './core/store.js';
 import { router } from './core/router.js';
-import { renderSidebar, updateActiveNavLink } from './components/layout/sidebar.js';
+import { renderSidebar, updateActiveNavLink, initSidebar } from './components/layout/sidebar.js';
 import { renderHeader } from './components/layout/header.js';
-import { renderMobileNav } from './components/layout/mobile-nav.js';
+import { renderMobileNav, initMobileNav } from './components/layout/mobile-nav.js';
 import { toggleLoader, showToast } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
@@ -135,6 +135,12 @@ function renderAppLayout() {
         </div>
     `;
 
+    // Init Sidebar Events (Logout code)
+    initSidebar();
+
+    // Init Mobile Nav Events
+    initMobileNav();
+
     attachGlobalListeners();
 
     // On définit le root du routeur sur le slot principal
@@ -142,7 +148,24 @@ function renderAppLayout() {
     router.root = mainSlot;
 
     // On lance le routeur pour injecter la vue courante
-    router.handleLocation();
+    try {
+        router.handleLocation();
+    } catch (err) {
+        console.error("Router Error:", err);
+        mainSlot.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center p-6 animate-fade-in">
+                <div class="bg-red-50 text-red-500 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Une erreur est survenue</h2>
+                <p class="text-slate-500 mb-6 max-w-md">L'application a rencontré un problème inattendu. Veuillez rafraîchir la page.</p>
+                <button onclick="window.location.reload()" class="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition shadow-lg">
+                    Rafraîchir
+                </button>
+            </div>
+        `;
+        createIcons({ icons, root: mainSlot });
+    }
 }
 
 function attachGlobalListeners() {

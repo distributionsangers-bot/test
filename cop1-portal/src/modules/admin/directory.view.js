@@ -55,7 +55,10 @@ export async function renderDirectory(container) {
         }
 
         listContainer.innerHTML = data.map(u => {
-            const isMe = u.id === currentUserId;
+            // [FIX] Remplacement de currentUserId par le store
+            const currentUser = store.state.user;
+            const isMe = currentUser && u.id === currentUser.id;
+
             const fullName = escapeHtml(`${u.first_name || ''} ${u.last_name || ''}`);
             const initial = (u.first_name || '?')[0].toUpperCase();
             const isAdmin = u.is_admin;

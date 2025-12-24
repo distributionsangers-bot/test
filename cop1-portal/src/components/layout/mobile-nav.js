@@ -54,3 +54,23 @@ export function renderMobileNav(profile, currentView, adminMode) {
         </nav>
     `;
 }
+
+export function initMobileNav() {
+    const btnMenu = document.getElementById('btn-mobile-menu');
+    if (btnMenu) {
+        btnMenu.addEventListener('click', () => {
+            // Logique simple pour l'instant : on redirige vers /profile ou on ouvre un vrai menu overlay
+            // Pour ce MVP, "Menu" -> ouvre /profile qui contient les liens supplémentaires
+            // Ou on pourrait toggle une modale. Restons simple : le bouton "Menu" sert de "More"
+            // Le user voulait "accéder aux options supplémentaires".
+            // Si on regarde renderMobileNav, si on est admin, on a 'MENU'.
+            // Si on clique dessus, on va aller sur /dashboard ou /profile?
+            // Le code original ne faisait rien.
+            // On peut router vers /profile qui a souvent les settings.
+            // Ou mieux trigger un event custom pour ouvrir une sidebar mobile.
+
+            // Simulation d'ouverture de sidebar ou navigation vers profile
+            window.location.hash = '#/profile';
+        });
+    }
+}

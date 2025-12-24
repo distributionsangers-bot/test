@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>COP1 Angers - Espace Bénévoles</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Setup temporaire pour le dev sans build step complexe immédiat, mais on prépare pour Vite -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'scan': 'scan 2s linear infinite'
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+                        scan: { '0%': { transform: 'translateY(0)' }, '100%': { transform: 'translateY(16rem)' } }
+                    }
+                }
+            }
+        }
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            min-height: 100vh;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .pt-safe {
+            padding-top: env(safe-area-inset-top);
+        }
+
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-900">
+
+    <div id="toast-container"></div>
+    <div id="global-loader"
+        class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500 hidden">
+        <div class="w-16 h-16 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Point d'entrée de l'application -->
+    <div id="app" class="h-full w-full relative"></div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

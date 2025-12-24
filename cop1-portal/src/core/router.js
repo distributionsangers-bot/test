@@ -31,7 +31,10 @@ export class Router {
      * @param {string} path 
      */
     navigateTo(path) {
-        window.history.pushState({}, '', path);
+        // Avoid pushing same state twice
+        if (window.location.pathname !== path) {
+            window.history.pushState({}, '', path);
+        }
         this.handleLocation();
     }
 
@@ -59,28 +62,24 @@ export class Router {
             }
         }
 
+        // --- FALLBACK LOGIC ---
         if (!match) {
-            console.warn(`No route found for path: ${path}. Redirecting to / or default.`);
-            // Default to login or dashboard if no match, simplified for now:
-            // logic usually handled by guards in main.js, but here we just return
+            console.warn(`⚠️ Route not found: ${path} -> Redirecting to /login`);
+            this.navigateTo('/login');
             return;
         }
 
         // Render logic
         this.currentView = match.module;
 
-        // Clean container
+        // Clean container (Important to prevent memory leaks or duplicate listeners if manually managed)
         if (this.root) this.root.innerHTML = '';
 
-        // Init module if exists
-        if (this.currentView.init) {
-            await this.currentView.init();
-        }
-
-        // Render module
+        // 1. Render module
         if (this.currentView.render) {
             if (this.root) {
                 // Pass params and the container
+                // Some views return a string, others might manipulate DOM directly.
                 const viewContent = await this.currentView.render(this.root, params);
 
                 if (typeof viewContent === 'string') {
@@ -88,13 +87,17 @@ export class Router {
                 }
             }
         }
+
+        // 2. Init module if exists (Attach listeners, fetches, etc.)
+        if (this.currentView.init) {
+            await this.currentView.init();
+        }
     }
 
     /**
      * Helper to retrieve current Params if needed externally
      */
     getCurrentParams() {
-        // Logic duplicated for simplicity, ideally cached
         const path = window.location.pathname;
         for (const route of this.routes) {
             const result = path.match(route.regex);

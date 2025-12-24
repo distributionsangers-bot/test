@@ -40,26 +40,44 @@ export function renderLogin() {
 
 export function initLogin() {
     createIcons();
-    const form = document.getElementById('form-login');
-    if (form) form.addEventListener('submit', handleLoginSubmit);
 
+    // 1. Submit Listener
+    const form = document.getElementById('form-login');
+    if (form) {
+        form.addEventListener('submit', handleLoginSubmit);
+    }
+
+    // 2. Forgot Password Listener
     const forgotBtn = document.getElementById('btn-forgot-password');
-    if (forgotBtn) forgotBtn.addEventListener('click', handleForgotPassword);
+    if (forgotBtn) {
+        forgotBtn.addEventListener('click', handleForgotPassword);
+    }
 }
 
 async function handleLoginSubmit(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+    e.preventDefault(); // SUPER IMPORTANT
+
+    const emailInput = document.getElementById('login-email');
+    const passInput = document.getElementById('login-password');
+
+    if (!emailInput || !passInput) return;
+
+    const email = emailInput.value.trim();
+    const password = passInput.value.trim();
 
     if (!email || !password) return showToast("Veuillez remplir tous les champs", "error");
 
     toggleLoader(true);
     try {
         const { error } = await AuthService.login(email, password);
-        if (error) showToast(error.message, "error");
-        // Le listener dans main.js gérera la redirection
+        if (error) {
+            showToast(error.message, "error");
+        } else {
+            // SUCCESS -> RELOAD TO TRIGGER MAIN INIT
+            window.location.reload();
+        }
     } catch (err) {
+        console.error(err);
         showToast("Erreur inattendue", "error");
     } finally {
         toggleLoader(false);
@@ -67,10 +85,17 @@ async function handleLoginSubmit(e) {
 }
 
 async function handleForgotPassword() {
-    const email = prompt("Email ?");
+    // Basic implementation as per original
+    const email = prompt("Veuillez entrer votre email pour réinitialiser le mot de passe :");
     if (!email) return;
+
     toggleLoader(true);
     const { error } = await AuthService.resetPassword(email);
     toggleLoader(false);
-    showToast(error ? error.message : 'Email envoyé', error ? 'error' : 'success');
+
+    if (error) {
+        showToast(error.message, "error");
+    } else {
+        showToast('Email de réinitialisation envoyé', 'success');
+    }
 }

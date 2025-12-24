@@ -266,24 +266,67 @@ function setupDelete(c, uid) {
     const btn = c.querySelector('#btn-delete-account');
     if (!btn) return;
 
-    btn.addEventListener('click', async () => {
-        if (!confirm("ATTENTION : Cette action est irréversible. Voulez-vous vraiment supprimer votre compte ?")) return;
+    btn.addEventListener('click', () => {
+        // Create Modal
+        const m = document.createElement('div');
+        m.id = 'delete-account-modal';
+        m.className = 'fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+        m.innerHTML = `
+            <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl animate-slide-up relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-orange-500"></div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-100 shadow-sm">
+                        <i data-lucide="alert-triangle" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">Supprimer le compte ?</h3>
+                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                        Cette action est <span class="font-bold text-red-500">irréversible</span>. 
+                        Toutes vos données (historique, heures, profil) seront effacées définitivement.
+                    </p>
+                    <div class="bg-slate-50 p-4 rounded-xl text-left border border-slate-200 mb-6">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Confirmez votre email</label>
+                        <input id="delete-confirm-email" type="email" placeholder="${store.state.user?.email || ''}" class="w-full p-3 bg-white rounded-lg font-bold text-sm outline-none border border-slate-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition placeholder:text-slate-300">
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-cancel-delete" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition">
+                            Annuler
+                        </button>
+                        <button id="btn-confirm-delete" class="flex-1 py-3.5 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2">
+                             <i data-lucide="trash-2" class="w-4 h-4"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(m);
+        createIcons({ root: m });
 
-        const email = prompt("Pour confirmer, tapez 'SUPPRIMER' en majuscules :");
-        if (email !== 'SUPPRIMER') return;
+        m.querySelector('#btn-cancel-delete').onclick = () => m.remove();
+        m.querySelector('#btn-confirm-delete').onclick = async () => {
+            const input = m.querySelector('#delete-confirm-email');
+            const val = input.value.trim();
+            const currentEmail = store.state.user?.email;
 
-        toggleLoader(true);
-        const res = await ProfileService.deleteAccount(uid);
+            if (val !== currentEmail) {
+                input.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
+                showToast("L'email ne correspond pas.", "error");
+                setTimeout(() => input.classList.remove('ring-2', 'ring-red-500', 'bg-red-50'), 2000);
+                return;
+            }
 
-        if (res.error) {
-            toggleLoader(false);
-            showToast("Erreur suppression: " + res.error.message, "error");
-        } else {
-            // Logout and reload
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
+            toggleLoader(true);
+            const res = await ProfileService.deleteAccount(uid);
+
+            if (res.error) {
+                toggleLoader(false);
+                showToast("Erreur: " + res.error.message, "error");
+            } else {
+                await supabase.auth.signOut();
+                window.location.reload();
+            }
+            m.remove();
+        };
     });
 }
 
-export function initProfile() {}
+export function initProfile() { }

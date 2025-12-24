@@ -3,52 +3,80 @@
 @tailwind utilities;
 
 /* Custom CSS from original index.html */
-body { 
-    background-color: #F8FAFC; 
+body {
+    background-color: #F8FAFC;
     min-height: 100vh;
 }
 
-.goog-te-banner-frame, .goog-te-gadget-icon, .goog-te-gadget-simple, .skiptranslate { display: none !important; }
-body > .skiptranslate { display: none !important; }
-
-#toast-container { 
-    position: fixed; 
-    top: 1rem; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    z-index: 10000; 
-    width: 90%; 
-    max-width: 400px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 0.5rem; 
-    pointer-events: none; 
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.goog-te-gadget-simple,
+.skiptranslate {
+    display: none !important;
 }
 
-.toast { 
-    pointer-events: auto; 
-    background: white; 
-    padding: 1rem; 
-    border-radius: 1rem; 
-    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15); 
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    animation: slideDown 0.3s ease; 
-    border-left: 4px solid #2563eb; 
+body>.skiptranslate {
+    display: none !important;
 }
 
-@keyframes slideDown { 
-    from { transform: translateY(-20px); opacity: 0; } 
-    to { transform: translateY(0); opacity: 1; } 
+#toast-container {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
 }
 
-input[type="file"]::file-selector-button { display: none; }
+.toast {
+    pointer-events: auto;
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+    border-left: 4px solid #2563eb;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+input[type="file"]::file-selector-button {
+    display: none;
+}
 
 /* Utilities to hide scrollbar */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
 
 /* Safe area padding for iPhone X+ */
-.pt-safe { padding-top: env(safe-area-inset-top); }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe {
+    padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}

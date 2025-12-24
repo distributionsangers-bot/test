@@ -101,3 +101,5 @@ export const ParticipantsView = {
         }
     }
 };
+
+export const { openParticipantsModal } = ParticipantsView;

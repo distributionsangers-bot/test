@@ -111,5 +111,24 @@ export const PlanningService = {
         const { error } = await supabase.from('shifts').insert([shiftData]);
         if (error) return { error };
         return { success: true };
+    },
+
+    // --- TEMPLATES ---
+    async getTemplates() {
+        const { data, error } = await supabase.from('event_templates').select('*');
+        if (error) return { error };
+        return { data };
+    },
+
+    async createTemplate(templateData) {
+        // templateData: { name, event_title, event_location, shifts_config: [] }
+        const { data, error } = await supabase
+            .from('event_templates')
+            .insert([templateData])
+            .select()
+            .single();
+
+        if (error) return { error };
+        return { data };
     }
 };

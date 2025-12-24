@@ -1,12 +1,8 @@
+import { APP_CONFIG } from '../../core/constants.js';
 
 export function Sidebar(user, currentView, adminMode) {
-    const LOGO_URL = "logo.png"; // Ideally, this should come from a config or passed prop
-    const isAdmin = user?.user_metadata?.is_admin || (user?.profile?.is_admin) || false; // Check profile if available
-    // Note: 'user' prop might be the full state object or just the user. 
-    // Based on original code: state.profile.is_admin checked.
-    // Let's assume 'user' passed here is the 'state' object for better context? 
-    // Or we pass (user, profile, view, adminMode).
-    // Let's assume the arguments are: (profile, currentView, isAdminModeEnabled)
+    // const LOGO_URL = APP_CONFIG.LOGO_URL; // Not used here directly in renderSidebar, actually Sidebar function is unused/skeleton
+    // Keeping function signature for safety but mainly editing renderSidebar below
 }
 
 /**
@@ -17,7 +13,7 @@ export function Sidebar(user, currentView, adminMode) {
  * @returns {string} The HTML string for the sidebar.
  */
 export function renderSidebar(profile, currentView, adminMode) {
-    const LOGO_URL = "logo.png";
+    const { LOGO_URL } = APP_CONFIG;
     const isProfileAdmin = profile?.is_admin;
     const isEffectiveAdmin = isProfileAdmin && adminMode;
 

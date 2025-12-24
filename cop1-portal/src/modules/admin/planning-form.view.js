@@ -7,7 +7,7 @@ import { initPlanningList } from './planning-list.view.js'; // Pour le refresh
 
 // --- RENDER MODAL ---
 
-export function openEventModal(eventToEdit = null) {
+export async function openEventModal(eventToEdit = null) {
     // Si modale existe déjà, on la vire
     const existing = document.getElementById('event-modal');
     if (existing) existing.remove();
@@ -16,6 +16,15 @@ export function openEventModal(eventToEdit = null) {
     const adminOpts = (store.state.admins || [])
         .map(a => `<option value="${escapeHtml(a.first_name)}">${escapeHtml(a.first_name)}</option>`)
         .join('');
+
+    // Fetch Templates
+    let templateOpts = '<option value="">-- Choisir un modèle --</option>';
+    try {
+        const { data: tmpls } = await PlanningService.getTemplates();
+        if (tmpls) {
+            templateOpts += tmpls.map(t => `<option value="${t.id}">${escapeHtml(t.name)} (${escapeHtml(t.event_title)})</option>`).join('');
+        }
+    } catch (e) { console.error('Tpl fetch error', e); }
 
     const isEdit = !!eventToEdit;
     const title = isEdit ? escapeHtml(eventToEdit.title) : '';
@@ -38,6 +47,22 @@ export function openEventModal(eventToEdit = null) {
 
             <!-- Scrollable Content -->
             <div class="flex-1 overflow-y-auto p-6">
+                <!-- Templates Section -->
+                <div class="bg-brand-50 p-4 rounded-xl border border-brand-100 mb-6 flex flex-col md:flex-row gap-3 items-end md:items-center">
+                    <div class="flex-1 w-full">
+                        <label class="text-xs font-bold text-brand-700 uppercase mb-1 block">Modèles rapides</label>
+                        <select id="template-select" class="w-full p-2 bg-white rounded-lg text-sm font-bold border border-brand-200 focus:border-brand-500 outline-none">
+                            ${templateOpts}
+                        </select>
+                    </div>
+                    <button type="button" id="btn-apply-template" class="w-full md:w-auto px-4 py-2 bg-brand-600 text-white font-bold rounded-lg text-sm hover:bg-brand-700 transition">
+                        Appliquer
+                    </button>
+                    <button type="button" id="btn-save-template" class="w-full md:w-auto px-4 py-2 bg-white text-brand-600 font-bold rounded-lg text-sm border border-brand-200 hover:bg-white/80 transition" title="Sauvegarder la configuration actuelle">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
                 <form id="form-event" class="space-y-8">
                     
                     <!-- Basic Info -->
@@ -81,7 +106,7 @@ export function openEventModal(eventToEdit = null) {
             <!-- Footer -->
             <div class="p-6 border-t border-slate-100 bg-white grid grid-cols-2 gap-4">
                 <button type="button" id="btn-cancel-modal" class="py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition text-sm">Annuler</button>
-                <button type="button" id="btn-save-event" class="py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-200 hover:bg-brand-700 transition text-sm">
+                <button type="submit" id="btn-save-event" class="py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-200 hover:bg-brand-700 transition text-sm">
                     ${isEdit ? 'Enregistrer les modifications' : 'Publier l\'événement'}
                 </button>
             </div>
@@ -112,7 +137,81 @@ export function openEventModal(eventToEdit = null) {
         container.appendChild(renderShiftRow(null, adminOpts));
     };
 
-    modal.querySelector('#btn-save-event').onclick = () => handleSave(eventToEdit ? eventToEdit.id : null);
+    modal.querySelector('#form-event').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSave(eventToEdit ? eventToEdit.id : null);
+    });
+
+    // 3. Template Handlers
+    modal.querySelector('#btn-apply-template').onclick = async () => {
+        const tmplId = document.getElementById('template-select').value;
+        if (!tmplId) return showToast("Veuillez sélectionner un modèle", "info");
+
+        if (!confirm('Appliquer ce modèle ? Cela remplacera les champs actuels.')) return;
+
+        toggleLoader(true);
+        const { data: tmpls } = await PlanningService.getTemplates();
+        const t = tmpls.find(x => x.id == tmplId); // Loose equality for string/int match
+
+        if (t) {
+            document.querySelector('[name=title]').value = t.event_title || '';
+            document.querySelector('[name=location]').value = t.event_location || '';
+
+            // Rebuild shifts
+            container.innerHTML = ''; // Clear
+            if (t.shifts_config && Array.isArray(t.shifts_config)) {
+                t.shifts_config.forEach(sc => {
+                    // Clean id from template config to ensure new insert
+                    const cleanShift = { ...sc, id: null };
+                    container.appendChild(renderShiftRow(cleanShift, adminOpts));
+                });
+            }
+            showToast("Modèle appliqué !");
+        }
+        toggleLoader(false);
+    };
+
+    modal.querySelector('#btn-save-template').onclick = async () => {
+        const title = document.querySelector('[name=title]').value.trim();
+        const location = document.querySelector('[name=location]').value.trim();
+
+        // Gather shifts
+        const shiftsData = [];
+        document.querySelectorAll('.shift-row').forEach(row => {
+            shiftsData.push({
+                title: row.querySelector('.shift-title').value.trim(),
+                start_time: row.querySelector('.shift-start').value,
+                end_time: row.querySelector('.shift-end').value,
+                max_slots: parseInt(row.querySelector('.shift-max').value) || 0,
+                reserved_slots: parseInt(row.querySelector('.shift-res').value) || 0,
+                referent_name: row.querySelector('.shift-ref').value
+            });
+        });
+
+        if (!title || shiftsData.length === 0) return showToast("Titre et créneaux requis pour le modèle", "error");
+
+        const name = prompt("Nom du modèle ?", title);
+        if (!name) return;
+
+        toggleLoader(true);
+        const { error } = await PlanningService.createTemplate({
+            name,
+            event_title: title,
+            event_location: location,
+            shifts_config: shiftsData
+        });
+        toggleLoader(false);
+
+        if (error) showToast("Erreur sauvegarde modèle", "error");
+        else {
+            showToast("Modèle sauvegardé !");
+            // Refresh modal to show new template in list? 
+            // Simpler: reload modal or just append usage... 
+            // For now, close/open is best to refresh list cleanly
+            modal.remove();
+            openEventModal();
+        }
+    };
 }
 
 // --- HELPER RENDERING ---
@@ -250,7 +349,7 @@ async function handleSave(eventId) {
         // Calculate hours_value
         const d1 = new Date(`1970-01-01T${s}:00`);
         const d2 = new Date(`1970-01-01T${e}:00`);
-        const hours = parseFloat((Math.abs(d2 - d1) / 36e5).toFixed(2));
+        const hours = parseFloat((Math.abs(d2 - d1) / 36e5).toFixed(1));
 
         shiftsData.push({
             id: id, // Optional

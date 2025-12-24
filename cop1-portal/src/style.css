@@ -1,9 +1,126 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-/* Tu pourras ajouter tes styles persos en dessous si besoin */
+/* =========================================
+   GLOBAL STYLES & RESETS
+   ========================================= */
 body {
     background-color: #F8FAFC;
     min-height: 100vh;
+}
+
+/* =========================================
+   TOAST SYSTEM
+   ========================================= */
+.toast {
+    pointer-events: auto;
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+    border-left: 4px solid #2563eb;
+    margin-bottom: 0.75rem;
+    min-width: 300px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease-out;
+}
+
+.toast.bg-white {
+    background-color: white;
+}
+
+.toast.text-slate-800 {
+    color: #1e293b;
+}
+
+.toast.border-brand-500 {
+    border-color: #3b82f6;
+}
+
+.toast.text-brand-600 {
+    color: #2563eb;
+}
+
+/* Error State */
+.toast.border-red-500 {
+    border-color: #ef4444;
+}
+
+.toast.text-red-600 {
+    color: #dc2626;
+}
+
+/* Warning State */
+.toast.border-orange-400 {
+    border-color: #fb923c;
+}
+
+.toast.text-orange-600 {
+    color: #ea580c;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   UTILITIES
+   ========================================= */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Safe Area (iPhone X+) */
+.pt-safe {
+    padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Loader Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Google Translate Hidden Elements */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.goog-te-gadget-simple,
+.skiptranslate {
+    display: none !important;
+}
+
+body>.skiptranslate {
+    display: none !important;
 }

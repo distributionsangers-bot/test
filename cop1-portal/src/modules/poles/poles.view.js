@@ -103,9 +103,66 @@ export async function renderPoles(container) {
         </div>
     `;
 
+
+    // --- MODALE CREATION POLE (Embedded) ---
+    const createModalHtml = `
+        <div id="create-pole-modal" class="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in hidden">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-extrabold text-xl text-slate-900">Nouveau Pôle</h3>
+                    <button class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-600 transition btn-close">
+                        <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
+                    </button>
+                </div>
+                <form id="form-create-pole" class="space-y-4">
+                    <input name="name" placeholder="Nom (Ex: Logistique)" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500" required>
+                    <textarea name="desc" rows="2" placeholder="Description..." class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                    <div>
+                         <label class="text-xs font-bold text-slate-400 uppercase ml-1 block mb-1">Icône (Lucide)</label>
+                         <input name="icon" value="users" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-700 transition mt-2">Créer le pôle</button>
+                </form>
+            </div>
+        </div>
+    `;
+
+    // Ajout à la fin du container
+    container.innerHTML += createModalHtml;
     createIcons({ icons, root: container });
 
     // 3. Event Handling
+    // Listener fermeture modale création
+    const createModal = container.querySelector('#create-pole-modal');
+    if (createModal) {
+        createModal.addEventListener('click', (e) => {
+            if (e.target === createModal || e.target.closest('.btn-close')) {
+                createModal.classList.add('hidden');
+            }
+        });
+
+        container.querySelector('#form-create-pole').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            toggleLoader(true);
+            try {
+                await PolesService.createTeam({
+                    name: fd.get('name'),
+                    description: fd.get('desc'),
+                    icon: fd.get('icon')
+                });
+                showToast('Pôle créé !');
+                createModal.classList.add('hidden');
+                e.target.reset();
+                await renderPoles(container);
+            } catch (err) {
+                showToast(err.message || "Erreur création", "error");
+            } finally {
+                toggleLoader(false);
+            }
+        });
+    }
+
     container.addEventListener('click', async (e) => {
         const btn = e.target.closest('button');
         if (!btn) return;
@@ -119,8 +176,6 @@ export async function renderPoles(container) {
             try {
                 await PolesService.toggleInterest(store.state.user.id, id, isInterested);
                 showToast(isInterested ? 'Intérêt retiré' : 'Intérêt signalé aux admins !');
-                // Refresh full view to update state
-                // Ideally we update local state and re-render partial, but here we reload view logic
                 await renderPoles(container);
             } catch (err) {
                 console.error(err);
@@ -145,7 +200,8 @@ export async function renderPoles(container) {
             const team = teams.find(t => t.id == id);
             if (team) openEditPoleModal(team, async () => await renderPoles(container));
         } else if (btn.id === 'btn-create-pole') {
-            openCreatePoleModal(async () => await renderPoles(container));
+            const m = document.getElementById('create-pole-modal');
+            if (m) m.classList.remove('hidden');
         }
     });
 
@@ -198,53 +254,6 @@ async function viewPoleCandidates(teamId, teamName) {
     createIcons({ icons, root: m });
 
     m.querySelector('.btn-close').onclick = () => m.remove();
-}
-
-function openCreatePoleModal(onSuccess) {
-    const m = document.createElement('div');
-    m.className = 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
-    m.innerHTML = `
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-extrabold text-xl text-slate-900">Nouveau Pôle</h3>
-                <button class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-600 transition btn-close">
-                    <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
-                </button>
-            </div>
-            <form id="form-create-pole" class="space-y-4">
-                <input name="name" placeholder="Nom (Ex: Logistique)" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500" required>
-                <textarea name="desc" rows="2" placeholder="Description..." class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500"></textarea>
-                <div>
-                     <label class="text-xs font-bold text-slate-400 uppercase ml-1 block mb-1">Icône (Lucide)</label>
-                     <input name="icon" value="users" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-                <button type="submit" class="w-full py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-700 transition mt-2">Créer le pôle</button>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(m);
-    createIcons({ icons, root: m });
-
-    m.querySelector('.btn-close').onclick = () => m.remove();
-    m.querySelector('#form-create-pole').onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        toggleLoader(true);
-        try {
-            await PolesService.createTeam({
-                name: fd.get('name'),
-                description: fd.get('desc'),
-                icon: fd.get('icon')
-            });
-            showToast('Pôle créé !');
-            m.remove();
-            if (onSuccess) onSuccess();
-        } catch (err) {
-            showToast(err.message || "Erreur création", "error");
-        } finally {
-            toggleLoader(false);
-        }
-    };
 }
 
 function openEditPoleModal(team, onSuccess) {

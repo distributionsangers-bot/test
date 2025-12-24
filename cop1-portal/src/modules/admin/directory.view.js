@@ -220,13 +220,23 @@ export async function renderDirectory(container) {
     // Action Delegation
     const listContainer = container.querySelector('#directory-list');
     listContainer.addEventListener('click', async (e) => {
+        // Handle User Row Click (for details)
+        const userRow = e.target.closest('.user-row');
+        // Prevent click if clicking on a button inside row
+        if (userRow && !e.target.closest('button')) {
+            // Find user ID from a button inside the row (hacky but works with current DOM)
+            // Better: add data-id to the row itself
+            // Let's assume we can get ID from the delete/toggle buttons inside
+            const btn = userRow.querySelector('button[data-id]');
+            if (btn) viewUserDetails(btn.dataset.id);
+            return;
+        }
+
         const btn = e.target.closest('button');
         if (!btn) return;
 
         const action = btn.dataset.action;
         const id = btn.dataset.id;
-        // Actions (toggle-status, delete, etc.) remain mostly same but need to reload current page
-        // to reflect changes or remove item.
 
         if (action === 'toggle-status') {
             const currentStatus = btn.dataset.status;
@@ -238,7 +248,7 @@ export async function renderDirectory(container) {
             if (res.error) showToast("Erreur modification statut", "error");
             else {
                 showToast(`Utilisateur ${newStatus === 'approved' ? 'validé' : 'désactivé'}`);
-                loadUsers(); // Reload to update UI state properly
+                loadUsers();
             }
         }
         else if (action === 'toggle-admin') {
@@ -272,6 +282,175 @@ export async function renderDirectory(container) {
 
 }
 
-export function cleanup() {
-    // No specific cleanup needed as container is managed by router
+// ==========================================
+// DETAILS MODAL & LOGIC
+// ==========================================
+async function viewUserDetails(uid) {
+    if (!uid) return;
+    toggleLoader(true);
+    // Fetch full details if needed (using existing get single user would be better, but we can reuse the list data if we had it in state, else fetch)
+    // For now we re-fetch to be safe and get fresh notes
+    const { data: u, error } = await DirectoryService.getUserById(uid); // Need to ensure this exists in Service
+    toggleLoader(false);
+
+    if (error || !u) {
+        showToast("Erreur chargement détails", "error");
+        return;
+    }
+
+    const m = document.createElement('div');
+    m.id = 'user-details-modal';
+    m.className = 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+
+    m.innerHTML = `
+        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl animate-slide-up">
+            <div class="bg-brand-600 p-8 text-center text-white relative">
+                <button id="close-details-btn" class="absolute top-4 right-4 bg-white/20 p-2 rounded-full hover:bg-white/30 transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+                <div class="w-20 h-20 bg-white text-brand-600 rounded-full flex items-center justify-center text-3xl font-extrabold mx-auto mb-3 shadow-lg border-4 border-brand-400">
+                    ${(u.first_name || '?')[0]}
+                </div>
+                <h2 class="text-xl font-bold">${u.first_name} ${u.last_name}</h2>
+                <p class="opacity-80 text-xs font-medium">${u.email}</p>
+            </div>
+
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm space-y-2">
+                    <div class="flex justify-between"><span class="text-slate-400">Téléphone</span> <span class="font-bold">${u.phone || '-'}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Statut</span> <span class="font-bold ${u.status === 'approved' ? 'text-green-600' : 'text-orange-500'}">${u.status === 'approved' ? 'Actif' : 'En attente'}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Total Heures</span> <span class="font-bold text-brand-600">${u.total_hours || 0}h</span></div>
+                </div>
+
+                <div class="bg-white border-2 border-slate-100 p-4 rounded-2xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-slate-100 p-2 rounded-lg"><i data-lucide="briefcase" class="w-4 h-4 text-slate-600"></i></div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-900">${u.role_title || 'Bénévole'}</div>
+                            <div class="text-xs text-slate-500">Pôle ID: ${u.pole_id || 'Aucun'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Justificatif Viewer Button (Only if Pending) -->
+                ${u.status === 'pending' ? `
+                <button id="btn-view-proof" class="w-full py-3 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4"></i> Voir Justificatif
+                </button>` : ''}
+
+                <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 relative">
+                    <label class="text-[10px] font-bold text-yellow-700 uppercase mb-1 block flex items-center gap-1"><i data-lucide="sticky-note" class="w-3 h-3"></i> Note Interne</label>
+                    <textarea id="admin-note-input" class="w-full bg-white p-3 rounded-xl text-sm outline-none border border-yellow-200 text-slate-700 placeholder-yellow-300/50" rows="3" placeholder="Note sur le bénévole...">${u.admin_note || ''}</textarea>
+                    <button id="btn-save-note" class="mt-2 w-full py-2 bg-yellow-400 text-yellow-900 font-bold rounded-lg text-xs hover:bg-yellow-500 transition shadow-sm">Enregistrer la note</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(m);
+    createIcons({ icons, root: m });
+
+    m.querySelector('#close-details-btn').addEventListener('click', () => m.remove());
+
+    const saveBtn = m.querySelector('#btn-save-note');
+    if (saveBtn) saveBtn.addEventListener('click', async () => {
+        const note = m.querySelector('#admin-note-input').value;
+        toggleLoader(true);
+        const res = await DirectoryService.updateAdminNote(uid, note);
+        toggleLoader(false);
+        if (res.error) showToast("Erreur sauvegarde note", "error");
+        else showToast("Note enregistrée");
+    });
+
+    const proofBtn = m.querySelector('#btn-view-proof');
+    if (proofBtn) proofBtn.addEventListener('click', () => openProof(uid));
 }
+
+// ==========================================
+// DOCUMENT VIEWER
+// ==========================================
+async function openProof(userId) {
+    if (!userId) return;
+    toggleLoader(true);
+    const { signedUrl, error } = await DirectoryService.getProofUrl(userId);
+    toggleLoader(false);
+
+    if (error || !signedUrl) {
+        showToast("Document introuvable", "error");
+        return;
+    }
+
+    openDocumentViewer(signedUrl, userId);
+}
+
+function openDocumentViewer(url, userId) {
+    const m = document.createElement('div');
+    m.id = 'doc-viewer-modal';
+    m.className = 'fixed inset-0 bg-slate-900/95 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+
+    m.innerHTML = `
+        <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <a href="${url}" download="justificatif_${userId}" class="bg-white/10 text-white p-3 rounded-full hover:bg-white/20 transition backdrop-blur-md" title="Télécharger">
+                <i data-lucide="download" class="w-5 h-5"></i>
+            </a>
+            <button id="close-doc-btn" class="bg-white/10 text-white p-3 rounded-full hover:bg-red-500/80 transition backdrop-blur-md">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="w-full h-full max-w-4xl max-h-[80vh] bg-white rounded-lg shadow-2xl overflow-hidden flex items-center justify-center relative">
+            <object data="${url}" type="application/pdf" class="w-full h-full object-contain">
+                <img src="${url}" class="w-full h-full object-contain bg-slate-800" alt="Justificatif">
+            </object>
+        </div>
+
+        <div class="absolute bottom-8 flex gap-4 animate-slide-up">
+            <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition flex items-center gap-2 transform hover:scale-105">
+                <i data-lucide="x-circle" class="w-5 h-5"></i> Refuser
+            </button>
+            <button id="btn-doc-accept" class="px-6 py-3 bg-green-500 text-white font-bold rounded-full shadow-lg hover:bg-green-600 transition flex items-center gap-2 transform hover:scale-105">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i> Valider le dossier
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(m);
+    createIcons({ icons, root: m });
+
+    m.querySelector('#close-doc-btn').addEventListener('click', () => m.remove());
+
+    m.querySelector('#btn-doc-accept').addEventListener('click', async () => {
+        if (!confirm("Valider ce dossier ?")) return;
+        m.remove();
+        toggleLoader(true);
+        await DirectoryService.deleteProofFile(userId); // Cleanup file
+        const res = await DirectoryService.updateUserStatus(userId, 'approved');
+        toggleLoader(false);
+        if (res.error) showToast("Erreur validation", "error");
+        else {
+            showToast("Dossier validé !");
+            // Refresh main list if possible, but we are outside renderScope... 
+            // Ideally trigger a global event or just reload page
+            window.location.reload();
+        }
+    });
+
+    m.querySelector('#btn-doc-reject').addEventListener('click', async () => {
+        if (!confirm("Refuser ce dossier ?")) return;
+        m.remove();
+        toggleLoader(true);
+        await DirectoryService.deleteProofFile(userId); // Cleanup file anyway? Usually yes if rejected.
+        const res = await DirectoryService.updateUserStatus(userId, 'rejected');
+        toggleLoader(false);
+        if (res.error) showToast("Erreur refus", "error");
+        else {
+            showToast("Dossier refusé.");
+            window.location.reload();
+        }
+    });
+}
+
+export function cleanup() {
+    // No specific cleanup needed
+}
+

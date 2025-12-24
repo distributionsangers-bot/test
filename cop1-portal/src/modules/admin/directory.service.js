@@ -77,5 +77,65 @@ export const DirectoryService = {
 
         if (error) return { error };
         return { success: true };
+    },
+    async getUserById(userId) {
+        return this.getUserDetails(userId);
+    },
+
+    async updateAdminNote(userId, note) {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ admin_note: note })
+            .eq('id', userId);
+
+        if (error) return { error };
+        return { success: true };
+    },
+
+    async getProofUrl(userId) {
+        // Logique "Proof" : map user_id -> file path
+        // D'après index_originel, le path est souvent stocké ou déduit.
+        // Ici on va chercher le dernier fichier dans le bucket 'proofs' qui commence par user_id
+        // OU on suppose que le path est stocké quelque part.
+        // Option simple : List files in folder
+
+        const { data: list, error: listErr } = await supabase
+            .storage
+            .from('proofs')
+            .list('', { search: userId }); // Search returns files containing userId
+
+        if (listErr || !list || list.length === 0) return { error: 'Not found' };
+
+        // Take the most recent one?
+        const file = list[0];
+
+        const { data } = await supabase
+            .storage
+            .from('proofs')
+            .createSignedUrl(file.name, 3600); // 1 hour link
+
+        if (!data) return { error: 'Sign failed' };
+
+        return { signedUrl: data.signedUrl };
+    },
+
+    async deleteProofFile(userId) {
+        // Find file first to get name
+        const { data: list } = await supabase
+            .storage
+            .from('proofs')
+            .list('', { search: userId });
+
+        if (!list || list.length === 0) return { success: true };
+
+        const filesToRemove = list.map(x => x.name);
+
+        const { error } = await supabase
+            .storage
+            .from('proofs')
+            .remove(filesToRemove);
+
+        if (error) return { error };
+        return { success: true };
     }
 };

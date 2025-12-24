@@ -1,5 +1,6 @@
 
 
+import QRCode from 'qrcode';
 
 export const QRDisplayView = {
     showShiftQR(shiftId, shiftTitle) {
@@ -20,7 +21,7 @@ export const QRDisplayView = {
                 <p class="text-slate-500 font-medium mb-8 text-sm px-4 leading-relaxed">${shiftTitle}</p>
                 
                 <div class="bg-white p-4 rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100 inline-block mb-8 relative group">
-                    <div id="qr-container" class="opacity-0 transition-opacity duration-300"></div>
+                    <canvas id="qr-canvas" class="opacity-0 transition-opacity duration-300 w-[200px] h-[200px]"></canvas>
                     
                     <!-- Logo Central Overlay (Optionnel) -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -33,7 +34,7 @@ export const QRDisplayView = {
                 <div class="space-y-3">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">À scanner par les bénévoles</p>
                     
-                    <button onclick="document.getElementById('qr-display-modal').remove()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-lg shadow-slate-200 hover:bg-slate-800 transition active:scale-95">
+                    <button id="close-qr-btn" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-lg shadow-slate-200 hover:bg-slate-800 transition active:scale-95">
                         Fermer
                     </button>
                 </div>
@@ -42,27 +43,28 @@ export const QRDisplayView = {
 
         document.body.appendChild(modal);
 
+        modal.querySelector('#close-qr-btn').addEventListener('click', () => modal.remove());
+
         // 3. Génération du QR Code
-        // Payload : { shift_id, type }
         const payload = JSON.stringify({
             shift_id: shiftId,
             type: 'attendance_validation'
         });
 
-        // Utilisation de la global QRCode (supposée chargée via CDN dans index.html)
-        // Petit délai pour laisser le temps au DOM de s'afficher
         setTimeout(() => {
-            const container = document.getElementById('qr-container');
-            if (container) {
-                new QRCode(container, {
-                    text: payload,
+            const canvas = document.getElementById('qr-canvas');
+            if (canvas) {
+                QRCode.toCanvas(canvas, payload, {
                     width: 200,
-                    height: 200,
-                    colorDark: "#0f172a", // slate-900
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
+                    margin: 2,
+                    color: {
+                        dark: "#0f172a",
+                        light: "#ffffff"
+                    }
+                }, function (error) {
+                    if (error) console.error(error);
+                    else canvas.classList.remove('opacity-0');
                 });
-                container.classList.remove('opacity-0');
             }
         }, 50);
     }

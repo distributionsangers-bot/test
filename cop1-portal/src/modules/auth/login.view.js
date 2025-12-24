@@ -1,9 +1,9 @@
-
 import { AuthService } from '../../services/auth.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
+import { APP_CONFIG } from '../../core/constants.js';
 
-const LOGO_URL = "logo.png";
+const { LOGO_URL } = APP_CONFIG;
 
 export function renderLogin() {
     return `
@@ -21,8 +21,8 @@ export function renderLogin() {
                 </div>
 
                 <form id="form-login" class="space-y-4 animate-fade-in">
-                    <input id="login-email" type="email" required class="w-full px-5 py-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-500" placeholder="Email">
-                    <input id="login-password" type="password" required class="w-full px-5 py-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-500" placeholder="Mot de passe">
+                    <input id="login-email" type="email" autocomplete="username" required class="w-full px-5 py-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-500" placeholder="Email">
+                    <input id="login-password" type="password" autocomplete="current-password" required class="w-full px-5 py-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-500" placeholder="Mot de passe">
                     
                     <button type="submit" class="w-full py-4 bg-brand-600 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition">Se connecter</button>
                     <button type="button" id="btn-forgot-password" class="w-full text-xs font-bold text-slate-400 hover:text-brand-600 transition">Mot de passe oublié ?</button>

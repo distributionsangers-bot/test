@@ -130,10 +130,37 @@ async function renderAdminDashboard(container) {
         urgentHtml = '<div class="p-4 text-center text-slate-400 text-sm bg-green-50 rounded-2xl border border-green-100"><i data-lucide="check-circle" class="w-5 h-5 mx-auto mb-1 text-green-500"></i>Aucune urgence planning !</div>';
     }
 
-    // 3. Rendu HTML
+
+    // --- MODALE ANNONCE (Embedded) ---
+    const announcementModal = `
+        <div id="announcement-modal" class="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in hidden">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up border-t-4 border-purple-500">
+                <h3 class="font-extrabold text-lg mb-4 text-purple-900">📢 Faire une annonce</h3>
+                <p class="text-xs text-slate-500 mb-4">Ce message sera visible par TOUS les bénévoles.</p>
+                <form id="form-create-announcement" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Titre</label>
+                        <input name="subject" required class="w-full p-3 bg-purple-50 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Message</label>
+                        <textarea name="content" rows="4" required class="w-full p-3 bg-purple-50 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg hover:bg-purple-700">Publier l'annonce</button>
+                    <button type="button" id="btn-close-announcement" class="w-full py-3 text-slate-400 font-bold text-sm hover:bg-slate-50 rounded-xl">Annuler</button>
+                </form>
+            </div>
+        </div>
+    `;
+
     container.innerHTML = `
         <div class="animate-fade-in max-w-lg mx-auto pb-20">
-            <h2 class="text-2xl font-extrabold text-slate-900 mb-6">Tableau de bord</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900 mb-6 flex justify-between items-center">
+                Tableau de bord
+                <button id="btn-open-announcement" class="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200 transition" title="Faire une annonce">
+                    <i data-lucide="megaphone" class="w-5 h-5"></i>
+                </button>
+            </h2>
             
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <!-- Card Bénévoles -->
@@ -186,6 +213,7 @@ async function renderAdminDashboard(container) {
                 <i data-lucide="plus-circle" class="w-5 h-5"></i> Créer événement
             </button>
         </div>
+        ${announcementModal}
     `;
 }
 
@@ -312,6 +340,7 @@ async function renderUserDashboard(container) {
 
 // Admin Dashboard Listeners Helper (called by initDashboard)
 async function attachAdminListeners(container) {
+    // 1. Create Event
     const createBtn = container.querySelector('#btn-create-event-dash');
     if (createBtn) {
         createBtn.addEventListener('click', () => {
@@ -320,6 +349,47 @@ async function attachAdminListeners(container) {
                 openEventModal();
             });
         });
+    }
+
+    // 2. Announcement Modal Logic
+    const openAnnounceBtn = container.querySelector('#btn-open-announcement');
+    const announceModal = container.querySelector('#announcement-modal');
+
+    if (openAnnounceBtn && announceModal) {
+        // Open
+        openAnnounceBtn.addEventListener('click', () => announceModal.classList.remove('hidden'));
+
+        // Close
+        const closeBtn = announceModal.querySelector('#btn-close-announcement');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => announceModal.classList.add('hidden'));
+        }
+
+        // Submit
+        const form = announceModal.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const subject = fd.get('subject');
+                const content = fd.get('content');
+
+                toggleLoader(true);
+                // On doit importer le ChatService dynamiquement pour éviter les dépendances circulaires
+                const { ChatService } = await import('../chat/chat.service.js');
+
+                const res = await ChatService.createAnnouncement(subject, content);
+                toggleLoader(false);
+
+                if (res.success) {
+                    showToast('Annonce publiée !');
+                    announceModal.classList.add('hidden');
+                    form.reset();
+                } else {
+                    showToast(res.error.message || "Erreur publication", "error");
+                }
+            });
+        }
     }
 }
 

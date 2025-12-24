@@ -8,6 +8,7 @@ import { renderHeader } from './components/layout/header.js';
 import { renderMobileNav } from './components/layout/mobile-nav.js';
 import { toggleLoader, showToast } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
+import { CookieConsent } from './components/layout/cookie-consent.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
@@ -52,7 +53,6 @@ async function init() {
     try {
         // 1. Setup Realtime
         supabase.channel('global-app-changes')
-            .on('postgres_changes', { event: '*', schema: 'public' }, () => console.log('Update DB'))
             .subscribe();
 
         // 2. Auth & Data
@@ -115,6 +115,7 @@ async function init() {
         router.navigateTo('/login');
     } finally {
         toggleLoader(false);
+        CookieConsent.init();
     }
 }
 

@@ -2,8 +2,9 @@
 import { supabase } from '../../services/supabase.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
+import { APP_CONFIG } from '../../core/constants.js';
 
-const LOGO_URL = "logo.png";
+const { LOGO_URL, BUCKET_PROOF } = APP_CONFIG;
 
 export function renderRegister() {
     return `
@@ -24,9 +25,9 @@ export function renderRegister() {
                         <input id="reg-fn" type="text" placeholder="Prénom" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
                         <input id="reg-ln" type="text" placeholder="Nom" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
                     </div>
-                    <input id="reg-email" type="email" placeholder="Email" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
+                    <input id="reg-email" type="email" placeholder="Email" autocomplete="username" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
                     <input id="reg-phone" type="tel" placeholder="Téléphone" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
-                    <input id="reg-pass" type="password" placeholder="Mot de passe" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
+                    <input id="reg-pass" type="password" placeholder="Mot de passe" autocomplete="new-password" required class="w-full px-4 py-3 bg-slate-50 rounded-xl font-bold outline-none border focus:border-brand-500">
                     
                     <label class="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
                         <input type="checkbox" id="reg-permit" class="w-5 h-5 text-brand-600 rounded">
@@ -162,7 +163,7 @@ export function initRegister() {
                 // B. UPLOAD DU FICHIER
                 if (data.user) {
                     const { error: uploadError } = await supabase.storage
-                        .from('proofs')
+                        .from(BUCKET_PROOF)
                         .upload(data.user.id, file, { upsert: true });
 
                     if (uploadError) {

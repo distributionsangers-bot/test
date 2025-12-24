@@ -21,6 +21,7 @@ export function renderPlanningList() {
             <div class="bg-white p-1 rounded-2xl border border-slate-100 flex mb-6">
                 <button data-tab="upcoming" class="tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition bg-slate-900 text-white shadow-md">À venir</button>
                 <button data-tab="history" class="tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:bg-slate-100">Historique</button>
+                <button data-tab="templates" class="tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:bg-slate-100">Modèles</button>
             </div>
             <div id="planning-list" class="space-y-6">
                 ${renderSkeleton()}
@@ -88,16 +89,30 @@ async function loadEvents() {
     list.innerHTML = renderSkeleton();
 
     try {
-        const { data, error } = await PlanningService.getAllEventsAdmin(currentTab);
+        let data, error;
+
+        if (currentTab === 'templates') {
+            const res = await PlanningService.getTemplates();
+            data = res.data;
+            error = res.error;
+        } else {
+            const res = await PlanningService.getAllEventsAdmin(currentTab);
+            data = res.data;
+            error = res.error;
+        }
+
         if (error) throw error;
 
-        if (data.length === 0) {
-            list.innerHTML = `<div class="text-center py-20 text-slate-400">Aucun événement dans cette vue.</div>`;
+        if (!data || data.length === 0) {
+            list.innerHTML = `<div class="text-center py-20 text-slate-400">Aucun élément trouvé.</div>`;
         } else {
-            list.innerHTML = data.map(evt => renderEventCard(evt)).join('');
+            if (currentTab === 'templates') {
+                list.innerHTML = data.map(t => renderTemplateCard(t)).join('');
+            } else {
+                list.innerHTML = data.map(evt => renderEventCard(evt)).join('');
+            }
         }
-        // CORRECTION : Injection
-        createIcons({ icons });
+        createIcons({ icons, root: list });
     } catch (err) {
         console.error(err);
         list.innerHTML = `<div class="text-center py-20 text-red-400">Erreur de chargement.</div>`;
@@ -208,6 +223,13 @@ async function handleListClick(e) {
         toggleLoader(false);
         if (res.error) showToast("Erreur suppression", "error");
         else { showToast("Créneau supprimé"); loadEvents(); }
+    } else if (action === 'delete-template') {
+        if (!confirm("Supprimer ce modèle ?")) return;
+        toggleLoader(true);
+        const res = await PlanningService.deleteTemplate(id);
+        toggleLoader(false);
+        if (res.error) showToast("Erreur suppression", "error");
+        else { showToast("Modèle supprimé"); loadEvents(); }
     } else if (action === 'edit-event') {
         toggleLoader(true);
         const { data, error } = await PlanningService.getEventById(id);
@@ -219,4 +241,29 @@ async function handleListClick(e) {
     } else if (action === 'qr-shift') {
         QRDisplayView.showShiftQR(id, btn.dataset.title);
     }
+}
+
+function renderTemplateCard(t) {
+    const shiftCount = t.shifts_config ? t.shifts_config.length : 0;
+
+    return `
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between mb-4 group hover:shadow-md transition">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
+                    <i data-lucide="layout-template" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 leading-tight">${escapeHtml(t.name)}</h3>
+                    <div class="text-xs text-slate-500 mt-1">
+                        <span class="font-medium text-slate-700">${escapeHtml(t.event_title)}</span> 
+                        • ${shiftCount} créneaux
+                    </div>
+                </div>
+            </div>
+            
+            <button data-action="delete-template" data-id="${t.id}" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition" title="Supprimer">
+                <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
+            </button>
+        </div>
+    `;
 }

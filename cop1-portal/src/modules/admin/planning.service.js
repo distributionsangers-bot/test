@@ -130,5 +130,11 @@ export const PlanningService = {
 
         if (error) return { error };
         return { data };
+    },
+
+    async deleteTemplate(id) {
+        const { error } = await supabase.from('event_templates').delete().eq('id', id);
+        if (error) return { error };
+        return { success: true };
     }
 };

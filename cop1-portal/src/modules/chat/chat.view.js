@@ -1,7 +1,7 @@
 import { ChatService } from './chat.service.js';
 import { store } from '../../core/store.js';
 import { showToast, toggleLoader, escapeHtml, formatDate } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 // État local du module
 let currentTicketId = null;
@@ -85,7 +85,7 @@ export async function renderChat(container, params = {}) {
     // Gestionnaires d'événements globaux pour cette vue
     setupEventListeners(container); // S'assure de lier les boutons générés
 
-    createIcons();
+    createIcons({ icons });
 
     // Chargement des données
     await loadTicketsList();
@@ -116,7 +116,7 @@ async function loadTicketsList() {
                 <span class="text-xs font-bold">Aucune conversation</span>
             </div>
         `;
-        createIcons();
+        createIcons({ icons });
         return;
     }
 
@@ -190,7 +190,7 @@ async function openTicket(ticketId) {
     // Reset du chat container
     const messagesContainer = document.getElementById('messages-container');
     messagesContainer.innerHTML = `<div class="flex justify-center py-10"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-brand-500"></i></div>`;
-    createIcons();
+    createIcons({ icons });
 
     // 2. Fetch Messages
     const res = await ChatService.getMessages(ticketId);

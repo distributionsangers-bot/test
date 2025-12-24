@@ -22,21 +22,21 @@ export function renderSidebar(profile, currentView, adminMode) {
     const isEffectiveAdmin = isProfileAdmin && adminMode;
 
     const desktopItems = isEffectiveAdmin ? [
-        { id: 'dashboard', i: 'layout-grid', l: 'Accueil' },
-        { id: 'admin_planning', i: 'calendar-days', l: 'Planning' },
-        { id: 'messages', i: 'message-circle', l: 'Chat' },
-        { id: 'admin_users', i: 'users', l: 'Annuaire' },
-        { id: 'poles', i: 'network', l: 'Pôles' },
-        { id: 'profile', i: 'user', l: 'Profil' }
+        { id: '/dashboard', i: 'layout-grid', l: 'Accueil' },
+        { id: '/admin_planning', i: 'calendar-days', l: 'Planning' },
+        { id: '/messages', i: 'message-circle', l: 'Chat' },
+        { id: '/admin_users', i: 'users', l: 'Annuaire' },
+        { id: '/poles', i: 'network', l: 'Pôles' },
+        { id: '/profile', i: 'user', l: 'Profil' }
     ] : [
-        { id: 'events', i: 'calendar-check', l: 'Missions' },
-        { id: 'poles', i: 'network', l: 'Pôles' },
-        { id: 'messages', i: 'message-circle', l: 'Chat' },
-        { id: 'profile', i: 'user', l: 'Profil' }
+        { id: '/events', i: 'calendar-check', l: 'Missions' },
+        { id: '/poles', i: 'network', l: 'Pôles' },
+        { id: '/messages', i: 'message-circle', l: 'Chat' },
+        { id: '/profile', i: 'user', l: 'Profil' }
     ];
 
     const navItemsHtml = desktopItems.map(i => `
-        <button data-link="${i.id}" class="w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition ${currentView === i.id ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}">
+        <button data-link="${i.id}" class="w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition ${currentView === i.id || currentView === i.id.substring(1) ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}">
             <i data-lucide="${i.i}" class="w-5 h-5"></i> ${i.l}
         </button>
     `).join('');
@@ -68,4 +68,39 @@ export function renderSidebar(profile, currentView, adminMode) {
             </div>
         </aside>
     `;
+}
+
+/**
+ * Updates the active state of sidebar navigation links without re-rendering the DOM.
+ * @param {string} path - The current active path (e.g. '/dashboard')
+ */
+export function updateActiveNavLink(path) {
+    const nav = document.getElementById('sidebar-nav');
+    if (!nav) return;
+
+    // Clean current active
+    const currentActive = nav.querySelector('.bg-brand-600');
+    if (currentActive) {
+        currentActive.className = "w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition text-slate-500 hover:bg-slate-50";
+        currentActive.classList.remove('shadow-lg');
+    }
+
+    // Set new active
+    // Ensure path matches data-link (which now includes '/')
+    // If path comes without /, add it
+    const targetPath = path.startsWith('/') ? path : `/${path}`;
+
+    // Try exact match first
+    let targetBtn = nav.querySelector(`[data-link="${targetPath}"]`);
+
+    // Fallback: try matching root of section (e.g. /messages/123 -> /messages)
+    if (!targetBtn) {
+        // Assuming desktopItems IDs are root paths
+        const rootPath = `/${targetPath.split('/')[1]}`;
+        targetBtn = nav.querySelector(`[data-link="${rootPath}"]`);
+    }
+
+    if (targetBtn) {
+        targetBtn.className = "w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition bg-brand-600 text-white shadow-lg";
+    }
 }

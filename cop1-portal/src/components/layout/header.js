@@ -15,8 +15,8 @@ export function renderHeader(profile) {
                 <span class="font-extrabold text-xl text-brand-900">COP1</span>
             </div>
             <div class="flex items-center gap-3">
-                <button id="btn-toggle-lang" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">🌍</button>
-                <button data-link="profile" class="w-9 h-9 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm">
+                <button id="btn-toggle-lang" aria-label="Changer la langue" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">🌍</button>
+                <button data-link="profile" aria-label="Mon Profil" class="w-9 h-9 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm">
                     ${initial}
                 </button>
             </div>

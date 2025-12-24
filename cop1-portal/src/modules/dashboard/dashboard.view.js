@@ -1,7 +1,7 @@
 
 import { supabase } from '../../services/supabase.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 import { store } from '../../core/store.js';
 
 export function renderDashboard() {
@@ -19,6 +19,7 @@ export async function initDashboard() {
 
         if (profile?.is_admin && adminMode) {
             await renderAdminDashboard(container);
+            await attachAdminListeners(container);
         } else {
             await renderUserDashboard(container);
         }
@@ -27,7 +28,19 @@ export async function initDashboard() {
         showToast("Erreur chargement dashboard", "error");
     } finally {
         toggleLoader(false);
-        createIcons();
+        createIcons({ icons });
+    }
+}
+
+// ============================================================
+// ADMIN DASHBOARD (Logique importée de index_originel.html)
+// ============================================================
+// 3. Cleanup
+export function cleanup() {
+    // Si on avait des listeners globaux ou des intervals, on les nettoie ici
+    const container = document.getElementById('dashboard-view');
+    if (container) {
+        // Remove event listeners if they were named functions
     }
 }
 
@@ -35,17 +48,28 @@ export async function initDashboard() {
 // ADMIN DASHBOARD (Logique importée de index_originel.html)
 // ============================================================
 async function renderAdminDashboard(container) {
-    // 1. Stats générales (Total heures, Bénévoles, Validations en attente)
-    // On requête la table profiles directement comme dans le fichier original
-    const { data: stats, error: statsError } = await supabase
+    // 1. Stats générales (Optimisation COUNT)
+
+    // a) Total Heures (Somme) - Pas de fonction SUM facile, on doit fetcher id, total_hours
+    // On limite aux colonnes nécessaires
+    const { data: profilesData, error: statsError } = await supabase
         .from('profiles')
-        .select('total_hours, status');
+        .select('total_hours');
 
     if (statsError) throw statsError;
 
-    const totalHours = stats.reduce((acc, curr) => acc + (curr.total_hours || 0), 0);
-    const pendingCount = stats.filter(u => u.status === 'pending').length;
-    const volunteersCount = stats.filter(u => u.status === 'approved').length;
+    const totalHours = profilesData.reduce((acc, curr) => acc + (curr.total_hours || 0), 0);
+
+    // b) Counts (Optimisation count: 'exact') pour éviter le transport de data
+    const { count: pendingCount } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+    const { count: volunteersCount } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'approved');
 
     // Config graphique cercle (SVG)
     const radius = 35;
@@ -158,7 +182,7 @@ async function renderAdminDashboard(container) {
             </div>
 
             <!-- Bouton Création -->
-            <button onclick="window.openCreateEventModal && window.openCreateEventModal()" class="w-full py-4 rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 font-bold hover:border-brand-500 hover:text-brand-500 transition flex items-center justify-center gap-2">
+            <button id="btn-create-event-dash" class="w-full py-4 rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 font-bold hover:border-brand-500 hover:text-brand-500 transition flex items-center justify-center gap-2">
                 <i data-lucide="plus-circle" class="w-5 h-5"></i> Créer événement
             </button>
         </div>
@@ -176,23 +200,38 @@ async function renderUserDashboard(container) {
     const totalHours = profile.total_hours || 0;
 
     // Prochaine Mission
-    const today = new Date().toISOString();
-    const { data: myRegs } = await supabase
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayISO = today.toISOString();
+
+    // Optimisation : On récupère les inscriptions futures uniquement
+    const { data: myRegs, error } = await supabase
         .from('registrations')
-        .select('shift_id, shifts(*, events(*))')
+        .select(`
+            shift_id, 
+            shifts!inner (
+                title, 
+                start_time, 
+                end_time,
+                events!inner (
+                    title, 
+                    date,
+                    location
+                )
+            )
+        `)
         .eq('user_id', user.id)
-        .gte('shifts.start_time', '00:00') // Simplificado
-        .limit(10); // On prend large et on filtre JS
+        .gte('shifts.events.date', todayISO);
 
     let nextMission = null;
-    if (myRegs) {
-        // Filtrer et trier pour trouver la vraie prochaine
-        const upcoming = myRegs
+
+    if (myRegs && myRegs.length > 0) {
+        const candidates = myRegs
             .map(r => ({ ...r.shifts, event: r.shifts.events }))
-            .filter(s => s && s.event && s.event.date >= today.split('T')[0])
+            .filter(s => new Date(s.event.date) >= today)
             .sort((a, b) => new Date(a.event.date) - new Date(b.event.date));
 
-        if (upcoming.length > 0) nextMission = upcoming[0];
+        if (candidates.length > 0) nextMission = candidates[0];
     }
 
     // Rendu
@@ -207,7 +246,7 @@ async function renderUserDashboard(container) {
                     <h1 class="text-2xl font-extrabold text-slate-900">Bonjour, ${profile.first_name || 'Bénévole'} 👋</h1>
                     <div class="mt-1">${statusBadge}</div>
                 </div>
-                <button data-link="/profile" class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-white transition">
+                <button data-link="/profile" aria-label="Mon Profil" class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-white transition">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -229,7 +268,7 @@ async function renderUserDashboard(container) {
             ${missionHtml}
 
             <div class="grid grid-cols-2 gap-4">
-                 <button onclick="window.openScanner && window.openScanner()" class="col-span-2 bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl shadow-lg shadow-slate-200 text-white flex items-center justify-between group overflow-hidden relative">
+                 <button id="btn-open-scanner-dashboard" class="col-span-2 bg-gradient-to-r from-slate-900 to-slate-800 p-4 rounded-2xl shadow-lg shadow-slate-200 text-white flex items-center justify-between group overflow-hidden relative">
                     <div class="relative z-10 flex items-center gap-3">
                         <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition">
                              <i data-lucide="qr-code" class="w-5 h-5 text-white"></i>
@@ -259,6 +298,29 @@ async function renderUserDashboard(container) {
             </div>
         </div>
     `;
+
+    // Listeners for User Dashboard
+    const scanBtn = container.querySelector('#btn-open-scanner-dashboard');
+    if (scanBtn) {
+        scanBtn.addEventListener('click', () => {
+            import('../scanner/scanner.view.js').then(({ ScannerView }) => {
+                ScannerView.openScanner();
+            });
+        });
+    }
+}
+
+// Admin Dashboard Listeners Helper (called by initDashboard)
+async function attachAdminListeners(container) {
+    const createBtn = container.querySelector('#btn-create-event-dash');
+    if (createBtn) {
+        createBtn.addEventListener('click', () => {
+            // Dynamic import to avoid circular dependencies/loading unused code
+            import('../admin/planning-form.view.js').then(({ openEventModal }) => {
+                openEventModal();
+            });
+        });
+    }
 }
 
 function getStatusBadge(status) {
@@ -297,7 +359,7 @@ function renderNextMissionCard(mission) {
                         </div>
                     </div>
                  </div>
-                 <button data-link="/events" class="absolute bottom-4 right-4 bg-brand-50 text-brand-600 p-2 rounded-full hover:bg-brand-100 transition">
+                 <button data-link="/events" aria-label="Voir la mission" class="absolute bottom-4 right-4 bg-brand-50 text-brand-600 p-2 rounded-full hover:bg-brand-100 transition">
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                  </button>
             </div>

@@ -1,113 +1,103 @@
+import { createIcons, icons } from 'lucide';
+
 export class Router {
     constructor() {
         this.routes = [];
         this.currentView = null;
-        this.root = document.getElementById('app');
+        // On garde une référence fixe à la racine de l'application
+        this.appRoot = document.getElementById('app');
+        this.root = this.appRoot;
 
-        // Handle browser Back/Forward
+        // Gestion du bouton "Précédent" du navigateur
         window.addEventListener('popstate', () => this.handleLocation());
     }
 
     /**
-     * Registers a route
-     * @param {string} path - URL path (e.g. '/dashboard' or '/profile/:id')
-     * @param {Object} module - The module object containing { render, init }
+     * Enregistre une route avec un Regex plus souple
      */
     addRoute(path, module) {
-        // Convert path to Regex
-        // /profile/:id -> /^\/profile\/([^/]+)$/
         const paramNames = [];
+        // Transforme /profile/:id en regex, et accepte un slash final optionnel [/]?
         const regexPath = path.replace(/:([^/]+)/g, (_, key) => {
             paramNames.push(key);
             return '([^/]+)';
         });
 
-        const regex = new RegExp(`^${regexPath}$`);
+        const regex = new RegExp(`^${regexPath}[/]?$`);
         this.routes.push({ regex, module, paramNames, path });
     }
 
-    /**
-     * Navigates to a URL
-     * @param {string} path 
-     */
     navigateTo(path) {
-        // Avoid pushing same state twice
         if (window.location.pathname !== path) {
             window.history.pushState({}, '', path);
         }
         this.handleLocation();
     }
 
-    /**
-     * Resolves the current URL and renders the matching module
-     */
     async handleLocation() {
         const path = window.location.pathname;
         let match = null;
         let params = {};
 
-        // Find matching route
+        // 1. Trouver la route correspondante
         for (const route of this.routes) {
             const result = path.match(route.regex);
-
             if (result) {
                 match = route;
-
-                // Extract params
                 route.paramNames.forEach((name, index) => {
                     params[name] = result[index + 1];
                 });
-
                 break;
             }
         }
 
-        // --- FALLBACK LOGIC ---
+        // Fallback: Si aucune route, retour au login
         if (!match) {
-            console.warn(`⚠️ Route not found: ${path} -> Redirecting to /login`);
+            console.warn(`Route inconnue: ${path} -> Redirection Login`);
             this.navigateTo('/login');
             return;
         }
 
-        // Render logic
+        // 2. Choisir le bon endroit où afficher la vue (Root vs MainSlot)
+        // Les pages "Plein écran" (Login, Register...) écrasent tout
+        const fullScreenRoutes = ['/login', '/register', '/pending', '/rejected'];
+        const isFullScreen = fullScreenRoutes.some(r => path.startsWith(r));
+
+        if (isFullScreen) {
+            this.root = this.appRoot;
+        } else {
+            // Sinon on cherche le slot du dashboard, ou on se replie sur app
+            const mainSlot = document.getElementById('main-slot');
+            this.root = mainSlot || this.appRoot;
+        }
+
+        // 3. Nettoyage de l'ancienne vue
+        if (this.currentView && typeof this.currentView.cleanup === 'function') {
+            this.currentView.cleanup();
+        }
         this.currentView = match.module;
 
-        // Clean container (Important to prevent memory leaks or duplicate listeners if manually managed)
+        // Reset du contenu
         if (this.root) this.root.innerHTML = '';
 
-        // 1. Render module
+        // 4. Rendu de la nouvelle vue
         if (this.currentView.render) {
-            if (this.root) {
-                // Pass params and the container
-                // Some views return a string, others might manipulate DOM directly.
-                const viewContent = await this.currentView.render(this.root, params);
-
-                if (typeof viewContent === 'string') {
-                    this.root.innerHTML = viewContent;
-                }
+            const viewContent = await this.currentView.render(this.root, params);
+            if (typeof viewContent === 'string' && this.root) {
+                this.root.innerHTML = viewContent;
             }
         }
 
-        // 2. Init module if exists (Attach listeners, fetches, etc.)
+        // 5. Initialisation JS (Listeners, etc.)
         if (this.currentView.init) {
             await this.currentView.init();
         }
-    }
 
-    /**
-     * Helper to retrieve current Params if needed externally
-     */
-    getCurrentParams() {
-        const path = window.location.pathname;
-        for (const route of this.routes) {
-            const result = path.match(route.regex);
-            if (result) {
-                let params = {};
-                route.paramNames.forEach((name, index) => params[name] = result[index + 1]);
-                return params;
-            }
-        }
-        return {};
+        // 6. IMPORTANT : On force le rendu des icônes Lucide
+        createIcons({ icons });
+
+        // Reset du scroll
+        if (this.root) this.root.scrollTop = 0;
     }
 }
 

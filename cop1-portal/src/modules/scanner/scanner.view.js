@@ -66,5 +66,5 @@ export const ScannerView = {
     }
 };
 
-// Exposition globale pour usage dans le HTML onclick="openScanner()"
-window.openScanner = ScannerView.openScanner;
+// Exposition globale supprimée pour favoriser l'import modulaire
+// window.openScanner = ScannerView.openScanner;

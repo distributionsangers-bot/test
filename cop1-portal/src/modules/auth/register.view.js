@@ -1,7 +1,7 @@
 
 import { supabase } from '../../services/supabase.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 const LOGO_URL = "logo.png";
 
@@ -81,7 +81,7 @@ export function renderRegister() {
 }
 
 export function initRegister() {
-    createIcons();
+    createIcons({ icons });
 
     const form = document.getElementById('form-register');
     const fileInput = document.getElementById('reg-proof');

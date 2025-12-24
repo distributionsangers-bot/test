@@ -1,8 +1,7 @@
-
 import { PlanningService } from './planning.service.js';
 import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
-import { createIcons } from 'lucide';
-
+// CORRECTION : Import
+import { createIcons, icons } from 'lucide';
 import { openEventModal } from './planning-form.view.js';
 import { openParticipantsModal } from './participants.view.js';
 import { QRDisplayView } from './qr-display.view.js';
@@ -19,14 +18,11 @@ export function renderPlanningList() {
                     <i data-lucide="plus-circle" class="w-4 h-4"></i> Nouveau
                 </button>
             </div>
-
             <div class="bg-white p-1 rounded-2xl border border-slate-100 flex mb-6">
                 <button data-tab="upcoming" class="tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition bg-slate-900 text-white shadow-md">À venir</button>
                 <button data-tab="history" class="tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:bg-slate-100">Historique</button>
             </div>
-
             <div id="planning-list" class="space-y-6">
-                <!-- Squelette -->
                 ${renderSkeleton()}
             </div>
         </div>
@@ -52,38 +48,37 @@ function renderSkeleton() {
 }
 
 let currentTab = 'upcoming';
+let abortController = null;
 
 export async function initPlanningList() {
-    // 1. Gestion des Tabs
+    if (abortController) abortController.abort();
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
     const tabs = document.querySelectorAll('.tab-btn');
     tabs.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Update UI
             tabs.forEach(t => t.className = "tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:bg-slate-100");
             btn.className = "tab-btn flex-1 py-2 text-sm font-bold rounded-xl transition bg-slate-900 text-white shadow-md";
-
-            // Update Data
             currentTab = btn.dataset.tab;
             loadEvents();
-        });
+        }, { signal });
     });
 
-    // 2. Gestion du bouton Créer
     const createBtn = document.getElementById('btn-create-event');
-    if (createBtn) {
-        createBtn.addEventListener('click', () => {
-            openEventModal();
-        });
-    }
+    if (createBtn) createBtn.addEventListener('click', () => openEventModal(), { signal });
 
-    // 3. Délégation d'événements pour les Actions (Supprimer, Edit, etc)
     const list = document.getElementById('planning-list');
-    if (list) {
-        list.addEventListener('click', handleListClick);
-    }
+    if (list) list.addEventListener('click', handleListClick, { signal });
 
-    // 4. Chargement initial
     await loadEvents();
+}
+
+export function cleanup() {
+    if (abortController) {
+        abortController.abort();
+        abortController = null;
+    }
 }
 
 async function loadEvents() {
@@ -101,7 +96,8 @@ async function loadEvents() {
         } else {
             list.innerHTML = data.map(evt => renderEventCard(evt)).join('');
         }
-        createIcons();
+        // CORRECTION : Injection
+        createIcons({ icons });
     } catch (err) {
         console.error(err);
         list.innerHTML = `<div class="text-center py-20 text-red-400">Erreur de chargement.</div>`;
@@ -112,11 +108,7 @@ function renderEventCard(e) {
     const date = new Date(e.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
     const safeTitle = escapeHtml(e.title);
     const safeLoc = escapeHtml(e.location);
-
-    // Boutons d'action pour l'événement
     const showActions = currentTab === 'upcoming';
-
-    // Rendu des créneaux
     const shiftsHtml = (e.shifts || []).map(s => renderShiftItem(s)).join('');
 
     return `
@@ -140,7 +132,6 @@ function renderEventCard(e) {
                     </button>
                 </div>` : ''}
             </div>
-
             <div class="space-y-3">
                 ${shiftsHtml}
             </div>
@@ -153,10 +144,7 @@ function renderShiftItem(s) {
     const taken = (s.registrations && s.registrations[0]) ? s.registrations[0].count : 0;
     const percent = total > 0 ? (taken / total) * 100 : 0;
     const isFull = taken >= total;
-
-    const reservedBadge = s.reserved_slots > 0
-        ? `<span class="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded border border-orange-200 whitespace-nowrap ml-2">+${s.reserved_slots} Rés.</span>`
-        : '';
+    const reservedBadge = s.reserved_slots > 0 ? `<span class="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded border border-orange-200 whitespace-nowrap ml-2">+${s.reserved_slots} Rés.</span>` : '';
 
     return `
         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group hover:shadow-sm transition-all">
@@ -172,7 +160,6 @@ function renderShiftItem(s) {
                         Ref: ${escapeHtml(s.referent_name || 'Aucun')}
                     </div>
                 </div>
-
                 <div class="text-right min-w-[60px]">
                     <div class="text-xs font-bold ${isFull ? 'text-red-500' : 'text-brand-600'} mb-1">${taken} / ${total}</div>
                     <div class="h-1.5 w-16 bg-slate-200 rounded-full overflow-hidden ml-auto">
@@ -180,7 +167,6 @@ function renderShiftItem(s) {
                     </div>
                 </div>
             </div>
-
             <div class="flex items-center justify-end gap-1 mt-3 pt-3 border-t border-slate-200/60">
                 <button data-action="edit-event" data-id="${s.event_id}" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-white rounded-xl transition" title="Modifier">
                     <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
@@ -214,32 +200,23 @@ async function handleListClick(e) {
         const res = await PlanningService.deleteEvent(id);
         toggleLoader(false);
         if (res.error) showToast("Erreur suppression", "error");
-        else {
-            showToast("Événement supprimé");
-            loadEvents();
-        }
+        else { showToast("Événement supprimé"); loadEvents(); }
     } else if (action === 'delete-shift') {
-        if (!confirm("Supprimer ce créneau ? Les bénévoles inscrits seront désinscrits.")) return;
+        if (!confirm("Supprimer ce créneau ?")) return;
         toggleLoader(true);
         const res = await PlanningService.deleteShift(id);
         toggleLoader(false);
         if (res.error) showToast("Erreur suppression", "error");
-        else {
-            showToast("Créneau supprimé");
-            loadEvents();
-        }
+        else { showToast("Créneau supprimé"); loadEvents(); }
     } else if (action === 'edit-event') {
         toggleLoader(true);
         const { data, error } = await PlanningService.getEventById(id);
         toggleLoader(false);
-
         if (error || !data) showToast("Erreur de chargement", "error");
         else openEventModal(data);
-
     } else if (action === 'view-participants') {
         openParticipantsModal(id);
     } else if (action === 'qr-shift') {
-        const title = btn.dataset.title;
-        QRDisplayView.showShiftQR(id, title);
+        QRDisplayView.showShiftQR(id, btn.dataset.title);
     }
 }

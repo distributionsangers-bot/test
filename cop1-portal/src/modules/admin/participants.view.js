@@ -1,7 +1,7 @@
 
 import { ParticipantsService } from './participants.service.js';
 import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 // --- MAIN FUNCTION ---
 
@@ -66,7 +66,7 @@ export async function openParticipantsModal(shiftId) {
         `;
 
         document.body.appendChild(modal);
-        createIcons({ root: modal });
+        createIcons({ icons, root: modal });
 
         // 4. Bind Events
         modal.querySelector('#btn-close-part').onclick = () => modal.remove();

@@ -1,5 +1,5 @@
 
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 // ============================================================
 // 1. GESTION DU LOADER (Identique à l'original)
@@ -48,7 +48,7 @@ export function showToast(msg, type = 'success') {
     `;
 
     container.appendChild(el);
-    createIcons();
+    createIcons({ icons });
 
     // Animation Entrée
     requestAnimationFrame(() => {

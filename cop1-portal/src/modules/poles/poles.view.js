@@ -1,7 +1,7 @@
 import { PolesService } from './poles.service.js';
 import { store } from '../../core/store.js';
 import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 export async function renderPoles(container) {
     if (!container) return;
@@ -103,7 +103,7 @@ export async function renderPoles(container) {
         </div>
     `;
 
-    createIcons({ root: container });
+    createIcons({ icons, root: container });
 
     // 3. Event Handling
     container.addEventListener('click', async (e) => {
@@ -195,7 +195,7 @@ async function viewPoleCandidates(teamId, teamName) {
     `;
 
     document.body.appendChild(m);
-    createIcons({ root: m });
+    createIcons({ icons, root: m });
 
     m.querySelector('.btn-close').onclick = () => m.remove();
 }
@@ -223,7 +223,7 @@ function openCreatePoleModal(onSuccess) {
         </div>
     `;
     document.body.appendChild(m);
-    createIcons({ root: m });
+    createIcons({ icons, root: m });
 
     m.querySelector('.btn-close').onclick = () => m.remove();
     m.querySelector('#form-create-pole').onsubmit = async (e) => {
@@ -270,7 +270,7 @@ function openEditPoleModal(team, onSuccess) {
         </div>
     `;
     document.body.appendChild(m);
-    createIcons({ root: m });
+    createIcons({ icons, root: m });
 
     m.querySelector('.btn-close').onclick = () => m.remove();
     m.querySelector('#form-edit-pole').onsubmit = async (e) => {

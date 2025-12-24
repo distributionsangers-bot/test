@@ -1,7 +1,7 @@
 
 import { AuthService } from '../../services/auth.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 const LOGO_URL = "logo.png";
 
@@ -39,7 +39,7 @@ export function renderLogin() {
 }
 
 export function initLogin() {
-    createIcons();
+    createIcons({ icons });
 
     // 1. Submit Listener
     const form = document.getElementById('form-login');
@@ -54,8 +54,18 @@ export function initLogin() {
     }
 }
 
+
+
+export function cleanup() {
+    const form = document.getElementById('form-login');
+    if (form) form.removeEventListener('submit', handleLoginSubmit);
+
+    const forgotBtn = document.getElementById('btn-forgot-password');
+    if (forgotBtn) forgotBtn.removeEventListener('click', handleForgotPassword);
+}
+
 async function handleLoginSubmit(e) {
-    e.preventDefault(); // SUPER IMPORTANT
+    e.preventDefault();
 
     const emailInput = document.getElementById('login-email');
     const passInput = document.getElementById('login-password');
@@ -73,8 +83,8 @@ async function handleLoginSubmit(e) {
         if (error) {
             showToast(error.message, "error");
         } else {
-            // SUCCESS -> RELOAD TO TRIGGER MAIN INIT
-            window.location.reload();
+            showToast("Connexion réussie", "success");
+            document.dispatchEvent(new CustomEvent('auth:login-success'));
         }
     } catch (err) {
         console.error(err);

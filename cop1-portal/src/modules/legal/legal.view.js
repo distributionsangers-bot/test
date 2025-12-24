@@ -1,7 +1,7 @@
 import { escapeHtml } from '../../services/utils.js';
 import { router } from '../../core/router.js';
 import { store } from '../../core/store.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 
 export async function renderLegal(container, params) {
     if (!container) return;
@@ -110,5 +110,5 @@ export async function renderLegal(container, params) {
     // Note: createIcons is usually handled by the caller or global observer, but strictness helps
     // We didn't import createIcons here to keep it lean, assuming router or Utils handles it? 
     // Wait, previous modules imported it. I should import it too.
-    createIcons({ root: container });
+    createIcons({ icons, root: container });
 }

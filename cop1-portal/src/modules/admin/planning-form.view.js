@@ -2,7 +2,7 @@
 import { PlanningService } from './planning.service.js';
 import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
 import { store } from '../../core/store.js';
-import { createIcons } from 'lucide';
+import { createIcons, icons } from 'lucide';
 import { initPlanningList } from './planning-list.view.js'; // Pour le refresh
 
 // --- RENDER MODAL ---
@@ -89,7 +89,7 @@ export function openEventModal(eventToEdit = null) {
     `;
 
     document.body.appendChild(modal);
-    createIcons({ root: modal });
+    createIcons({ icons, root: modal });
 
     // --- Init Logic ---
     const container = document.getElementById('shifts-container');

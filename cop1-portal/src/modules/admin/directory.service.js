@@ -1,16 +1,35 @@
 import { supabase } from '../../services/supabase.js';
 
 export const DirectoryService = {
-    async getAllUsers() {
-        // Fetch profiles with exact count if needed, or just list
-        // We order by name by default
-        const { data, error } = await supabase
+    async getUsers(page = 1, limit = 20, search = '', filter = 'all') {
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        let query = supabase
             .from('profiles')
-            .select('*')
-            .order('last_name', { ascending: true });
+            .select('*', { count: 'exact' });
+
+        // Filter Logic
+        if (filter === 'pending') {
+            query = query.eq('status', 'pending');
+        } else if (filter === 'admin') {
+            query = query.eq('is_admin', true);
+        }
+
+        // Search Logic
+        if (search) {
+            // Note: Supabase 'or' syntax for multiple columns
+            query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+        }
+
+        // Order & Paginate
+        query = query.order('last_name', { ascending: true })
+            .range(from, to);
+
+        const { data, error, count } = await query;
 
         if (error) return { error };
-        return { data };
+        return { data, count };
     },
 
     async getUserDetails(userId) {

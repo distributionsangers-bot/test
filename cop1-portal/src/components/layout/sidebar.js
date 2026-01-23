@@ -19,6 +19,7 @@
 import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
 import { store } from '../../core/store.js';
+import { showConfirm } from '../../services/utils.js';
 
 /**
  * Configuration des menus de navigation
@@ -210,27 +211,17 @@ export function initSidebar() {
  * RESTAURÉ depuis index_originel.html avec amélioration
  */
 async function handleLogout() {
-    // Confirmation utilisateur
-    const confirmed = confirm("Voulez-vous vraiment vous déconnecter ?");
-    if (!confirmed) return;
-
-    try {
-        // Utilise le service d'authentification (DRY)
-        await AuthService.logout();
-
-        // Nettoie le state local
-        store.state.user = null;
-        store.state.profile = null;
-
-        // Redirige vers la page de connexion
-        window.location.href = '/login';
-
-    } catch (error) {
-        console.error('❌ Erreur lors de la déconnexion:', error);
-
-        // Fallback : force le rechargement (nettoie la session)
-        window.location.reload();
-    }
+    showConfirm("Voulez-vous vraiment vous déconnecter ?", async () => {
+        try {
+            await AuthService.logout();
+            store.state.user = null;
+            store.state.profile = null;
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('❌ Erreur lors de la déconnexion:', error);
+            window.location.reload();
+        }
+    }, { confirmText: 'Se déconnecter' });
 }
 
 /**

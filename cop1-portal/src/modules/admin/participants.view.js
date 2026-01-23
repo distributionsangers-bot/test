@@ -15,7 +15,7 @@
  */
 
 import { ParticipantsService } from './participants.service.js';
-import { showToast, toggleLoader } from '../../services/utils.js';
+import { showToast, toggleLoader, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 
@@ -43,25 +43,25 @@ async function togglePresence(regId, isPresent) {
  * @param {HTMLElement} rowElement - Élément DOM à supprimer
  */
 async function forceUnsubscribe(regId, rowElement) {
-    if (!confirm('Êtes-vous sûr de vouloir désinscrire ce bénévole ?')) return;
+    showConfirm('Êtes-vous sûr de vouloir désinscrire ce bénévole ?', async () => {
+        try {
+            toggleLoader(true);
+            const { error } = await ParticipantsService.deleteRegistration(regId);
 
-    try {
-        toggleLoader(true);
-        const { error } = await ParticipantsService.deleteRegistration(regId);
+            if (error) throw error;
 
-        if (error) throw error;
+            showToast("Bénévole désinscrit");
+            if (rowElement) rowElement.remove();
 
-        showToast("Bénévole désinscrit");
-        if (rowElement) rowElement.remove();
-
-        // Met à jour le compteur
-        updateParticipantCount();
-    } catch (error) {
-        console.error('❌ Erreur désinscription:', error);
-        showToast("Erreur désinscription", "error");
-    } finally {
-        toggleLoader(false);
-    }
+            // Met à jour le compteur
+            updateParticipantCount();
+        } catch (error) {
+            console.error('❌ Erreur désinscription:', error);
+            showToast("Erreur désinscription", "error");
+        } finally {
+            toggleLoader(false);
+        }
+    }, { type: 'danger', confirmText: 'Désinscrire' });
 }
 
 /**

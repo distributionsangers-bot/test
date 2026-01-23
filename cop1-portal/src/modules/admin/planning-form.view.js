@@ -1,6 +1,6 @@
 
 import { PlanningService } from './planning.service.js';
-import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm, showPrompt } from '../../services/utils.js';
 import { store } from '../../core/store.js';
 import { createIcons, icons } from 'lucide';
 import { initPlanningList } from './planning-list.view.js'; // Pour le refresh
@@ -147,28 +147,27 @@ export async function openEventModal(eventToEdit = null) {
         const tmplId = document.getElementById('template-select').value;
         if (!tmplId) return showToast("Veuillez sélectionner un modèle", "info");
 
-        if (!confirm('Appliquer ce modèle ? Cela remplacera les champs actuels.')) return;
+        showConfirm('Appliquer ce modèle ? Cela remplacera les champs actuels.', async () => {
+            toggleLoader(true);
+            const { data: tmpls } = await PlanningService.getTemplates();
+            const t = tmpls.find(x => x.id == tmplId);
 
-        toggleLoader(true);
-        const { data: tmpls } = await PlanningService.getTemplates();
-        const t = tmpls.find(x => x.id == tmplId); // Loose equality for string/int match
+            if (t) {
+                document.querySelector('[name=title]').value = t.event_title || '';
+                document.querySelector('[name=location]').value = t.event_location || '';
 
-        if (t) {
-            document.querySelector('[name=title]').value = t.event_title || '';
-            document.querySelector('[name=location]').value = t.event_location || '';
-
-            // Rebuild shifts
-            container.innerHTML = ''; // Clear
-            if (t.shifts_config && Array.isArray(t.shifts_config)) {
-                t.shifts_config.forEach(sc => {
-                    // Clean id from template config to ensure new insert
-                    const cleanShift = { ...sc, id: null };
-                    container.appendChild(renderShiftRow(cleanShift, adminOpts));
-                });
+                // Rebuild shifts
+                container.innerHTML = '';
+                if (t.shifts_config && Array.isArray(t.shifts_config)) {
+                    t.shifts_config.forEach(sc => {
+                        const cleanShift = { ...sc, id: null };
+                        container.appendChild(renderShiftRow(cleanShift, adminOpts));
+                    });
+                }
+                showToast("Modèle appliqué !");
             }
-            showToast("Modèle appliqué !");
-        }
-        toggleLoader(false);
+            toggleLoader(false);
+        });
     };
 
     modal.querySelector('#btn-save-template').onclick = async () => {
@@ -190,27 +189,25 @@ export async function openEventModal(eventToEdit = null) {
 
         if (!title || shiftsData.length === 0) return showToast("Titre et créneaux requis pour le modèle", "error");
 
-        const name = prompt("Nom du modèle ?", title);
-        if (!name) return;
+        showPrompt("Nom du modèle ?", async (name) => {
+            if (!name) return;
 
-        toggleLoader(true);
-        const { error } = await PlanningService.createTemplate({
-            name,
-            event_title: title,
-            event_location: location,
-            shifts_config: shiftsData
-        });
-        toggleLoader(false);
+            toggleLoader(true);
+            const { error } = await PlanningService.createTemplate({
+                name,
+                event_title: title,
+                event_location: location,
+                shifts_config: shiftsData
+            });
+            toggleLoader(false);
 
-        if (error) showToast("Erreur sauvegarde modèle", "error");
-        else {
-            showToast("Modèle sauvegardé !");
-            // Refresh modal to show new template in list? 
-            // Simpler: reload modal or just append usage... 
-            // For now, close/open is best to refresh list cleanly
-            modal.remove();
-            openEventModal();
-        }
+            if (error) showToast("Erreur sauvegarde modèle", "error");
+            else {
+                showToast("Modèle sauvegardé !");
+                modal.remove();
+                openEventModal();
+            }
+        }, { defaultValue: title, confirmText: 'Sauvegarder' });
     };
 }
 
@@ -295,17 +292,17 @@ function renderShiftRow(shift = null, adminOptionsHtml = '') {
 
 async function handleRemoveShift(row, isExisting) {
     if (isExisting) {
-        if (!confirm("Supprimer ce créneau existant ? Cela le supprimera définitivement de la base.")) return;
+        showConfirm("Supprimer ce créneau existant ? Cela le supprimera définitivement de la base.", async () => {
+            toggleLoader(true);
+            const id = row.dataset.shiftId;
+            const res = await PlanningService.deleteShift(id);
+            toggleLoader(false);
 
-        toggleLoader(true);
-        const id = row.dataset.shiftId;
-        const res = await PlanningService.deleteShift(id); // Appel direct comme validé dans le plan
-        toggleLoader(false);
+            if (res.error) return showToast("Erreur suppression créneau", "error");
 
-        if (res.error) return showToast("Erreur suppression créneau", "error");
-
-        showToast("Créneau supprimé");
-        row.remove();
+            showToast("Créneau supprimé");
+            row.remove();
+        }, { type: 'danger' });
     } else {
         // Just remove from DOM
         row.remove();

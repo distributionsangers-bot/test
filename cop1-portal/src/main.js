@@ -1,4 +1,3 @@
-
 import './style.css';
 import { supabase } from './services/supabase.js';
 import { store } from './core/store.js';
@@ -6,7 +5,7 @@ import { router } from './core/router.js';
 import { renderSidebar, updateActiveNavLink, initSidebar } from './components/layout/sidebar.js';
 import { renderHeader, initHeader } from './components/layout/header.js';
 import { renderMobileNav, initMobileNav } from './components/layout/mobile-nav.js';
-import { toggleLoader, showToast } from './services/utils.js';
+import { toggleLoader, showToast, showConfirm } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
 
@@ -50,6 +49,10 @@ const app = document.getElementById('app');
 
 async function init() {
     toggleLoader(true);
+
+    // CORRECTION ICI : On active les écouteurs globaux (navigation) dès le début
+    attachGlobalListeners();
+
     try {
         // 1. Setup Realtime
         supabase.channel('global-app-changes')
@@ -144,7 +147,7 @@ function renderAppLayout() {
     // Init Header Events (Google Translate)
     initHeader();
 
-    attachGlobalListeners();
+    // NOTE: attachGlobalListeners a été déplacé dans init() pour garantir son exécution
 
     // On définit le root du routeur sur le slot principal
     const mainSlot = document.getElementById('main-slot');
@@ -172,7 +175,7 @@ function renderAppLayout() {
 }
 
 function attachGlobalListeners() {
-    // Utilisation d'un flag pour éviter d'attacher plusieurs fois si renderAppLayout est rappelé
+    // Utilisation d'un flag pour éviter d'attacher plusieurs fois si init est rappelé
     if (window._globalListenersAttached) return;
     window._globalListenersAttached = true;
 
@@ -189,7 +192,7 @@ function attachGlobalListeners() {
 
             router.navigateTo(path);
 
-            // Mise à jour visuelle Sidebar sans re-render total
+            // Mise à jour visuelle Sidebar sans re-render total (si la sidebar existe)
             updateActiveNavLink(viewName);
         }
 
@@ -210,13 +213,13 @@ function attachGlobalListeners() {
         // Logout
         const logoutBtn = e.target.closest('[data-action="logout"]');
         if (logoutBtn) {
-            if (confirm("Déconnexion ?")) {
+            showConfirm("Déconnexion ?", () => {
                 supabase.auth.signOut().then(() => {
                     store.state.user = null;
                     store.state.profile = null;
                     window.location.href = '/login';
                 });
-            }
+            }, { confirmText: 'Se déconnecter' });
         }
     });
 

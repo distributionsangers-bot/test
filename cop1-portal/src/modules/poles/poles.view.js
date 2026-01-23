@@ -1,6 +1,6 @@
 import { PolesService } from './poles.service.js';
 import { store } from '../../core/store.js';
-import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 
 export async function renderPoles(container) {
@@ -183,16 +183,17 @@ export async function renderPoles(container) {
                 toggleLoader(false);
             }
         } else if (action === 'delete-pole') {
-            if (!confirm("Supprimer ce pôle ?")) return;
-            toggleLoader(true);
-            try {
-                await PolesService.deleteTeam(id);
-                showToast("Pôle supprimé");
-                await renderPoles(container);
-            } catch (err) {
-                showToast("Erreur suppression", "error");
-                toggleLoader(false);
-            }
+            showConfirm("Supprimer ce pôle ?", async () => {
+                toggleLoader(true);
+                try {
+                    await PolesService.deleteTeam(id);
+                    showToast("Pôle supprimé");
+                    await renderPoles(container);
+                } catch (err) {
+                    showToast("Erreur suppression", "error");
+                    toggleLoader(false);
+                }
+            }, { type: 'danger', confirmText: 'Supprimer' });
         } else if (action === 'view-candidates') {
             const name = btn.dataset.name;
             await viewPoleCandidates(id, name);

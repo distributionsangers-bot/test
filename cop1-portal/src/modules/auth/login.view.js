@@ -1,5 +1,5 @@
 import { AuthService } from '../../services/auth.js';
-import { toggleLoader, showToast } from '../../services/utils.js';
+import { toggleLoader, showToast, showPrompt } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { APP_CONFIG } from '../../core/constants.js';
 
@@ -95,17 +95,22 @@ async function handleLoginSubmit(e) {
 }
 
 async function handleForgotPassword() {
-    // Basic implementation as per original
-    const email = prompt("Veuillez entrer votre email pour réinitialiser le mot de passe :");
-    if (!email) return;
+    showPrompt("Veuillez entrer votre email pour réinitialiser le mot de passe :", async (email) => {
+        if (!email) return;
 
-    toggleLoader(true);
-    const { error } = await AuthService.resetPassword(email);
-    toggleLoader(false);
+        toggleLoader(true);
+        const { error } = await AuthService.resetPassword(email);
+        toggleLoader(false);
 
-    if (error) {
-        showToast(error.message, "error");
-    } else {
-        showToast('Email de réinitialisation envoyé', 'success');
-    }
+        if (error) {
+            showToast(error.message, "error");
+        } else {
+            showToast('Email de réinitialisation envoyé', 'success');
+        }
+    }, {
+        title: 'Mot de passe oublié',
+        placeholder: 'Email',
+        inputType: 'email',
+        confirmText: 'Envoyer'
+    });
 }

@@ -1,5 +1,5 @@
 import { ScannerService } from './scanner.service.js';
-import { showToast } from '../../services/utils.js';
+import { showToast, showConfirm } from '../../services/utils.js';
 import { Html5Qrcode } from 'html5-qrcode'; // Import module from npm
 
 let html5QrcodeScanner = null;
@@ -110,27 +110,26 @@ export const ScannerView = {
     },
 
     async validateAttendance(shiftId) {
-        if (!confirm("Confirmer la présence pour ce créneau ?")) return;
+        showConfirm("Confirmer la présence pour ce créneau ?", async () => {
+            try {
+                const result = await ScannerService.validateAttendance(shiftId);
 
-        try {
-            const result = await ScannerService.validateAttendance(shiftId);
+                if (result.penalty) {
+                    showToast(`⚠️ ALERTE QUOTA SCOLAIRE: ${result.message} (0h)`, "warning");
+                } else {
+                    showToast(`C'est tout bon ! (+${result.hours_added}h)`);
+                }
 
-            if (result.penalty) {
-                alert("⚠️ ALERTE QUOTA SCOLAIRE\n\n" + result.message + "\n\nHeures comptabilisées : 0h.");
-                showToast("Validé (0h - Hors Quota)", "warning");
-            } else {
-                showToast(`C'est tout bon ! (+${result.hours_added}h)`);
+                // Rafraîchir dashboard si visible
+                if (document.getElementById('dashboard-view')) {
+                    window.location.reload();
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || "Erreur validation", 'error');
             }
-
-            // Rafraîchir dashboard si visible
-            if (document.getElementById('dashboard-view')) {
-                window.location.reload();
-            }
-
-        } catch (err) {
-            console.error(err);
-            showToast(err.message || "Erreur validation", 'error');
-        }
+        });
     }
 };
 

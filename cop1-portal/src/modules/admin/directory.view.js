@@ -1,5 +1,5 @@
 import { DirectoryService } from './directory.service.js';
-import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { store } from '../../core/store.js'; // To check current user for security
 
@@ -257,29 +257,32 @@ export async function renderDirectory(container) {
         else if (action === 'toggle-admin') {
             const isAdmin = btn.dataset.isAdmin === 'true';
             const newAdmin = !isAdmin;
-            if (!confirm(`Confirmer ${newAdmin ? 'donner' : 'retirer'} les droits Admin ?`)) return;
+            const msg = `Confirmer ${newAdmin ? 'donner' : 'retirer'} les droits Admin ?`;
 
-            toggleLoader(true);
-            const res = await DirectoryService.updateUserRole(id, newAdmin);
-            toggleLoader(false);
+            showConfirm(msg, async () => {
+                toggleLoader(true);
+                const res = await DirectoryService.updateUserRole(id, newAdmin);
+                toggleLoader(false);
 
-            if (res.error) showToast("Erreur droits admin", "error");
-            else {
-                showToast(`Droits mis à jour`);
-                loadUsers();
-            }
+                if (res.error) showToast("Erreur droits admin", "error");
+                else {
+                    showToast(`Droits mis à jour`);
+                    loadUsers();
+                }
+            }, { type: 'danger' });
         }
         else if (action === 'delete') {
-            if (!confirm("Supprimer définitivement cet utilisateur ?")) return;
-            toggleLoader(true);
-            const res = await DirectoryService.deleteUserProfile(id);
-            toggleLoader(false);
+            showConfirm("Supprimer définitivement cet utilisateur ?", async () => {
+                toggleLoader(true);
+                const res = await DirectoryService.deleteUserProfile(id);
+                toggleLoader(false);
 
-            if (res.error) showToast("Erreur suppression", "error");
-            else {
-                showToast("Utilisateur supprimé");
-                loadUsers();
-            }
+                if (res.error) showToast("Erreur suppression", "error");
+                else {
+                    showToast("Utilisateur supprimé");
+                    loadUsers();
+                }
+            }, { type: 'danger', confirmText: 'Supprimer' });
         }
     });
 
@@ -423,33 +426,33 @@ function openDocumentViewer(url, userId) {
     m.querySelector('#close-doc-btn').addEventListener('click', () => m.remove());
 
     m.querySelector('#btn-doc-accept').addEventListener('click', async () => {
-        if (!confirm("Valider ce dossier ?")) return;
-        m.remove();
-        toggleLoader(true);
-        await DirectoryService.deleteProofFile(userId); // Cleanup file
-        const res = await DirectoryService.updateUserStatus(userId, 'approved');
-        toggleLoader(false);
-        if (res.error) showToast("Erreur validation", "error");
-        else {
-            showToast("Dossier validé !");
-            // Refresh main list if possible, but we are outside renderScope... 
-            // Ideally trigger a global event or just reload page
-            window.location.reload();
-        }
+        showConfirm("Valider ce dossier ?", async () => {
+            m.remove();
+            toggleLoader(true);
+            await DirectoryService.deleteProofFile(userId);
+            const res = await DirectoryService.updateUserStatus(userId, 'approved');
+            toggleLoader(false);
+            if (res.error) showToast("Erreur validation", "error");
+            else {
+                showToast("Dossier validé !");
+                window.location.reload();
+            }
+        });
     });
 
     m.querySelector('#btn-doc-reject').addEventListener('click', async () => {
-        if (!confirm("Refuser ce dossier ?")) return;
-        m.remove();
-        toggleLoader(true);
-        await DirectoryService.deleteProofFile(userId); // Cleanup file anyway? Usually yes if rejected.
-        const res = await DirectoryService.updateUserStatus(userId, 'rejected');
-        toggleLoader(false);
-        if (res.error) showToast("Erreur refus", "error");
-        else {
-            showToast("Dossier refusé.");
-            window.location.reload();
-        }
+        showConfirm("Refuser ce dossier ?", async () => {
+            m.remove();
+            toggleLoader(true);
+            await DirectoryService.deleteProofFile(userId);
+            const res = await DirectoryService.updateUserStatus(userId, 'rejected');
+            toggleLoader(false);
+            if (res.error) showToast("Erreur refus", "error");
+            else {
+                showToast("Dossier refusé.");
+                window.location.reload();
+            }
+        }, { type: 'danger', confirmText: 'Refuser' });
     });
 }
 

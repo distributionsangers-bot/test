@@ -1,5 +1,5 @@
 import { PlanningService } from './planning.service.js';
-import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 // CORRECTION : Import
 import { createIcons, icons } from 'lucide';
 import { openEventModal } from './planning-form.view.js';
@@ -210,26 +210,31 @@ async function handleListClick(e) {
     if (!action || !id) return;
 
     if (action === 'delete-event') {
-        if (!confirm("⚠️ Attention : Supprimer l'événement effacera TOUS les créneaux et désinscrira les bénévoles. Continuer ?")) return;
-        toggleLoader(true);
-        const res = await PlanningService.deleteEvent(id);
-        toggleLoader(false);
-        if (res.error) showToast("Erreur suppression", "error");
-        else { showToast("Événement supprimé"); loadEvents(); }
+        showConfirm("⚠️ Attention : Supprimer l'événement effacera TOUS les créneaux et désinscrira les bénévoles. Continuer ?", async () => {
+            toggleLoader(true);
+            const res = await PlanningService.deleteEvent(id);
+            toggleLoader(false);
+            if (res.error) showToast("Erreur suppression", "error");
+            else { showToast("Événement supprimé"); loadEvents(); }
+        }, { type: 'danger', confirmText: 'Supprimer Tout' });
+
     } else if (action === 'delete-shift') {
-        if (!confirm("Supprimer ce créneau ?")) return;
-        toggleLoader(true);
-        const res = await PlanningService.deleteShift(id);
-        toggleLoader(false);
-        if (res.error) showToast("Erreur suppression", "error");
-        else { showToast("Créneau supprimé"); loadEvents(); }
+        showConfirm("Supprimer ce créneau ?", async () => {
+            toggleLoader(true);
+            const res = await PlanningService.deleteShift(id);
+            toggleLoader(false);
+            if (res.error) showToast("Erreur suppression", "error");
+            else { showToast("Créneau supprimé"); loadEvents(); }
+        }, { type: 'danger' });
+
     } else if (action === 'delete-template') {
-        if (!confirm("Supprimer ce modèle ?")) return;
-        toggleLoader(true);
-        const res = await PlanningService.deleteTemplate(id);
-        toggleLoader(false);
-        if (res.error) showToast("Erreur suppression", "error");
-        else { showToast("Modèle supprimé"); loadEvents(); }
+        showConfirm("Supprimer ce modèle ?", async () => {
+            toggleLoader(true);
+            const res = await PlanningService.deleteTemplate(id);
+            toggleLoader(false);
+            if (res.error) showToast("Erreur suppression", "error");
+            else { showToast("Modèle supprimé"); loadEvents(); }
+        }, { type: 'danger' });
     } else if (action === 'edit-event') {
         toggleLoader(true);
         const { data, error } = await PlanningService.getEventById(id);

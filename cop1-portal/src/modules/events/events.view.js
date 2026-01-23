@@ -1,3 +1,4 @@
+import { EventsService } from './events.service.js';
 import { supabase } from '../../services/supabase.js';
 import { store } from '../../core/store.js';
 import { showToast, toggleLoader } from '../../services/utils.js';
@@ -131,23 +132,16 @@ export function cleanup() {
 async function handleToggleRegistration(shiftId, isRegistered) {
     toggleLoader(true);
     try {
-        if (isRegistered) {
-            // Unsubscribe
-            const { error } = await supabase
-                .from('registrations')
-                .delete()
-                .eq('shift_id', shiftId)
-                .eq('user_id', store.state.user.id);
+        const userId = store.state.user.id;
 
-            if (error) throw error;
+        // FIX: Utilisation du service pour gérer la logique métier (RPC safe)
+        const result = await EventsService.toggleRegistration(shiftId, userId, isRegistered);
+
+        if (result.error) throw result.error;
+
+        if (result.action === 'unregister') {
             showToast("Désinscription validée", "success");
         } else {
-            // Subscribe
-            const { error } = await supabase
-                .from('registrations')
-                .insert([{ shift_id: shiftId, user_id: store.state.user.id }]);
-
-            if (error) throw error;
             showToast("Inscription validée !", "success");
         }
 

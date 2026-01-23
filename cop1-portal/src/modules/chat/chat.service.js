@@ -22,14 +22,8 @@ export const ChatService = {
             .order('updated_at', { ascending: false });
 
         if (!isAdmin) {
-            // Pour un bénévole : Ses tickets OU les annonces
-            // Note: La syntaxe .or() de Supabase est puissante
             query = query.or(`user_id.eq.${user.id},category.eq.announcement`);
         }
-
-        // On récupère aussi le profil de l'auteur du ticket pour l'affichage (si support)
-        // Mais pour l'instant restons simple, on supposera que le titre du ticket suffit
-        // Ou on peut faire une jointure si nécessaire.
 
         const { data, error } = await query;
 
@@ -38,13 +32,18 @@ export const ChatService = {
             return { success: false, error };
         }
 
-        // Petit traitement pour avoir le dernier message proprement
+        // FIX: Aplatir last_message (array -> string) pour la vue
         const formatted = data.map(t => {
-            // last_message est un tableau à cause de la relation one-to-many, on prend le plus récent sil est trié ou on tri
-            // En général on limite la sous-requête, mais ici Supabase JS le fait différemment.
-            // Simplifions : on va fetcher les messages séparément ou assumer que le backend met à jour 'updated_at' du ticket.
-            // Pour l'aperçu, on peut utiliser le champ 'last_message_preview' s'il existe, sinon on le laisse vide pour l'instant.
-            return t;
+            const msgs = t.last_message;
+            let content = null;
+            // On prend le dernier message (supposons que Supabase renvoie dans l'ordre ou on prend le 1er)
+            // Idéalement il faudrait trier msgs par created_at desc si ce n'est pas le cas
+            if (Array.isArray(msgs) && msgs.length > 0) {
+                // Tri simple au cas où
+                msgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                content = msgs[0].content;
+            }
+            return { ...t, last_message: content };
         });
 
         return { success: true, data: formatted };
@@ -58,7 +57,7 @@ export const ChatService = {
             .from('messages')
             .select(`
                 *,
-                profile:profiles(first_name, last_name, is_admin)
+                profiles(first_name, last_name, is_admin)
             `)
             .eq('ticket_id', ticketId)
             .order('created_at', { ascending: true }); // Chronologique

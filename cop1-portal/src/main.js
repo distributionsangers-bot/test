@@ -4,7 +4,7 @@ import { supabase } from './services/supabase.js';
 import { store } from './core/store.js';
 import { router } from './core/router.js';
 import { renderSidebar, updateActiveNavLink, initSidebar } from './components/layout/sidebar.js';
-import { renderHeader } from './components/layout/header.js';
+import { renderHeader, initHeader } from './components/layout/header.js';
 import { renderMobileNav, initMobileNav } from './components/layout/mobile-nav.js';
 import { toggleLoader, showToast } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
@@ -141,6 +141,9 @@ function renderAppLayout() {
     // Init Mobile Nav Events
     initMobileNav();
 
+    // Init Header Events (Google Translate)
+    initHeader();
+
     attachGlobalListeners();
 
     // On définit le root du routeur sur le slot principal
@@ -214,11 +217,6 @@ function attachGlobalListeners() {
                     window.location.href = '/login';
                 });
             }
-        }
-
-        // Langue Toggle (Simulation)
-        if (e.target.closest('#btn-toggle-lang')) {
-            showToast("Fonctionnalité multilingue bientôt disponible !", "info");
         }
     });
 

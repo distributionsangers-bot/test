@@ -84,7 +84,6 @@ export async function renderProfile(container, params) {
                 <div class="flex p-1 bg-slate-100 rounded-xl mb-4">
                     <button id="tab-history" class="flex-1 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition">Historique</button>
                     ${isMe ? `<button id="tab-edit" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition">Modifier</button>` : ''}
-                    <button id="tab-qr" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition">QR Code</button>
                 </div>
 
                 <div id="content-history" class="space-y-3">
@@ -113,15 +112,7 @@ export async function renderProfile(container, params) {
                     </div>
                 </div>` : ''}
 
-                <div id="content-qr" class="hidden flex flex-col items-center justify-center py-10 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-sm font-bold text-slate-500 mb-4">Votre Code Bénévole</p>
-                    <div id="my-qrcode" class="p-4 bg-white rounded-xl shadow-inner border border-slate-100 mb-4">
-                        <div class="w-40 h-40 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 text-xs text-center p-2">
-                            QR Code généré ici automatiquement
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 max-w-xs text-center">Présentez ce code aux responsables pour valider vos missions.</p>
-                </div>
+
             </div>
         </div>
     `;
@@ -190,7 +181,7 @@ function renderHistoryList(history) {
 }
 
 function setupTabs(c) {
-    const tabs = ['history', 'edit', 'qr'];
+    const tabs = ['history', 'edit'];
     tabs.forEach(t => {
         const btn = c.querySelector(`#tab-${t}`);
         if (!btn) return;

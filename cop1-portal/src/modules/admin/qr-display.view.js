@@ -86,7 +86,7 @@ export const QRDisplayView = {
             // Génération du QR Code
             const payload = JSON.stringify({
                 shift_id: shiftId,
-                type: 'attendance_validation',
+                type: 'shift',
                 timestamp: Date.now()
             });
 
@@ -170,7 +170,7 @@ export const QRDisplayView = {
         try {
             const payload = JSON.stringify({
                 shift_id: shiftId,
-                type: 'attendance_validation',
+                type: 'shift',
                 timestamp: Date.now()
             });
 

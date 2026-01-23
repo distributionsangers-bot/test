@@ -17,7 +17,7 @@ export const ScannerService = {
 
     async processScan(data) {
         // Logique centralisée si besoin
-        if (data.type === 'attendance_validation') {
+        if (data.type === 'shift' || data.type === 'attendance_validation') {
             return this.validateAttendance(data.shift_id);
         }
         throw new Error("Type de QR inconnu");

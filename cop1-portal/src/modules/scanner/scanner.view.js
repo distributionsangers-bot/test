@@ -42,7 +42,7 @@ export const ScannerView = {
             </div>
 
             <p class="text-white/60 mt-8 text-xs font-medium px-10 text-center max-w-xs mx-auto">
-                Placez le code du bénévole dans le carré bleu.
+                Visez le QR Code du créneau.
             </p>
         `;
 
@@ -99,7 +99,7 @@ export const ScannerView = {
             const data = JSON.parse(decodedText);
 
             // Vérification du type de QR Code
-            if (data.type === 'attendance_validation') {
+            if (data.type === 'shift' || data.type === 'attendance_validation') {
                 await ScannerView.validateAttendance(data.shift_id);
             } else {
                 showToast('QR Code non reconnu', 'error');

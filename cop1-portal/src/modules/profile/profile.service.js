@@ -1,4 +1,5 @@
 import { supabase } from '../../services/supabase.js';
+import { APP_CONFIG } from '../../core/constants.js';
 
 export const ProfileService = {
     /**
@@ -7,7 +8,7 @@ export const ProfileService = {
      */
     async getProfileAndHistory(userId) {
         try {
-            // 1. Fetch Profile (with total_hours which is likely a column or view)
+            // 1. Fetch Profile
             const profilePromise = supabase
                 .from('profiles')
                 .select('*')
@@ -15,7 +16,6 @@ export const ProfileService = {
                 .single();
 
             // 2. Fetch History (Registrations -> Shift -> Event)
-            // We need to join: registrations -> shifts -> events
             const historyPromise = supabase
                 .from('registrations')
                 .select(`
@@ -54,25 +54,32 @@ export const ProfileService = {
     },
 
     /**
-     * Updates user profile (phone, etc.)
+     * Updates user profile with all editable fields
      * Handles password update if provided (using Auth API)
      */
     async updateProfile(userId, formData) {
         try {
             const updates = {};
-            if (formData.phone) updates.phone = formData.phone;
-            // Add other fields as necessary (e.g. avatar_url if we handle upload separately)
 
-            // 1. Update Profile Data
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .update(updates)
-                .eq('id', userId);
+            // All editable fields
+            if (formData.first_name !== undefined) updates.first_name = formData.first_name;
+            if (formData.last_name !== undefined) updates.last_name = formData.last_name;
+            if (formData.phone !== undefined) updates.phone = formData.phone;
+            if (formData.has_permit !== undefined) updates.has_permit = formData.has_permit;
+            if (formData.mandatory_hours !== undefined) updates.mandatory_hours = formData.mandatory_hours;
 
-            if (profileError) throw profileError;
+            // 1. Update Profile Data (only if there are updates)
+            if (Object.keys(updates).length > 0) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update(updates)
+                    .eq('id', userId);
+
+                if (profileError) throw profileError;
+            }
 
             // 2. Update Password if provided
-            if (formData.password) {
+            if (formData.password && formData.password.trim()) {
                 const { error: authError } = await supabase.auth.updateUser({
                     password: formData.password
                 });
@@ -82,24 +89,72 @@ export const ProfileService = {
             return { success: true };
 
         } catch (error) {
+            console.error("Update Profile Error:", error);
+            return { error };
+        }
+    },
+
+    /**
+     * Uploads avatar to Supabase Storage and updates profile
+     * @param {string} userId - User ID
+     * @param {File} file - Image file to upload
+     * @returns {Promise<{url, error}>}
+     */
+    async uploadAvatar(userId, file) {
+        try {
+            const bucketName = APP_CONFIG?.BUCKET_AVATARS || 'avatars';
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${userId}.${fileExt}`;
+            const filePath = fileName;
+
+            // 1. Upload to storage (upsert to replace existing)
+            const { error: uploadError } = await supabase.storage
+                .from(bucketName)
+                .upload(filePath, file, {
+                    upsert: true,
+                    contentType: file.type
+                });
+
+            if (uploadError) throw uploadError;
+
+            // 2. Get public URL
+            const { data: urlData } = supabase.storage
+                .from(bucketName)
+                .getPublicUrl(filePath);
+
+            const publicUrl = urlData?.publicUrl;
+
+            // Add cache buster to URL
+            const finalUrl = publicUrl ? `${publicUrl}?t=${Date.now()}` : null;
+
+            // 3. Update profile with new avatar URL
+            if (finalUrl) {
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ avatar_url: finalUrl })
+                    .eq('id', userId);
+
+                if (updateError) throw updateError;
+            }
+
+            return { url: finalUrl, success: true };
+
+        } catch (error) {
+            console.error("Upload Avatar Error:", error);
             return { error };
         }
     },
 
     /**
      * Deletes the user account securely via RPC
-     * (Assumes 'delete_own_account' RPC exists as per legacy code)
-     * Or uses Admin API if this is an admin action? 
-     * Requirement says: "deleteAccount(userId) : (Sécurisé) Pour la suppression de compte."
-     * User prompt implies "Supprimer mon compte" -> RPC 'delete_own_account'
      */
     async deleteAccount(userId) {
         try {
-            // If deleting self
             const { error } = await supabase.rpc('delete_own_account');
             if (error) throw error;
             return { success: true };
         } catch (error) {
+            console.error("Delete Account Error:", error);
             return { error };
         }
     }

@@ -21,10 +21,24 @@ export async function renderEvents() {
 
         if (error) throw error;
 
-        // Client-side sort by event date
-        shifts.sort((a, b) => new Date(a.events.date) - new Date(b.events.date));
+        // Filter out hidden events (not visible or scheduled for future)
+        const now = new Date();
+        const visibleShifts = shifts.filter(shift => {
+            if (!shift.events) return false;
 
-        const eventsHtml = shifts.map(shift => {
+            // Check is_visible flag (default to true if not set)
+            const isVisible = shift.events.is_visible !== false;
+
+            // Check if publish_at is in the future
+            const isScheduledForFuture = shift.events.publish_at && new Date(shift.events.publish_at) > now;
+
+            return isVisible && !isScheduledForFuture;
+        });
+
+        // Client-side sort by event date
+        visibleShifts.sort((a, b) => new Date(a.events.date) - new Date(b.events.date));
+
+        const eventsHtml = visibleShifts.map(shift => {
             const isRegistered = shift.registrations.some(r => r.user_id === store.state.user.id);
             const dateObj = new Date(shift.events.date);
             const dateStr = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });

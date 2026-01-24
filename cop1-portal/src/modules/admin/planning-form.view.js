@@ -30,6 +30,8 @@ export async function openEventModal(eventToEdit = null) {
     const title = isEdit ? escapeHtml(eventToEdit.title) : '';
     const location = isEdit ? escapeHtml(eventToEdit.location) : '';
     const date = isEdit ? convertDateForInput(eventToEdit.date) : '';
+    const isVisible = isEdit ? (eventToEdit.is_visible !== false) : true;
+    const publishAt = isEdit && eventToEdit.publish_at ? convertDateTimeForInput(eventToEdit.publish_at) : '';
 
     const modal = document.createElement('div');
     modal.id = 'event-modal';
@@ -100,6 +102,27 @@ export async function openEventModal(eventToEdit = null) {
                         </div>
                     </div>
 
+                    <div class="border-t border-slate-100 my-4"></div>
+
+                    <!-- Visibility Controls (Admin) -->
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Visibilité</h4>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="is_visible" ${isVisible ? 'checked' : ''} class="w-5 h-5 rounded-lg border-slate-300 text-brand-600 focus:ring-brand-500">
+                                <div>
+                                    <span class="font-bold text-slate-700">Événement visible</span>
+                                    <p class="text-xs text-slate-400">Si décoché, l'événement sera masqué aux bénévoles</p>
+                                </div>
+                            </label>
+                            <div>
+                                <label class="text-sm font-bold text-slate-700 block mb-1">Publier à partir de (optionnel)</label>
+                                <input name="publish_at" type="datetime-local" value="${publishAt}" class="w-full p-3 bg-white rounded-xl font-bold text-sm outline-none ring-1 ring-slate-200 focus:ring-brand-500">
+                                <p class="text-xs text-slate-400 mt-1">L'événement sera automatiquement visible à cette date</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
 
@@ -138,6 +161,12 @@ export async function openEventModal(eventToEdit = null) {
     };
 
     modal.querySelector('#form-event').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSave(eventToEdit ? eventToEdit.id : null);
+    });
+
+    // FIX: Also add click handler to the save button (since it's outside the form)
+    modal.querySelector('#btn-save-event').addEventListener('click', (e) => {
         e.preventDefault();
         handleSave(eventToEdit ? eventToEdit.id : null);
     });
@@ -318,6 +347,11 @@ async function handleSave(eventId) {
     const location = form.querySelector('[name="location"]').value.trim();
     const date = form.querySelector('[name="date"]').value;
 
+    // Visibility fields
+    const isVisible = form.querySelector('[name="is_visible"]')?.checked ?? true;
+    const publishAtInput = form.querySelector('[name="publish_at"]')?.value;
+    const publishAt = publishAtInput ? new Date(publishAtInput).toISOString() : null;
+
     if (!title || !location || !date) return showToast("Champs généraux incomplets", "error");
 
     // 2. Scan DOM for Shifts
@@ -371,7 +405,7 @@ async function handleSave(eventId) {
         if (eventId) {
             // --- EDIT MODE ---
             // 1. Update Event
-            const evtRes = await PlanningService.updateEvent(eventId, { title, location, date });
+            const evtRes = await PlanningService.updateEvent(eventId, { title, location, date, is_visible: isVisible, publish_at: publishAt });
             if (evtRes.error) throw evtRes.error;
 
             // 2. Upsert Shifts
@@ -408,7 +442,7 @@ async function handleSave(eventId) {
         } else {
             // --- CREATE MODE ---
             const res = await PlanningService.createEvent(
-                { title, location, date },
+                { title, location, date, is_visible: isVisible, publish_at: publishAt },
                 shiftsData
             );
             if (res.error) throw res.error;
@@ -432,4 +466,16 @@ async function handleSave(eventId) {
 function convertDateForInput(isoStr) {
     if (!isoStr) return '';
     return isoStr.split('T')[0]; // YYYY-MM-DD
+}
+
+function convertDateTimeForInput(isoStr) {
+    if (!isoStr) return '';
+    try {
+        const d = new Date(isoStr);
+        // Format: YYYY-MM-DDTHH:MM
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+        return '';
+    }
 }

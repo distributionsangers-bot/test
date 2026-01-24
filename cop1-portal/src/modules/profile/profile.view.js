@@ -1,7 +1,6 @@
 import { ProfileService } from './profile.service.js';
 import { store } from '../../core/store.js';
-import { toggleLoader, showToast, escapeHtml } from '../../services/utils.js';
-// CORRECTION : Import
+import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 
@@ -12,114 +11,230 @@ export async function renderProfile(container, params) {
     const targetUserId = params?.id || currentUserId;
     const isMe = (targetUserId === currentUserId);
 
+    // Skeleton
     container.innerHTML = `
-        <div class="animate-pulse max-w-lg mx-auto mt-10 space-y-4">
-            <div class="h-32 bg-slate-200 rounded-3xl"></div>
-            <div class="h-10 bg-slate-200 rounded-xl w-1/2 mx-auto"></div>
-            <div class="h-64 bg-slate-100 rounded-3xl"></div>
+        <div class="animate-pulse max-w-2xl mx-auto mt-10 space-y-6">
+            <div class="h-48 bg-gradient-to-r from-slate-200 to-slate-300 rounded-3xl"></div>
+            <div class="h-24 bg-slate-100 rounded-3xl"></div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="h-28 bg-slate-100 rounded-2xl"></div>
+                <div class="h-28 bg-slate-100 rounded-2xl"></div>
+                <div class="h-28 bg-slate-100 rounded-2xl"></div>
+            </div>
         </div>
     `;
 
     const { profile, history, error } = await ProfileService.getProfileAndHistory(targetUserId);
 
     if (error || !profile) {
-        container.innerHTML = `<div class="text-center text-red-500 py-20 font-bold">Impossible de charger le profil.</div>`;
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-20">
+                <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="user-x" class="w-10 h-10 text-red-400"></i>
+                </div>
+                <p class="text-red-500 font-bold">Impossible de charger le profil.</p>
+            </div>
+        `;
+        createIcons({ icons, root: container });
         return;
     }
+
+    // Compute stats
+    const stats = computeStats(history, profile);
+    const badges = computeBadges(stats, profile);
 
     const fullName = escapeHtml(`${profile.first_name || ''} ${profile.last_name || ''}`);
     const email = escapeHtml(profile.email || '');
     const initial = (profile.first_name || '?')[0].toUpperCase();
-    const isMandatory = profile.mandatory_hours;
+    const avatarUrl = profile.avatar_url || null;
     const hours = profile.total_hours || 0;
     const hasPermit = profile.has_permit;
-    const roleBadge = profile.is_admin
-        ? `<div class="absolute bottom-0 right-0 bg-yellow-400 text-yellow-900 p-1.5 rounded-full border-4 border-white shadow-sm"><i data-lucide="shield" class="w-4 h-4"></i></div>`
-        : '';
+    const isMandatory = profile.mandatory_hours;
+    const phone = profile.phone || '';
 
-    let statusBadge = '';
-    if (profile.status === 'pending') statusBadge = '<span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-sm font-bold">En attente</span>';
-    else if (profile.status === 'approved') statusBadge = '<span class="px-2 py-1 rounded bg-green-100 text-green-800 text-sm font-bold">Validé</span>';
-    else statusBadge = '<span class="px-2 py-1 rounded bg-red-100 text-red-800 text-sm font-bold">Refusé</span>';
+    // Status badge
+    let statusConfig = { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Inconnu', icon: 'help-circle' };
+    if (profile.status === 'pending') statusConfig = { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente', icon: 'clock' };
+    else if (profile.status === 'approved') statusConfig = { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Validé', icon: 'check-circle' };
+    else if (profile.status === 'rejected') statusConfig = { bg: 'bg-red-100', text: 'text-red-700', label: 'Refusé', icon: 'x-circle' };
 
     container.innerHTML = `
-        <div class="animate-slide-up max-w-lg mx-auto pb-24 space-y-5">
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 text-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-brand-50 to-white"></div>
-                <div class="relative z-10">
-                    <div class="relative w-24 h-24 mx-auto mb-3">
-                        <div class="w-full h-full bg-white text-brand-600 rounded-full flex items-center justify-center text-3xl font-extrabold shadow-lg border-4 border-white">
-                            ${initial}
+        <div class="max-w-2xl mx-auto pb-32 space-y-6 animate-fade-in">
+            
+            <!-- HERO HEADER -->
+            <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 shadow-2xl shadow-brand-500/30">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                
+                <div class="relative p-8 pt-12">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <!-- Avatar -->
+                        <div class="relative">
+                            <div id="avatar-container" class="w-28 h-28 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-4xl font-black shadow-xl border-4 border-white/30 overflow-hidden">
+                                ${initial}
+                            </div>
+                            ${profile.is_admin ? `
+                            <div class="absolute -top-1 -right-1 w-8 h-8 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
+                                <i data-lucide="shield" class="w-4 h-4 text-amber-900"></i>
+                            </div>
+                            ` : ''}
                         </div>
-                        ${roleBadge}
-                    </div>
-                    <h2 class="text-xl font-extrabold text-slate-900">${fullName}</h2>
-                    <p class="text-slate-400 font-medium text-sm mb-5">${email}</p>
-                    <div class="flex justify-center gap-3 flex-wrap">
-                        <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Statut</div>
-                            ${statusBadge}
+                        
+                        <!-- Info -->
+                        <div class="flex-1 text-center md:text-left text-white">
+                            <h1 class="text-3xl font-black tracking-tight mb-1">${fullName}</h1>
+                            <p class="text-brand-200 font-medium mb-3">${email}</p>
+                            <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                <span class="px-3 py-1.5 rounded-xl text-xs font-bold ${statusConfig.bg} ${statusConfig.text} flex items-center gap-1.5">
+                                    <i data-lucide="${statusConfig.icon}" class="w-3.5 h-3.5"></i>
+                                    ${statusConfig.label}
+                                </span>
+                                <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">
+                                    ${isMandatory ? '🎓 Scolaire' : '💚 Bénévole'}
+                                </span>
+                                ${hasPermit ? `<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>` : ''}
+                            </div>
                         </div>
-                        <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Permis</div>
-                            <div class="font-bold ${hasPermit ? 'text-green-600' : 'text-slate-400'} text-sm">${hasPermit ? 'Oui' : 'Non'}</div>
-                        </div>
-                        <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
-                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Type</div>
-                             <div class="font-bold text-brand-600 text-sm">${isMandatory ? 'Scolaire' : 'Bénévole'}</div>
-                        </div>
+
+
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg shadow-emerald-200 relative overflow-hidden flex items-center justify-between">
-                <div class="relative z-10">
-                    <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1">Compteur Heures</p>
-                    <p class="text-5xl font-extrabold tracking-tighter">${hours}<span class="text-2xl opacity-60 ml-1">h</span></p>
+            <!-- STATS GRID -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Hours -->
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-20">
+                        <i data-lucide="clock" class="w-20 h-20"></i>
+                    </div>
+                    <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-wider mb-1">Heures</p>
+                    <p class="text-3xl font-black">${hours}<span class="text-lg opacity-60">h</span></p>
                 </div>
-                <i data-lucide="award" class="w-24 h-24 text-white opacity-20 absolute -right-4 -bottom-4 rotate-12"></i>
+
+                <!-- Missions -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10">
+                        <i data-lucide="calendar-check" class="w-20 h-20 text-brand-600"></i>
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Missions</p>
+                    <p class="text-3xl font-black text-slate-900">${stats.totalMissions}</p>
+                </div>
+
+                <!-- Presence Rate -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10">
+                        <i data-lucide="trending-up" class="w-20 h-20 text-blue-600"></i>
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Présence</p>
+                    <p class="text-3xl font-black ${stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500'}">${stats.presenceRate}<span class="text-lg opacity-60">%</span></p>
+                </div>
+
+                <!-- Upcoming -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10">
+                        <i data-lucide="rocket" class="w-20 h-20 text-purple-600"></i>
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">À venir</p>
+                    <p class="text-3xl font-black text-purple-600">${stats.upcoming}</p>
+                </div>
             </div>
 
-            <div class="mt-6">
-                <div class="flex p-1 bg-slate-100 rounded-xl mb-4">
-                    <button id="tab-history" class="flex-1 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition">Historique</button>
-                    ${isMe ? `<button id="tab-edit" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition">Modifier</button>` : ''}
+            <!-- BADGES -->
+            ${badges.length > 0 ? `
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-amber-500"></i>
+                    Badges obtenus
+                </h3>
+                <div class="flex flex-wrap gap-3">
+                    ${badges.map(b => `
+                        <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl ${b.bg} ${b.text} font-bold text-sm shadow-sm">
+                            <span class="text-xl">${b.emoji}</span>
+                            <span>${b.label}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- TABS -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex border-b border-slate-100">
+                    <button id="tab-history" class="flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4"></i>
+                        Historique
+                    </button>
+                    ${isMe ? `
+                    <button id="tab-edit" class="flex-1 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center gap-2 border-b-2 border-transparent">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        Paramètres
+                    </button>
+                    ` : ''}
                 </div>
 
-                <div id="content-history" class="space-y-3">
+                <!-- History Content -->
+                <div id="content-history" class="p-5">
                     ${renderHistoryList(history)}
                 </div>
 
+                <!-- Edit Content -->
                 ${isMe ? `
-                <div id="content-edit" class="hidden bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-lg mb-4">Mes Informations</h3>
-                    <form id="form-profile-update" class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Téléphone</label>
-                            <input name="phone" value="${profile.phone || ''}" type="tel" class="w-full p-3 bg-slate-50 rounded-xl font-bold border outline-none focus:ring-2 focus:ring-brand-500" placeholder="06...">
+                <div id="content-edit" class="hidden p-5 space-y-6">
+                    <form id="form-profile-update" class="space-y-5">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Prénom</label>
+                                <input name="first_name" value="${escapeHtml(profile.first_name || '')}" type="text" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="Prénom">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Nom</label>
+                                <input name="last_name" value="${escapeHtml(profile.last_name || '')}" type="text" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="Nom">
+                            </div>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Nouveau Mot de passe (optionnel)</label>
-                            <input name="password" type="password" class="w-full p-3 bg-slate-50 rounded-xl font-bold border outline-none focus:ring-2 focus:ring-brand-500" placeholder="********">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Téléphone</label>
+                            <input name="phone" value="${escapeHtml(phone)}" type="tel" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="06 00 00 00 00">
                         </div>
-                        <button type="submit" class="w-full py-3 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-700 transition">Enregistrer</button>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2">
+                                    <input type="checkbox" name="has_permit" ${hasPermit ? 'checked' : ''} class="w-5 h-5 rounded-lg border-slate-300 text-brand-600 focus:ring-brand-500">
+                                    J'ai le permis de conduire
+                                </label>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2">
+                                    <input type="checkbox" name="mandatory_hours" ${isMandatory ? 'checked' : ''} class="w-5 h-5 rounded-lg border-slate-300 text-brand-600 focus:ring-brand-500">
+                                    Heures obligatoires (scolaire)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Nouveau mot de passe (optionnel)</label>
+                            <input name="password" type="password" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            Enregistrer les modifications
+                        </button>
                     </form>
-                    
-                    <div class="pt-6 mt-6 border-t border-slate-100">
-                        <button id="btn-delete-account" class="w-full py-3 border border-red-100 text-red-500 font-bold rounded-xl hover:bg-red-50 transition text-xs flex items-center justify-center gap-2">
-                             <i data-lucide="trash-2" class="w-4 h-4"></i> Supprimer mon compte
+
+                    <!-- Danger Zone -->
+                    <div class="pt-6 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wider mb-3">Zone dangereuse</h4>
+                        <button id="btn-delete-account" class="w-full py-4 border-2 border-red-100 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            Supprimer mon compte
                         </button>
                     </div>
-                </div>` : ''}
-
-
+                </div>
+                ` : ''}
             </div>
         </div>
     `;
 
-    // CORRECTION : Injection globale
     createIcons({ icons, root: container });
-
     setupTabs(container);
 
     if (isMe) {
@@ -128,12 +243,69 @@ export async function renderProfile(container, params) {
     }
 }
 
-function renderHistoryList(history) {
-    if (!history || history.length === 0) {
-        return `<div class="text-center py-10 text-slate-400 font-medium bg-white rounded-2xl border border-slate-100">Aucune mission pour le moment.</div>`;
+function computeStats(history, profile) {
+    const now = new Date();
+    let totalMissions = history?.length || 0;
+    let presentCount = 0;
+    let pastCount = 0;
+    let upcoming = 0;
+
+    history?.forEach(item => {
+        const shift = item.shifts;
+        const event = shift?.events;
+        if (!shift || !event) return;
+
+        const eventEnd = new Date(`${event.date}T${shift.end_time}`);
+        const isPast = now > eventEnd;
+
+        if (isPast) {
+            pastCount++;
+            if (item.status === 'present') presentCount++;
+        } else {
+            upcoming++;
+        }
+    });
+
+    const presenceRate = pastCount > 0 ? Math.round((presentCount / pastCount) * 100) : 100;
+
+    return { totalMissions, presenceRate, upcoming, pastCount, presentCount };
+}
+
+function computeBadges(stats, profile) {
+    const badges = [];
+    const hours = profile.total_hours || 0;
+
+    if (hours >= 100) badges.push({ emoji: '🏆', label: 'Centenaire', bg: 'bg-amber-100', text: 'text-amber-800' });
+    else if (hours >= 50) badges.push({ emoji: '⭐', label: '50 heures', bg: 'bg-yellow-100', text: 'text-yellow-800' });
+    else if (hours >= 10) badges.push({ emoji: '🌟', label: 'Débutant', bg: 'bg-blue-100', text: 'text-blue-800' });
+
+    if (stats.totalMissions >= 20) badges.push({ emoji: '🎯', label: 'Vétéran', bg: 'bg-purple-100', text: 'text-purple-800' });
+    else if (stats.totalMissions >= 10) badges.push({ emoji: '💪', label: '10+ missions', bg: 'bg-green-100', text: 'text-green-800' });
+    else if (stats.totalMissions >= 5) badges.push({ emoji: '🚀', label: '5 missions', bg: 'bg-indigo-100', text: 'text-indigo-800' });
+
+    if (stats.presenceRate === 100 && stats.pastCount >= 5) {
+        badges.push({ emoji: '✅', label: 'Fiabilité max', bg: 'bg-emerald-100', text: 'text-emerald-800' });
     }
 
-    return history.map(item => {
+    if (profile.has_permit) badges.push({ emoji: '🚗', label: 'Conducteur', bg: 'bg-slate-100', text: 'text-slate-700' });
+
+    return badges;
+}
+
+function renderHistoryList(history) {
+    if (!history || history.length === 0) {
+        return `
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
+                </div>
+                <p class="text-slate-400 font-semibold">Aucune mission pour le moment</p>
+                <p class="text-xs text-slate-300 mt-1">Inscrivez-vous à un événement !</p>
+            </div>
+        `;
+    }
+
+    return `<div class="space-y-3">${history.map(item => {
         const shift = item.shifts;
         const event = shift?.events;
         if (!shift || !event) return '';
@@ -143,41 +315,34 @@ function renderHistoryList(history) {
         const isPresent = item.status === 'present';
         const isAbsent = item.status === 'absent';
 
-        let statusColor = 'border-slate-100 bg-white';
-        let icon = 'calendar';
-        let iconColor = 'text-slate-400';
+        let config = { border: 'border-slate-100', bg: 'bg-white', icon: 'calendar', iconColor: 'text-slate-400', badge: '', badgeBg: '' };
 
         if (isPresent) {
-            statusColor = 'border-green-200 bg-green-50';
-            icon = 'check-circle-2';
-            iconColor = 'text-green-600';
+            config = { border: 'border-emerald-200', bg: 'bg-emerald-50/50', icon: 'check-circle', iconColor: 'text-emerald-600', badge: 'Présent', badgeBg: 'bg-emerald-100 text-emerald-700' };
         } else if (isAbsent) {
-            statusColor = 'border-red-200 bg-red-50';
-            icon = 'x-circle';
-            iconColor = 'text-red-500';
+            config = { border: 'border-red-200', bg: 'bg-red-50/50', icon: 'x-circle', iconColor: 'text-red-500', badge: 'Absent', badgeBg: 'bg-red-100 text-red-700' };
         } else if (!isPast) {
-            statusColor = 'border-blue-100 bg-blue-50/50';
-            icon = 'clock';
-            iconColor = 'text-blue-500';
+            config = { border: 'border-blue-200', bg: 'bg-blue-50/50', icon: 'clock', iconColor: 'text-blue-500', badge: 'À venir', badgeBg: 'bg-blue-100 text-blue-700' };
         } else {
-            statusColor = 'border-orange-200 bg-orange-50';
-            icon = 'help-circle';
-            iconColor = 'text-orange-500';
+            config = { border: 'border-amber-200', bg: 'bg-amber-50/50', icon: 'help-circle', iconColor: 'text-amber-500', badge: 'Non pointé', badgeBg: 'bg-amber-100 text-amber-700' };
         }
 
         return `
-            <div class="flex items-center gap-4 p-4 rounded-2xl border ${statusColor} shadow-sm animate-fade-in">
-                <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm flex-shrink-0">
-                    <i data-lucide="${icon}" class="w-6 h-6 ${iconColor}"></i>
+            <div class="flex items-center gap-4 p-4 rounded-2xl border-2 ${config.border} ${config.bg} transition-all hover:shadow-md">
+                <div class="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="${config.icon}" class="w-6 h-6 ${config.iconColor}"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h4 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(event.title)}</h4>
-                    <div class="text-xs text-slate-500 truncate">${shift.title} • ${date.toLocaleDateString()}</div>
+                    <p class="text-xs text-slate-500 truncate">${escapeHtml(shift.title)} • ${date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
                 </div>
-                ${item.hours_added ? `<div class="text-xs font-bold text-green-600 bg-white px-2 py-1 rounded-lg border border-green-100 shadow-sm">+${item.hours_added}h</div>` : ''}
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    ${item.hours_added ? `<span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-lg">+${item.hours_added}h</span>` : ''}
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${config.badgeBg}">${config.badge}</span>
+                </div>
             </div>
         `;
-    }).join('');
+    }).join('')}</div>`;
 }
 
 function setupTabs(c) {
@@ -189,11 +354,13 @@ function setupTabs(c) {
             tabs.forEach(x => {
                 const b = c.querySelector(`#tab-${x}`);
                 const content = c.querySelector(`#content-${x}`);
-                if (b) b.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 transition";
+                if (b) {
+                    b.className = "flex-1 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center gap-2 border-b-2 border-transparent";
+                }
                 if (content) content.classList.add('hidden');
             });
-            btn.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition";
-            c.querySelector(`#content-${t}`).classList.remove('hidden');
+            btn.className = "flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all flex items-center justify-center gap-2";
+            c.querySelector(`#content-${t}`)?.classList.remove('hidden');
         });
     });
 }
@@ -201,73 +368,70 @@ function setupTabs(c) {
 function setupEditForm(c, uid) {
     const form = c.querySelector('#form-profile-update');
     if (!form) return;
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(form);
-        const data = { phone: fd.get('phone'), password: fd.get('password') };
+
+        const data = {
+            first_name: fd.get('first_name'),
+            last_name: fd.get('last_name'),
+            phone: fd.get('phone'),
+            has_permit: fd.get('has_permit') === 'on',
+            mandatory_hours: fd.get('mandatory_hours') === 'on',
+            password: fd.get('password')
+        };
+
         toggleLoader(true);
         const res = await ProfileService.updateProfile(uid, data);
         toggleLoader(false);
-        if (res.error) showToast("Erreur mise à jour", "error");
-        else {
-            showToast("Infos mises à jour avec succès");
+
+        if (res.error) {
+            showToast("Erreur mise à jour: " + (res.error.message || 'Erreur'), "error");
+        } else {
+            showToast("Profil mis à jour avec succès ✓");
+            // Update store
+            if (store.state.profile) {
+                store.state.profile.first_name = data.first_name;
+                store.state.profile.last_name = data.last_name;
+                store.state.profile.phone = data.phone;
+                store.state.profile.has_permit = data.has_permit;
+                store.state.profile.mandatory_hours = data.mandatory_hours;
+            }
             if (data.password) form.querySelector('[name=password]').value = '';
         }
     });
 }
+
+
 
 function setupDelete(c, uid) {
     const btn = c.querySelector('#btn-delete-account');
     if (!btn) return;
 
     btn.addEventListener('click', () => {
-        const m = document.createElement('div');
-        m.id = 'delete-account-modal';
-        m.className = 'fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
-        m.innerHTML = `
-            <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl animate-slide-up relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-orange-500"></div>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-100 shadow-sm">
-                        <i data-lucide="alert-triangle" class="w-10 h-10"></i>
-                    </div>
-                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">Supprimer le compte ?</h3>
-                    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Cette action est <span class="font-bold text-red-500">irréversible</span>. Toutes vos données seront effacées.</p>
-                    <div class="bg-slate-50 p-4 rounded-xl text-left border border-slate-200 mb-6">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Confirmez votre email</label>
-                        <input id="delete-confirm-email" type="email" placeholder="${store.state.user?.email || ''}" class="w-full p-3 bg-white rounded-lg font-bold text-sm outline-none border border-slate-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition placeholder:text-slate-300">
-                    </div>
-                    <div class="flex gap-3">
-                        <button id="btn-cancel-delete" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition">Annuler</button>
-                        <button id="btn-confirm-delete" class="flex-1 py-3.5 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2">
-                             <i data-lucide="trash-2" class="w-4 h-4"></i> Supprimer
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(m);
-        // CORRECTION : Injection dans la modale
-        createIcons({ icons, root: m });
+        showConfirm(
+            "Supprimer définitivement votre compte ? Cette action est irréversible.",
+            async () => {
+                // Prompt for email confirmation
+                const email = prompt("Pour confirmer, entrez votre email :");
+                if (email !== store.state.user?.email) {
+                    showToast("Email incorrect", "error");
+                    return;
+                }
 
-        m.querySelector('#btn-cancel-delete').addEventListener('click', () => m.remove());
-        m.querySelector('#btn-confirm-delete').addEventListener('click', async () => {
-            const input = m.querySelector('#delete-confirm-email');
-            if (input.value.trim() !== store.state.user?.email) {
-                input.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
-                return;
-            }
-            toggleLoader(true);
-            const res = await ProfileService.deleteAccount(uid);
-            if (res.error) {
-                toggleLoader(false);
-                showToast("Erreur: " + res.error.message, "error");
-            } else {
-                await supabase.auth.signOut();
-                window.location.reload();
-            }
-            m.remove();
-        });
+                toggleLoader(true);
+                const res = await ProfileService.deleteAccount(uid);
+                if (res.error) {
+                    toggleLoader(false);
+                    showToast("Erreur: " + res.error.message, "error");
+                } else {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                }
+            },
+            { type: 'danger', confirmText: 'Supprimer' }
+        );
     });
 }
 

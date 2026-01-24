@@ -126,11 +126,23 @@ function renderEventCard(e) {
     const showActions = currentTab === 'upcoming';
     const shiftsHtml = (e.shifts || []).map(s => renderShiftItem(s)).join('');
 
+    // Visibility logic
+    const isVisible = e.is_visible !== false;
+    const hasScheduledPublish = e.publish_at && new Date(e.publish_at) > new Date();
+
+    let visibilityBadge = '';
+    if (!isVisible) {
+        visibilityBadge = `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 ml-2">👁️‍🗨️ Masqué</span>`;
+    } else if (hasScheduledPublish) {
+        const publishDate = new Date(e.publish_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        visibilityBadge = `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200 ml-2">⏰ ${publishDate}</span>`;
+    }
+
     return `
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-6 group animate-fade-in">
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-6 group animate-fade-in ${!isVisible ? 'opacity-60' : ''}">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <div class="text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">${date}</div>
+                    <div class="text-xs font-bold text-brand-600 uppercase tracking-wider mb-1 flex items-center">${date}${visibilityBadge}</div>
                     <h3 class="text-xl font-extrabold text-slate-900">${safeTitle}</h3>
                     <div class="flex items-center gap-2 text-slate-500 text-sm mt-1">
                         <i data-lucide="map-pin" class="w-3 h-3"></i> ${safeLoc}
@@ -139,6 +151,9 @@ function renderEventCard(e) {
                 
                 ${showActions ? `
                 <div class="flex gap-1">
+                    <button data-action="toggle-visibility" data-id="${e.id}" data-visible="${isVisible}" class="p-2 rounded-xl transition ${isVisible ? 'text-green-500 bg-green-50 hover:bg-green-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" title="${isVisible ? 'Masquer' : 'Afficher'}">
+                        <i data-lucide="${isVisible ? 'eye' : 'eye-off'}" class="w-5 h-5 pointer-events-none"></i>
+                    </button>
                     <button data-action="edit-event" data-id="${e.id}" class="text-slate-300 hover:text-brand-600 p-2 hover:bg-brand-50 rounded-xl transition">
                         <i data-lucide="pencil" class="w-5 h-5 pointer-events-none"></i>
                     </button>
@@ -241,6 +256,22 @@ async function handleListClick(e) {
         toggleLoader(false);
         if (error || !data) showToast("Erreur de chargement", "error");
         else openEventModal(data);
+
+    } else if (action === 'toggle-visibility') {
+        const isCurrentlyVisible = btn.dataset.visible === 'true';
+        const newVisibility = !isCurrentlyVisible;
+
+        toggleLoader(true);
+        const res = await PlanningService.updateEvent(id, { is_visible: newVisibility });
+        toggleLoader(false);
+
+        if (res.error) {
+            showToast("Erreur changement visibilité", "error");
+        } else {
+            showToast(newVisibility ? "Événement visible" : "Événement masqué");
+            loadEvents();
+        }
+
     } else if (action === 'view-participants') {
         openParticipantsModal(id);
     } else if (action === 'qr-shift') {

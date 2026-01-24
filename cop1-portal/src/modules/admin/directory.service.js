@@ -205,54 +205,24 @@ export const DirectoryService = {
     },
 
     /**
-     * Supprime complètement un utilisateur (profil + auth.users)
-     * Utilise une fonction RPC Supabase pour supprimer de auth.users
+     * Supprime complètement un utilisateur via RPC
+     * La RPC gère l'ordre de suppression et bypass les RLS
      * @param {string} userId - ID de l'utilisateur
      * @returns {Promise<{success, error}>}
      */
     async deleteUserProfile(userId) {
         try {
-            // Supprime d'abord le justificatif si existe
+            // Supprime d'abord le justificatif du storage si existe
             await this.deleteProofFile(userId);
 
-            // Supprimer les inscriptions d'abord (au cas où pas de CASCADE)
-            await supabase
-                .from('registrations')
-                .delete()
-                .eq('user_id', userId);
-
-            // Supprimer les messages du chat
-            await supabase
-                .from('messages')
-                .delete()
-                .eq('user_id', userId);
-
-            // Supprimer les tickets créés par l'utilisateur
-            await supabase
-                .from('tickets')
-                .delete()
-                .eq('user_id', userId);
-
-            // Supprimer le profil
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .delete()
-                .eq('id', userId);
-
-            if (profileError) {
-                console.error('Erreur suppression profil:', profileError);
-                throw profileError;
-            }
-
-            // Appeler la RPC pour supprimer de auth.users
-            // Cette function doit être créée dans Supabase avec SECURITY DEFINER
-            const { error: rpcError } = await supabase.rpc('delete_user_from_auth', {
+            // Appeler la RPC qui fait tout le nettoyage
+            const { error: rpcError } = await supabase.rpc('admin_delete_user_complete', {
                 target_user_id: userId
             });
 
             if (rpcError) {
-                console.warn('RPC delete_user_from_auth non disponible ou erreur:', rpcError.message);
-                // On continue quand même, le profil est supprimé
+                console.error('Erreur RPC admin_delete_user_complete:', rpcError);
+                throw rpcError;
             }
 
             return { success: true, error: null };

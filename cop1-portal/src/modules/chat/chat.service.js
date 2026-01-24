@@ -182,5 +182,65 @@ export const ChatService = {
                 supabase.removeChannel(channel);
             }
         };
+    },
+
+    // --- TICKET MANAGEMENT (Admin) ---
+
+    /**
+     * Ferme/résout un ticket
+     * @param {string} ticketId
+     * @returns {Promise<{success, error}>}
+     */
+    async closeTicket(ticketId) {
+        if (!store.state.profile?.is_admin) {
+            return { success: false, error: "Non autorisé" };
+        }
+
+        const { error } = await supabase
+            .from('tickets')
+            .update({ status: 'closed' })
+            .eq('id', ticketId);
+
+        if (error) {
+            console.error("Error closing ticket:", error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    },
+
+    /**
+     * Supprime un ticket et ses messages
+     * @param {string} ticketId
+     * @returns {Promise<{success, error}>}
+     */
+    async deleteTicket(ticketId) {
+        if (!store.state.profile?.is_admin) {
+            return { success: false, error: "Non autorisé" };
+        }
+
+        // 1. Supprimer les messages d'abord (FK constraint)
+        const { error: msgErr } = await supabase
+            .from('messages')
+            .delete()
+            .eq('ticket_id', ticketId);
+
+        if (msgErr) {
+            console.error("Error deleting messages:", msgErr);
+            return { success: false, error: msgErr };
+        }
+
+        // 2. Supprimer le ticket
+        const { error: ticketErr } = await supabase
+            .from('tickets')
+            .delete()
+            .eq('id', ticketId);
+
+        if (ticketErr) {
+            console.error("Error deleting ticket:", ticketErr);
+            return { success: false, error: ticketErr };
+        }
+
+        return { success: true };
     }
 };

@@ -102,7 +102,7 @@ async function renderUserDashboard(container) {
                 </div>
                 <div class="space-y-2">
                     ${announcements.map(a => `
-                        <button data-link="/chat?id=${a.id}" class="w-full text-left bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-2xl border border-purple-100 hover:shadow-md transition-all group">
+                        <button data-link="/messages/${a.id}" class="w-full text-left bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-2xl border border-purple-100 hover:shadow-md transition-all group">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-slate-800 text-sm truncate flex-1">${escapeHtml(a.subject)}</span>
                                 <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform"></i>
@@ -179,7 +179,7 @@ async function renderUserDashboard(container) {
                     <div class="text-[10px] text-slate-400">Pointer</div>
                 </button>
 
-                <button data-link="/chat" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
+                <button data-link="/messages" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
                     <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-purple-500/20 group-hover:scale-110 transition">
                         <i data-lucide="message-circle" class="w-6 h-6 text-white"></i>
                     </div>
@@ -264,9 +264,11 @@ async function renderAdminDashboard(container) {
             <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
             </div>
-            <div class="flex-1 min-w-0">
-                <span class="text-sm font-semibold text-slate-700">${escapeHtml(r.profiles?.first_name || '')} ${escapeHtml(r.profiles?.last_name || '')}</span>
-                <span class="text-xs text-slate-400"> s'est inscrit à </span>
+            <div class="flex-1 min-w-0 flex flex-col justify-center">
+                <div class="flex items-center gap-1">
+                     <span class="text-sm font-semibold text-slate-700 truncate max-w-[120px]">${escapeHtml(r.profiles?.first_name || '')} ${escapeHtml(r.profiles?.last_name || '')}</span>
+                     <span class="text-xs text-slate-400 flex-shrink-0">s'est inscrit à</span>
+                </div>
                 <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(r.shifts?.events?.title || '')}</span>
             </div>
             <span class="text-[10px] text-slate-300 flex-shrink-0">${formatTimeAgo(r.created_at)}</span>
@@ -351,7 +353,7 @@ async function renderAdminDashboard(container) {
                     </div>
                     <div class="text-xs font-bold text-slate-700">Événement</div>
                 </button>
-                <button data-link="/chat" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
+                <button data-link="/messages" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
                     <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition">
                         <i data-lucide="message-square" class="w-5 h-5"></i>
                     </div>

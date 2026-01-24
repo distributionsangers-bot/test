@@ -40,12 +40,12 @@ export function renderMobileNav(profile, currentView, adminMode) {
                 <button 
                     data-action="open-mobile-menu"
                     aria-label="Menu"
-                    class="nav-item flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition ${isMenuPageActive ? 'text-brand-600' : 'text-slate-400'}"
+                    class="nav-item flex flex-col items-center justify-center gap-1 py-2 flex-1 transition ${isMenuPageActive ? 'text-brand-600' : 'text-slate-400'}"
                 >
                     <div class="relative">
-                        <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                        <i data-lucide="${item.icon}" class="w-6 h-6"></i>
                     </div>
-                    <span class="text-[10px] font-semibold">${item.label}</span>
+                    <span class="text-[11px] font-semibold">${item.label}</span>
                 </button>
             `;
         }
@@ -57,13 +57,13 @@ export function renderMobileNav(profile, currentView, adminMode) {
             <button 
                 data-link="${item.id}" 
                 aria-label="${item.label}"
-                class="nav-item flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition ${isActive ? 'text-brand-600' : 'text-slate-400'}"
+                class="nav-item flex flex-col items-center justify-center gap-1 py-2 flex-1 transition ${isActive ? 'text-brand-600' : 'text-slate-400'}"
             >
                 <div class="relative">
-                    <i data-lucide="${item.icon}" class="w-5 h-5 ${isActive ? 'stroke-[2.5px]' : ''}"></i>
+                    <i data-lucide="${item.icon}" class="w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}"></i>
                     ${item.id === '/messages' ? '<span id="chat-badge" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>' : ''}
                 </div>
-                <span class="text-[10px] font-semibold">${item.label}</span>
+                <span class="text-[11px] font-semibold">${item.label}</span>
             </button>
         `;
     }).join('');

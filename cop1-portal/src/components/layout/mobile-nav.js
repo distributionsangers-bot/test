@@ -2,6 +2,12 @@
  * ============================================
  * MOBILE NAVIGATION COMPONENT - Premium Bottom Bar
  * ============================================
+ * Design moderne avec :
+ * - Pill-style active indicator
+ * - Glassmorphism effect
+ * - Smooth animations
+ * - Premium bottom sheet menu
+ * ============================================
  */
 
 import { store } from '../../core/store.js';
@@ -14,14 +20,14 @@ const MOBILE_NAV_ITEMS = {
     admin: [
         { id: '/dashboard', icon: 'home', label: 'Accueil' },
         { id: '/admin_planning', icon: 'calendar', label: 'Planning' },
-        { id: '/messages', icon: 'message-circle', label: 'Chat' },
-        { id: 'MENU', icon: 'grid-2x2', label: 'Plus' }
+        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
+        { id: 'MENU', icon: 'menu', label: 'Menu' }
     ],
     volunteer: [
         { id: '/dashboard', icon: 'home', label: 'Accueil' },
         { id: '/events', icon: 'calendar-check', label: 'Missions' },
-        { id: '/messages', icon: 'message-circle', label: 'Chat' },
-        { id: 'MENU', icon: 'user', label: 'Profil' }
+        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
+        { id: 'MENU', icon: 'menu', label: 'Menu' }
     ]
 };
 
@@ -40,12 +46,13 @@ export function renderMobileNav(profile, currentView, adminMode) {
                 <button 
                     data-action="open-mobile-menu"
                     aria-label="Menu"
-                    class="nav-item flex flex-col items-center justify-center gap-1 py-2 flex-1 transition ${isMenuPageActive ? 'text-brand-600' : 'text-slate-400'}"
+                    class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isMenuPageActive ? 'text-brand-600' : 'text-slate-400'}"
                 >
-                    <div class="relative">
-                        <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                    ${isMenuPageActive ? '<div class="absolute top-0 w-10 h-1 bg-brand-600 rounded-full"></div>' : ''}
+                    <div class="relative w-10 h-10 flex items-center justify-center rounded-xl ${isMenuPageActive ? 'bg-brand-50' : ''} transition-all">
+                        <i data-lucide="${item.icon}" class="w-6 h-6 ${isMenuPageActive ? 'stroke-[2.5px]' : ''}"></i>
                     </div>
-                    <span class="text-[11px] font-semibold">${item.label}</span>
+                    <span class="text-[10px] font-semibold">${item.label}</span>
                 </button>
             `;
         }
@@ -57,13 +64,14 @@ export function renderMobileNav(profile, currentView, adminMode) {
             <button 
                 data-link="${item.id}" 
                 aria-label="${item.label}"
-                class="nav-item flex flex-col items-center justify-center gap-1 py-2 flex-1 transition ${isActive ? 'text-brand-600' : 'text-slate-400'}"
+                class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isActive ? 'text-brand-600' : 'text-slate-400'}"
             >
-                <div class="relative">
+                ${isActive ? '<div class="absolute top-0 w-10 h-1 bg-brand-600 rounded-full"></div>' : ''}
+                <div class="relative w-10 h-10 flex items-center justify-center rounded-xl ${isActive ? 'bg-brand-50' : ''} transition-all">
                     <i data-lucide="${item.icon}" class="w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}"></i>
-                    ${item.id === '/messages' ? '<span id="chat-badge" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>' : ''}
+                    ${item.badge ? '<span id="mobile-chat-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>' : ''}
                 </div>
-                <span class="text-[11px] font-semibold">${item.label}</span>
+                <span class="text-[10px] font-semibold">${item.label}</span>
             </button>
         `;
     }).join('');
@@ -71,10 +79,11 @@ export function renderMobileNav(profile, currentView, adminMode) {
     return `
         <nav 
             id="mobile-nav" 
-            class="md:hidden fixed bottom-0 left-0 right-0 w-full pb-safe bg-white border-t border-slate-100 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+            class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/50 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
             role="navigation"
+            style="padding-bottom: max(env(safe-area-inset-bottom), 8px);"
         >
-            <div class="flex justify-around items-stretch">
+            <div class="flex justify-around items-stretch px-2">
                 ${navHtml}
             </div>
         </nav>
@@ -92,112 +101,109 @@ function openMobileMenu() {
     const profile = store.state.profile;
     const isAdmin = profile?.is_admin && store.state.adminMode;
     const firstName = profile?.first_name || 'Utilisateur';
+    const lastName = profile?.last_name || '';
+    const email = profile?.email || '';
     const initial = firstName[0]?.toUpperCase() || '?';
 
     const modal = document.createElement('div');
     modal.id = 'mobile-menu-modal';
-    modal.className = 'fixed inset-0 bg-black/40 z-[100] flex flex-col justify-end backdrop-blur-sm animate-fade-in md:hidden';
+    modal.className = 'fixed inset-0 bg-black/50 z-[100] flex flex-col justify-end backdrop-blur-sm animate-fade-in md:hidden';
 
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeMobileMenu();
     });
 
     modal.innerHTML = `
-        <div class="bg-white rounded-t-3xl shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto">
-            <!-- Handle -->
-            <div class="flex justify-center pt-3 pb-2">
-                <div class="w-10 h-1 bg-slate-200 rounded-full"></div>
+        <div class="bg-white rounded-t-[2rem] shadow-2xl animate-slide-up" style="max-height: 85vh; overflow-y: auto; padding-bottom: max(env(safe-area-inset-bottom), 16px);">
+            <!-- Handle Bar -->
+            <div class="flex justify-center pt-3 pb-1">
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
             </div>
             
             <!-- User Card -->
-            <div class="px-5 pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-brand-400 to-brand-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            <div class="px-5 py-4">
+                <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-50 via-white to-slate-50 border border-slate-100">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30">
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="font-bold text-slate-900 truncate">${firstName} ${profile?.last_name || ''}</div>
-                        <div class="text-xs text-slate-400 truncate">${profile?.email || ''}</div>
+                        <div class="font-bold text-slate-900 text-lg truncate">${firstName} ${lastName}</div>
+                        <div class="text-sm text-slate-400 truncate">${email}</div>
                     </div>
-                    ${isAdmin ? '<span class="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Admin</span>' : ''}
+                    ${profile?.is_admin ? `
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
+                            ${isAdmin ? 'Admin' : 'Volontaire'}
+                        </span>
+                    ` : ''}
                 </div>
             </div>
             
-            <!-- Menu Items -->
-            <div class="p-4 space-y-1">
-                ${isAdmin ? `
-                    <!-- Admin Menu -->
-                    <button data-menu-action="navigate" data-menu-path="/profile" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600">
-                            <i data-lucide="user" class="w-4 h-4"></i>
+            <!-- Menu Grid -->
+            <div class="px-5 pb-4">
+                <div class="grid grid-cols-3 gap-3">
+                    <button data-menu-action="navigate" data-menu-path="/profile" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+                            <i data-lucide="user" class="w-5 h-5"></i>
                         </div>
-                        <span class="font-medium text-slate-700 text-sm">Mon Profil</span>
+                        <span class="text-xs font-semibold text-slate-700">Profil</span>
                     </button>
                     
-                    <button data-menu-action="navigate" data-menu-path="/admin_users" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">
-                            <i data-lucide="users" class="w-4 h-4"></i>
+                    <button data-menu-action="navigate" data-menu-path="/poles" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
+                            <i data-lucide="network" class="w-5 h-5"></i>
                         </div>
-                        <span class="font-medium text-slate-700 text-sm">Annuaire</span>
+                        <span class="text-xs font-semibold text-slate-700">Pôles</span>
                     </button>
                     
-                    <button data-menu-action="navigate" data-menu-path="/poles" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                            <i data-lucide="network" class="w-4 h-4"></i>
+                    ${isAdmin ? `
+                        <button data-menu-action="navigate" data-menu-path="/admin_users" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/25">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-700">Annuaire</span>
+                        </button>
+                    ` : `
+                        <button data-menu-action="navigate" data-menu-path="/events" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
+                                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-700">Missions</span>
+                        </button>
+                    `}
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="px-5 pb-4 space-y-2">
+                ${profile?.is_admin ? `
+                    <button data-menu-action="toggle-admin" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r ${isAdmin ? 'from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100' : 'from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'} transition-all active:scale-[0.98]">
+                        <div class="w-11 h-11 rounded-xl ${isAdmin ? 'bg-emerald-500' : 'bg-amber-500'} flex items-center justify-center text-white shadow-lg">
+                            <i data-lucide="${isAdmin ? 'user' : 'shield'}" class="w-5 h-5"></i>
                         </div>
-                        <span class="font-medium text-slate-700 text-sm">Pôles</span>
-                    </button>
-                    
-                    <div class="h-px bg-slate-100 my-2"></div>
-                    
-                    <button data-menu-action="toggle-admin" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                        <div class="flex-1 text-left">
+                            <div class="font-bold ${isAdmin ? 'text-emerald-700' : 'text-amber-700'}">${isAdmin ? 'Passer en Vue Bénévole' : 'Passer en Mode Admin'}</div>
+                            <div class="text-xs ${isAdmin ? 'text-emerald-500' : 'text-amber-500'}">Changer de vue</div>
                         </div>
-                        <span class="font-medium text-slate-700 text-sm">Vue Bénévole</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}"></i>
                     </button>
-                ` : `
-                    <!-- Volunteer Menu -->
-                    <button data-menu-action="navigate" data-menu-path="/profile" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600">
-                            <i data-lucide="user" class="w-4 h-4"></i>
-                        </div>
-                        <span class="font-medium text-slate-700 text-sm">Mon Profil</span>
-                    </button>
-                    
-                    <button data-menu-action="navigate" data-menu-path="/poles" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">
-                            <i data-lucide="network" class="w-4 h-4"></i>
-                        </div>
-                        <span class="font-medium text-slate-700 text-sm">Pôles</span>
-                    </button>
-                    
-                    ${profile?.is_admin ? `
-                    <div class="h-px bg-slate-100 my-2"></div>
-                    
-                    <button data-menu-action="toggle-admin" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
-                        <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
-                            <i data-lucide="shield" class="w-4 h-4"></i>
-                        </div>
-                        <span class="font-medium text-slate-700 text-sm">Mode Admin</span>
-                    </button>
-                    ` : ''}
-                `}
+                ` : ''}
                 
-                <div class="h-px bg-slate-100 my-2"></div>
-                
-                <!-- LOGOUT - Always visible -->
-                <button data-menu-action="logout" class="menu-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition text-left group">
-                    <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center text-red-500 group-hover:bg-red-200 transition">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                <!-- Déconnexion -->
+                <button data-menu-action="logout" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 transition-all active:scale-[0.98]">
+                    <div class="w-11 h-11 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/25">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
                     </div>
-                    <span class="font-medium text-red-600 text-sm">Se déconnecter</span>
+                    <div class="flex-1 text-left">
+                        <div class="font-bold text-red-700">Se déconnecter</div>
+                        <div class="text-xs text-red-400">Quitter l'application</div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-red-300"></i>
                 </button>
             </div>
             
             <!-- Close Button -->
-            <div class="p-4 pt-0 pb-safe">
-                <button data-menu-action="close" class="w-full py-3 bg-slate-100 font-semibold text-slate-500 rounded-xl hover:bg-slate-200 transition text-sm">
+            <div class="px-5 pb-2">
+                <button data-menu-action="close" class="w-full py-3.5 bg-slate-100 font-bold text-slate-500 rounded-2xl hover:bg-slate-200 active:scale-[0.98] transition-all text-sm">
                     Fermer
                 </button>
             </div>
@@ -254,7 +260,7 @@ function closeMobileMenu() {
 function handleAdminToggle() {
     store.state.adminMode = !store.state.adminMode;
     localStorage.setItem('cop1_admin_mode', store.state.adminMode.toString());
-    showToast(store.state.adminMode ? 'Mode Admin activé' : 'Mode Bénévole activé');
+    showToast(store.state.adminMode ? 'Mode Admin activé' : 'Mode Bénévole activé', 'success');
     window.location.reload();
 }
 

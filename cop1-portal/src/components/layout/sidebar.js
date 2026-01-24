@@ -1,125 +1,156 @@
 /**
  * ============================================
- * SIDEBAR COMPONENT - Desktop Navigation
+ * SIDEBAR COMPONENT - Premium Desktop Navigation
  * ============================================
- * Affiche la navigation latérale desktop avec :
- * - Logo et branding
- * - Menu de navigation contextuel (Admin vs Bénévole)
- * - Toggle mode admin (si l'utilisateur est admin)
- * - Bouton de déconnexion
- * 
- * PRINCIPE DRY APPLIQUÉ :
- * - Utilise APP_CONFIG pour les constantes (LOGO_URL)
- * - Utilise AuthService pour la déconnexion
- * - Utilise store pour l'état global (adminMode)
- * - Pas de duplication de logique
+ * Design moderne avec :
+ * - Glassmorphism effect
+ * - Pill-style navigation avec indicateur animé
+ * - Gradient accents
+ * - User card premium
+ * - Smooth hover states
  * ============================================
  */
 
 import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
 import { store } from '../../core/store.js';
-import { showConfirm } from '../../services/utils.js';
+import { showConfirm, showToast } from '../../services/utils.js';
 
 /**
  * Configuration des menus de navigation
- * RESTAURÉ depuis index_originel.html (lignes 669-681)
  */
 const NAV_ITEMS = {
     admin: [
-        { id: '/dashboard', icon: 'layout-grid', label: 'Accueil' },
-        { id: '/admin_planning', icon: 'calendar-days', label: 'Planning' },
-        { id: '/messages', icon: 'message-circle', label: 'Chat' },
-        { id: '/admin_users', icon: 'users', label: 'Annuaire' },
-        { id: '/poles', icon: 'network', label: 'Pôles' },
-        { id: '/profile', icon: 'user', label: 'Profil' }
+        { id: '/dashboard', icon: 'layout-grid', label: 'Accueil', color: 'from-blue-500 to-indigo-600' },
+        { id: '/admin_planning', icon: 'calendar-days', label: 'Planning', color: 'from-emerald-500 to-teal-600' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true },
+        { id: '/admin_users', icon: 'users', label: 'Annuaire', color: 'from-amber-500 to-orange-600' },
+        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600' },
+        { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700' }
     ],
     volunteer: [
-        { id: '/events', icon: 'calendar-check', label: 'Missions' },
-        { id: '/poles', icon: 'network', label: 'Pôles' },
-        { id: '/messages', icon: 'message-circle', label: 'Chat' },
-        { id: '/profile', icon: 'user', label: 'Profil' }
+        { id: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-blue-500 to-indigo-600' },
+        { id: '/events', icon: 'calendar-check', label: 'Missions', color: 'from-emerald-500 to-teal-600' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true },
+        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600' },
+        { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700' }
     ]
 };
 
 /**
- * Renders the Sidebar component as an HTML string.
- * @param {Object} profile - The user profile object
- * @param {string} currentView - The current active view (e.g., '/dashboard')
- * @param {boolean} adminMode - Whether admin mode is active
- * @returns {string} The HTML string for the sidebar
+ * Renders the Premium Sidebar component
  */
 export function renderSidebar(profile, currentView, adminMode) {
     const { LOGO_URL } = APP_CONFIG;
-
-    // Détermine si l'utilisateur est admin ET en mode admin
     const isProfileAdmin = profile?.is_admin || false;
     const isEffectiveAdmin = isProfileAdmin && adminMode;
-
-    // Sélectionne les items de navigation appropriés
     const navItems = isEffectiveAdmin ? NAV_ITEMS.admin : NAV_ITEMS.volunteer;
 
-    // Génère le HTML des items de navigation
+    // User info
+    const firstName = profile?.first_name || 'Utilisateur';
+    const lastName = profile?.last_name || '';
+    const email = profile?.email || '';
+    const initial = firstName[0]?.toUpperCase() || '?';
+
+    // Generate nav items HTML
     const navItemsHtml = navItems.map(item => {
         const isActive = isItemActive(item.id, currentView);
-        const activeClasses = isActive
-            ? 'bg-brand-600 text-white shadow-lg'
-            : 'text-slate-500 hover:bg-slate-50';
 
         return `
             <button 
                 data-link="${item.id}" 
                 aria-label="${item.label}"
                 aria-current="${isActive ? 'page' : 'false'}"
-                class="w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition ${activeClasses}"
+                class="nav-link group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${isActive
+                ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg shadow-brand-500/25'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }"
             >
-                <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-                <span>${item.label}</span>
+                <div class="relative flex items-center justify-center w-9 h-9 rounded-lg ${isActive
+                ? 'bg-white/20'
+                : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm'
+            } transition-all duration-200">
+                    <i data-lucide="${item.icon}" class="w-[18px] h-[18px]"></i>
+                    ${item.badge ? `<span id="sidebar-chat-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>` : ''}
+                </div>
+                <span class="flex-1 ${isActive ? 'font-semibold' : ''}">${item.label}</span>
+                ${isActive ? '<div class="w-1.5 h-1.5 rounded-full bg-white/80"></div>' : ''}
             </button>
         `;
     }).join('');
 
-    // Génère le toggle admin si l'utilisateur est admin
+    // Admin toggle section
     const adminToggleHtml = isProfileAdmin ? `
-        <div class="mt-8 px-4">
-            <div class="text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">Mode</div>
+        <div class="px-4 py-3">
             <button 
                 data-action="toggle-admin"
                 aria-label="${adminMode ? 'Passer en vue bénévole' : 'Passer en vue responsable'}"
-                class="w-full py-3 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 active:scale-95 transition-all shadow-sm"
+                class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${adminMode
+            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+        }"
             >
-                ${adminMode ? '👤 Vue Bénévole' : '🛡️ Vue Responsable'}
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg ${adminMode ? 'bg-amber-100' : 'bg-emerald-100'} flex items-center justify-center">
+                        <i data-lucide="${adminMode ? 'user' : 'shield'}" class="w-4 h-4"></i>
+                    </div>
+                    <span>${adminMode ? 'Vue Bénévole' : 'Vue Admin'}</span>
+                </div>
+                <i data-lucide="arrow-right-left" class="w-4 h-4 opacity-50"></i>
             </button>
         </div>
     ` : '';
 
     return `
-        <aside class="hidden md:flex w-72 flex-col bg-white border-r border-slate-100 z-50 flex-shrink-0 h-full">
+        <aside class="hidden md:flex w-72 flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/50 z-50 flex-shrink-0 h-full shadow-xl shadow-slate-200/50">
             <!-- Header avec Logo -->
-            <div class="h-24 flex items-center px-8 flex-shrink-0 border-b border-slate-50">
-                <img src="${LOGO_URL}" class="h-10 w-auto mr-3" alt="Logo COP1 Angers">
-                <span class="font-extrabold text-2xl text-brand-900">COP1</span>
+            <div class="h-20 flex items-center gap-3 px-6 flex-shrink-0 border-b border-slate-100/50">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <img src="${LOGO_URL}" class="h-6 w-auto" alt="Logo COP1">
+                </div>
+                <div>
+                    <span class="font-extrabold text-xl text-slate-900">COP1</span>
+                    <span class="font-bold text-xl text-brand-600"> Angers</span>
+                </div>
+            </div>
+            
+            <!-- User Card -->
+            <div class="px-4 py-4 border-b border-slate-100/50">
+                <div class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/50">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brand-500/25">
+                        ${initial}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-slate-900 text-sm truncate">${firstName} ${lastName}</div>
+                        <div class="text-xs text-slate-400 truncate">${email}</div>
+                    </div>
+                    ${isEffectiveAdmin ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-lg">Admin</span>' : ''}
+                </div>
             </div>
             
             <!-- Navigation -->
             <nav 
                 id="sidebar-nav" 
-                class="flex-1 px-4 space-y-2 py-4 overflow-y-auto no-scrollbar"
+                class="flex-1 px-3 space-y-1 py-4 overflow-y-auto no-scrollbar"
                 role="navigation"
                 aria-label="Navigation principale"
             >
                 ${navItemsHtml}
-                ${adminToggleHtml}
             </nav>
             
+            <!-- Admin Toggle -->
+            ${adminToggleHtml}
+            
             <!-- Footer avec Déconnexion -->
-            <div class="p-6 flex-shrink-0 border-t border-slate-50">
+            <div class="p-4 flex-shrink-0 border-t border-slate-100/50">
                 <button 
                     data-action="logout"
                     aria-label="Se déconnecter"
-                    class="flex items-center gap-3 text-sm font-bold text-red-500 hover:bg-red-50 w-full p-4 rounded-xl transition active:scale-95"
+                    class="group flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full p-3 rounded-xl transition-all duration-200"
                 >
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                        <i data-lucide="log-out" class="w-4 h-4 group-hover:text-red-500 transition-colors"></i>
+                    </div>
                     <span>Déconnexion</span>
                 </button>
             </div>
@@ -129,87 +160,80 @@ export function renderSidebar(profile, currentView, adminMode) {
 
 /**
  * Vérifie si un item de navigation est actif
- * AMÉLIORATION : Gère les sous-routes (ex: /messages/123 → /messages)
- * @param {string} itemPath - Le chemin de l'item (ex: '/messages')
- * @param {string} currentView - La vue actuelle (ex: '/messages' ou 'messages')
- * @returns {boolean}
  */
 function isItemActive(itemPath, currentView) {
-    // Normalise les chemins (ajoute '/' si manquant)
     const normalizedItem = itemPath.startsWith('/') ? itemPath : `/${itemPath}`;
     const normalizedView = currentView.startsWith('/') ? currentView : `/${currentView}`;
 
-    // Correspondance exacte
     if (normalizedItem === normalizedView) return true;
 
-    // Correspondance de la racine (ex: /messages/123 → /messages)
     const viewRoot = `/${normalizedView.split('/')[1]}`;
     return normalizedItem === viewRoot;
 }
 
 /**
- * Updates the active state of sidebar navigation links without re-rendering the DOM.
- * OPTIMISATION : Évite un re-render complet de la sidebar lors de la navigation
- * @param {string} path - The current active path (e.g. '/dashboard')
+ * Updates the active state of sidebar navigation links
  */
 export function updateActiveNavLink(path) {
     const nav = document.getElementById('sidebar-nav');
-    if (!nav) {
-        console.warn('⚠️ Sidebar: Navigation introuvable. Mise à jour ignorée.');
-        return;
-    }
+    if (!nav) return;
 
-    // Normalise le chemin
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-
-    // Désactive tous les liens
     const allButtons = nav.querySelectorAll('[data-link]');
+
     allButtons.forEach(btn => {
-        btn.className = "w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition text-slate-500 hover:bg-slate-50";
+        const btnPath = btn.dataset.link;
+        const isActive = isItemActive(btnPath, normalizedPath);
+
+        btn.classList.remove('bg-gradient-to-r', 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+        btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
         btn.setAttribute('aria-current', 'false');
+
+        const iconContainer = btn.querySelector('div');
+        if (iconContainer) {
+            iconContainer.classList.remove('bg-white/20');
+            iconContainer.classList.add('bg-slate-100', 'group-hover:bg-white');
+        }
+
+        // Remove active dot
+        const activeDot = btn.querySelector('.bg-white\\/80');
+        if (activeDot) activeDot.remove();
+
+        if (isActive) {
+            // Get the color from nav items
+            const navItems = store.state.adminMode ? NAV_ITEMS.admin : NAV_ITEMS.volunteer;
+            const navItem = navItems.find(item => item.id === btnPath);
+            const colorClass = navItem?.color || 'from-brand-500 to-brand-600';
+
+            btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
+            btn.classList.add('bg-gradient-to-r', colorClass, 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+            btn.setAttribute('aria-current', 'page');
+
+            if (iconContainer) {
+                iconContainer.classList.remove('bg-slate-100', 'group-hover:bg-white');
+                iconContainer.classList.add('bg-white/20');
+            }
+
+            // Add active dot
+            const dot = document.createElement('div');
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-white/80';
+            btn.appendChild(dot);
+        }
     });
-
-    // Active le lien correspondant
-    let targetBtn = nav.querySelector(`[data-link="${normalizedPath}"]`);
-
-    // Fallback : correspondance de la racine (ex: /messages/123 → /messages)
-    if (!targetBtn) {
-        const rootPath = `/${normalizedPath.split('/')[1]}`;
-        targetBtn = nav.querySelector(`[data-link="${rootPath}"]`);
-    }
-
-    if (targetBtn) {
-        targetBtn.className = "w-full flex items-center gap-4 p-4 rounded-2xl font-bold text-sm transition bg-brand-600 text-white shadow-lg";
-        targetBtn.setAttribute('aria-current', 'page');
-    }
 }
 
 /**
- * Initialise les événements de la sidebar (Déconnexion, Toggle Admin).
- * À appeler APRÈS avoir injecté le HTML de la sidebar dans le DOM.
- * 
- * PRINCIPE DRY :
- * - Utilise AuthService.logout() au lieu de dupliquer la logique
- * - Utilise store.state.adminMode au lieu d'une variable globale
+ * Initialise les événements de la sidebar
  */
 export function initSidebar() {
-    // 1. Gestion Déconnexion
-    const btnLogout = document.querySelector('[data-action="logout"]');
+    const btnLogout = document.querySelector('aside [data-action="logout"]');
     if (btnLogout) {
         btnLogout.addEventListener('click', handleLogout);
     }
-
-    // 2. Gestion du Toggle Admin (si présent)
-    // NOTE: Géré globalement dans main.js pour éviter les conflits et reloads inutiles
-    // const btnToggle = document.querySelector('[data-action="toggle-admin"]');
-    // if (btnToggle) {
-    //     btnToggle.addEventListener('click', handleAdminToggle);
-    // }
 }
 
 /**
- * Gère la déconnexion de l'utilisateur
- * RESTAURÉ depuis index_originel.html avec amélioration
+ * Gère la déconnexion
  */
 async function handleLogout() {
     showConfirm("Voulez-vous vraiment vous déconnecter ?", async () => {
@@ -217,57 +241,21 @@ async function handleLogout() {
             await AuthService.logout();
             store.state.user = null;
             store.state.profile = null;
+            showToast('Déconnexion réussie');
             window.location.href = '/login';
         } catch (error) {
-            console.error('❌ Erreur lors de la déconnexion:', error);
+            console.error('❌ Erreur déconnexion:', error);
             window.location.reload();
         }
-    }, { confirmText: 'Se déconnecter' });
+    }, { confirmText: 'Se déconnecter', type: 'danger' });
 }
 
 /**
- * Gère le basculement entre mode admin et mode bénévole
- * RESTAURÉ depuis index_originel.html (lignes 795-807) avec améliorations
- */
-function handleAdminToggle() {
-    try {
-        // Inverse le mode admin dans le store (DRY)
-        store.state.adminMode = !store.state.adminMode;
-
-        // Persiste le choix dans le localStorage
-        localStorage.setItem('cop1_admin_mode', store.state.adminMode.toString());
-
-        // Feedback visuel immédiat (optionnel)
-        const btn = document.querySelector('[data-action="toggle-admin"]');
-        if (btn) {
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-
-        // Recharge pour appliquer le changement de mode
-        // Note : Le main.js gère la redirection vers la bonne vue
-        window.location.reload();
-
-    } catch (error) {
-        console.error('❌ Erreur lors du changement de mode:', error);
-
-        // Fallback : recharge quand même
-        window.location.reload();
-    }
-}
-
-/**
- * Cleanup : Supprime les événements de la sidebar
- * Utile pour éviter les fuites mémoire si la sidebar est re-rendue
+ * Cleanup
  */
 export function cleanupSidebar() {
-    const btnLogout = document.querySelector('[data-action="logout"]');
+    const btnLogout = document.querySelector('aside [data-action="logout"]');
     if (btnLogout) {
         btnLogout.removeEventListener('click', handleLogout);
-    }
-
-    const btnToggle = document.querySelector('[data-action="toggle-admin"]');
-    if (btnToggle) {
-        // btnToggle.removeEventListener('click', handleAdminToggle);
     }
 }

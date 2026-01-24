@@ -23,36 +23,36 @@ export async function renderChat(container, params = {}) {
     const profile = store.state.profile;
 
     container.innerHTML = `
-        <div class="h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] w-full flex overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 md:rounded-3xl md:shadow-xl md:border md:border-slate-200/80">
+        <div class="h-[100dvh] md:h-[calc(100vh-64px)] w-full flex overflow-hidden bg-slate-100 md:bg-gradient-to-br md:from-slate-50 md:to-slate-100 md:rounded-3xl md:shadow-xl md:border md:border-slate-200/80 fixed md:relative inset-0 md:inset-auto z-40 md:z-auto">
             
             <!-- LISTE (GAUCHE) -->
-            <div id="chat-list-panel" class="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-slate-200/50 bg-white/70 backdrop-blur-sm ${params.id ? 'hidden md:flex' : 'flex'}">
+            <div id="chat-list-panel" class="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-slate-200/50 bg-white ${params.id ? 'hidden md:flex' : 'flex'}">
                 
                 <!-- Header Liste -->
-                <div class="p-5 border-b border-slate-100 bg-white/80 backdrop-blur-md flex justify-between items-center sticky top-0 z-10">
+                <div class="p-4 pt-safe border-b border-slate-100 bg-white flex justify-between items-center sticky top-0 z-10">
                     <div>
                         <h2 class="font-black text-xl text-slate-900 tracking-tight">Messages</h2>
                         <p class="text-xs text-slate-400 font-medium">Vos conversations</p>
                     </div>
-                    <button id="btn-new-ticket" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center hover:from-brand-600 hover:to-brand-700 transition-all shadow-lg shadow-brand-500/30 hover:shadow-xl hover:shadow-brand-500/40 hover:scale-105 active:scale-95">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    <button id="btn-new-ticket" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center hover:from-brand-600 hover:to-brand-700 transition-all shadow-lg shadow-brand-500/30 active:scale-95">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
                     </button>
                 </div>
 
                 <!-- Liste Items -->
-                <div id="tickets-container" class="flex-1 overflow-y-auto p-3 space-y-2 scroll-smooth">
+                <div id="tickets-container" class="flex-1 overflow-y-auto p-3 pb-safe space-y-2 scroll-smooth overscroll-contain">
                     ${renderSkeletonList()}
                 </div>
             </div>
 
             <!-- CONVERSATION (DROITE) -->
-            <div id="chat-conversation-panel" class="flex-1 flex flex-col bg-gradient-to-b from-slate-50/50 to-white overflow-hidden relative ${params.id ? 'flex' : 'hidden md:flex'}">
+            <div id="chat-conversation-panel" class="flex-1 flex flex-col bg-white overflow-hidden relative ${params.id ? 'flex' : 'hidden md:flex'}">
                 
                 <!-- Header Conv -->
-                <div id="chat-header" class="h-20 border-b border-slate-100 flex items-center px-5 justify-between bg-white/90 backdrop-blur-md z-10 flex-shrink-0 shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <button id="btn-back-list" class="md:hidden p-2 -ml-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">
-                            <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                <div id="chat-header" class="min-h-[70px] border-b border-slate-100 flex items-center px-4 pt-safe justify-between bg-white z-10 flex-shrink-0 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <button id="btn-back-list" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition active:scale-95">
+                            <i data-lucide="arrow-left" class="w-6 h-6"></i>
                         </button>
                         <div id="active-ticket-info" class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
@@ -69,9 +69,9 @@ export async function renderChat(container, params = {}) {
                 </div>
 
                 <!-- Messages Zone -->
-                <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-1 scroll-smooth" style="background: linear-gradient(180deg, rgba(248,250,252,0.5) 0%, rgba(255,255,255,1) 100%);">
+                <div id="messages-container" class="flex-1 overflow-y-auto px-3 py-4 space-y-1 scroll-smooth overscroll-contain bg-slate-50">
                     <div class="h-full flex flex-col items-center justify-center text-slate-300">
-                        <div class="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                        <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
                             <i data-lucide="message-square" class="w-10 h-10 opacity-50"></i>
                         </div>
                         <span class="text-sm font-semibold">Vos échanges apparaîtront ici</span>
@@ -79,24 +79,24 @@ export async function renderChat(container, params = {}) {
                     </div>
                 </div>
 
-                <!-- Input Zone -->
-                <form id="chat-input-form" class="p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 hidden">
-                    <div class="flex items-end gap-3">
+                <!-- Input Zone (fixed at bottom on mobile) -->
+                <form id="chat-input-form" class="p-3 pb-safe bg-white border-t border-slate-100 hidden">
+                    <div class="flex items-end gap-2">
                         <div class="flex-1 relative">
-                            <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border-2 border-slate-100 focus-within:border-brand-400 focus-within:bg-white transition-all shadow-sm">
-                                <input id="message-input" type="text" autocomplete="off" placeholder="Écrivez votre message..." class="flex-1 bg-transparent border-none outline-none text-sm font-medium text-slate-700 placeholder-slate-400 min-w-0">
-                                <button type="button" id="btn-emoji" class="p-2 text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-xl transition-all flex-shrink-0">
+                            <div class="flex items-center gap-1 bg-slate-100 p-2 pl-4 rounded-full border border-slate-200 focus-within:border-brand-400 focus-within:bg-white transition-all">
+                                <input id="message-input" type="text" autocomplete="off" placeholder="Message..." class="flex-1 bg-transparent border-none outline-none text-sm font-medium text-slate-700 placeholder-slate-400 min-w-0 py-1">
+                                <button type="button" id="btn-emoji" class="w-9 h-9 text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-full transition-all flex-shrink-0 flex items-center justify-center">
                                     <i data-lucide="smile" class="w-5 h-5"></i>
                                 </button>
                             </div>
                             <!-- Emoji Picker -->
-                            <div id="emoji-picker" class="absolute bottom-full left-0 mb-2 p-3 bg-white rounded-2xl shadow-2xl border border-slate-100 hidden animate-fade-in z-50">
+                            <div id="emoji-picker" class="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-2xl shadow-2xl border border-slate-100 hidden animate-fade-in z-50">
                                 <div class="grid grid-cols-8 gap-1">
-                                    ${EMOJI_LIST.map(e => `<button type="button" class="emoji-btn w-9 h-9 text-xl hover:bg-slate-100 rounded-lg transition flex items-center justify-center">${e}</button>`).join('')}
+                                    ${EMOJI_LIST.map(e => `<button type="button" class="emoji-btn w-9 h-9 text-xl hover:bg-slate-100 rounded-lg transition flex items-center justify-center active:scale-90">${e}</button>`).join('')}
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" id="btn-send" class="p-4 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl hover:from-brand-600 hover:to-brand-700 transition-all shadow-lg shadow-brand-500/30 hover:shadow-xl hover:shadow-brand-500/40 hover:scale-105 active:scale-95 flex-shrink-0">
+                        <button type="submit" id="btn-send" class="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-full hover:from-brand-600 hover:to-brand-700 transition-all shadow-lg shadow-brand-500/30 active:scale-90 flex-shrink-0 flex items-center justify-center">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>

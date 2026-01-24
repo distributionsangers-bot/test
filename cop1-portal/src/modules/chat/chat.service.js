@@ -149,7 +149,37 @@ export const ChatService = {
         return { success: true, data: ticket };
     },
 
-    // --- REALTIME ---
+    /**
+     * Crée un message direct à un bénévole (Admin seulement)
+     * @param {string} targetUserId - ID du bénévole destinataire
+     * @param {string} subject - Sujet du ticket
+     * @param {string} content - Premier message
+     */
+    async createDirectMessage(targetUserId, subject, content) {
+        const user = store.state.user;
+        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+
+        // Créer le ticket privé avec le bénévole comme owner
+        // L'admin envoie le premier message
+        const { data: ticket, error: tErr } = await supabase
+            .from('tickets')
+            .insert([{
+                user_id: targetUserId, // Le bénévole est le "owner" du ticket
+                subject: subject,
+                category: 'support' // Direct message = support privé
+            }])
+            .select()
+            .single();
+
+        if (tErr) return { success: false, error: tErr };
+
+        // Envoyer le premier message (de l'admin)
+        if (content) {
+            await this.sendMessage(ticket.id, content);
+        }
+
+        return { success: true, data: ticket };
+    },
 
     /**
      * Abonnement aux messages d'un ticket spécifique

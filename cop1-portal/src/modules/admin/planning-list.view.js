@@ -275,74 +275,65 @@ function renderEventCard(e) {
     return `
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all ${!isVisible ? 'opacity-60' : ''}" data-event-id="${e.id}">
             <!-- Header -->
-            <div class="p-4 flex gap-4 cursor-pointer" data-action="toggle-collapse" data-id="${e.id}">
+            <div class="p-3 sm:p-4 flex gap-3 cursor-pointer" data-action="toggle-collapse" data-id="${e.id}">
                 <!-- Date Block -->
-                <div class="w-16 h-20 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex flex-col items-center justify-center text-white shadow-lg shadow-brand-500/20 flex-shrink-0">
-                    <span class="text-2xl font-black leading-none">${dayNum}</span>
-                    <span class="text-[10px] font-bold opacity-80">${monthStr}</span>
+                <div class="w-12 h-14 sm:w-14 sm:h-16 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-black leading-none">${dayNum}</span>
+                    <span class="text-[8px] sm:text-[9px] font-bold opacity-80">${monthStr}</span>
                 </div>
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap mb-1">
-                        <span class="text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
+                    <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span class="text-[10px] sm:text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
                         ${visibilityBadge}
                     </div>
-                    <h3 class="font-bold text-lg text-slate-900 truncate">${safeTitle}</h3>
-                    <div class="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="map-pin" class="w-3 h-3"></i>
-                            ${safeLoc}
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900 truncate">${safeTitle}</h3>
+                    <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 mt-0.5">
+                        <span class="flex items-center gap-1 truncate">
+                            <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i>
+                            <span class="truncate">${safeLoc}</span>
                         </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="users" class="w-3 h-3"></i>
-                            ${e.shifts?.length || 0} créneaux
-                        </span>
+                        <span class="text-slate-300">•</span>
+                        <span>${e.shifts?.length || 0} crén.</span>
                     </div>
                 </div>
 
-                <!-- Fill Rate & Actions -->
-                <div class="flex items-center gap-3">
-                    <!-- Fill Circle -->
-                    <div class="relative w-12 h-12 flex items-center justify-center">
-                        <svg class="w-12 h-12 transform -rotate-90">
-                            <circle cx="24" cy="24" r="20" stroke="#f1f5f9" stroke-width="4" fill="transparent"/>
-                            <circle cx="24" cy="24" r="20" stroke="${fillColor === 'emerald' ? '#10b981' : fillColor === 'amber' ? '#f59e0b' : '#ef4444'}" stroke-width="4" fill="transparent" 
-                                stroke-dasharray="${2 * Math.PI * 20}" 
-                                stroke-dashoffset="${2 * Math.PI * 20 * (1 - fillRate / 100)}" 
+                <!-- Right Side -->
+                <div class="flex items-center gap-2">
+                    <!-- Fill Badge (mobile) / Circle (desktop) -->
+                    <div class="hidden sm:block relative w-10 h-10">
+                        <svg class="w-10 h-10 transform -rotate-90">
+                            <circle cx="20" cy="20" r="16" stroke="#f1f5f9" stroke-width="3" fill="transparent"/>
+                            <circle cx="20" cy="20" r="16" stroke="${fillColor === 'emerald' ? '#10b981' : fillColor === 'amber' ? '#f59e0b' : '#ef4444'}" stroke-width="3" fill="transparent" 
+                                stroke-dasharray="${2 * Math.PI * 16}" 
+                                stroke-dashoffset="${2 * Math.PI * 16 * (1 - fillRate / 100)}" 
                                 stroke-linecap="round"/>
                         </svg>
-                        <span class="absolute text-[10px] font-bold text-slate-600">${fillRate}%</span>
+                        <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-600">${fillRate}%</span>
                     </div>
+                    <span class="sm:hidden text-[10px] font-bold px-2 py-1 rounded-lg ${fillColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : fillColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                        ${fillRate}%
+                    </span>
 
                     ${showActions ? `
-                    <div class="flex gap-1">
-                        <button data-action="toggle-visibility" data-id="${e.id}" data-visible="${isVisible}" 
-                            class="p-2 rounded-xl transition ${isVisible ? 'text-emerald-500 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" 
-                            title="${isVisible ? 'Masquer' : 'Afficher'}">
-                            <i data-lucide="${isVisible ? 'eye' : 'eye-off'}" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                        <button data-action="duplicate-event" data-id="${e.id}" class="p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-purple-50 hover:text-purple-600 transition" title="Dupliquer">
-                            <i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                        <button data-action="edit-event" data-id="${e.id}" class="p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-brand-50 hover:text-brand-600 transition" title="Modifier">
-                            <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                        <button data-action="delete-event" data-id="${e.id}" class="p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-red-50 hover:text-red-500 transition" title="Supprimer">
-                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                    <!-- Actions Dropdown -->
+                    <div class="relative">
+                        <button data-action="open-actions-menu" data-id="${e.id}" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition" title="Actions">
+                            <i data-lucide="more-vertical" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                     </div>
                     ` : ''}
 
                     <!-- Collapse Toggle -->
-                    <button data-action="toggle-collapse" data-id="${e.id}" class="p-2 text-slate-300 hover:text-slate-500 transition">
+                    <button data-action="toggle-collapse" data-id="${e.id}" class="p-1.5 text-slate-300 hover:text-slate-500 transition">
                         <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" class="w-5 h-5 pointer-events-none"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Shifts (collapsible) -->
-            <div class="${isCollapsed ? 'hidden' : ''} border-t border-slate-100 bg-slate-50/50 p-4 space-y-2">
+            <div class="${isCollapsed ? 'hidden' : ''} border-t border-slate-100 bg-slate-50/50 p-2 sm:p-3 space-y-1.5">
                 ${shiftsHtml || '<div class="text-center text-slate-400 text-sm py-2">Aucun créneau</div>'}
             </div>
         </div>
@@ -355,43 +346,41 @@ function renderShiftItem(s, eventId) {
     const percent = total > 0 ? (taken / total) * 100 : 0;
     const isFull = taken >= total;
     const barColor = isFull ? 'bg-emerald-500' : percent >= 50 ? 'bg-amber-500' : 'bg-red-500';
-    const reservedBadge = s.reserved_slots > 0 ? `<span class="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded">+${s.reserved_slots} Rés.</span>` : '';
+    const reservedBadge = s.reserved_slots > 0 ? `<span class="text-[8px] font-bold text-orange-600 bg-orange-100 px-1 py-0.5 rounded">+${s.reserved_slots}</span>` : '';
 
     return `
-        <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-4 hover:shadow-sm transition">
+        <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-100 flex items-center gap-2 sm:gap-3 hover:shadow-sm transition">
             <!-- Time -->
-            <div class="w-20 text-center flex-shrink-0">
-                <div class="text-sm font-bold text-slate-700">${(s.start_time || '').slice(0, 5)}</div>
-                <div class="text-[10px] text-slate-400">${(s.end_time || '').slice(0, 5)}</div>
+            <div class="w-12 sm:w-14 text-center flex-shrink-0">
+                <div class="text-xs sm:text-sm font-bold text-slate-700">${(s.start_time || '').slice(0, 5)}</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400">${(s.end_time || '').slice(0, 5)}</div>
             </div>
 
             <!-- Info -->
             <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                    <span class="font-semibold text-sm text-slate-800 truncate">${escapeHtml(s.title)}</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-semibold text-xs sm:text-sm text-slate-800 truncate">${escapeHtml(s.title)}</span>
                     ${reservedBadge}
                 </div>
-                <div class="text-[10px] text-slate-400">Réf: ${escapeHtml(s.referent_name || 'Aucun')}</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">Réf: ${escapeHtml(s.referent_name || '-')}</div>
             </div>
 
             <!-- Progress -->
-            <div class="w-24 flex-shrink-0">
-                <div class="flex items-center justify-between text-[10px] font-bold mb-1">
+            <div class="w-16 sm:w-20 flex-shrink-0">
+                <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold mb-0.5">
                     <span class="${isFull ? 'text-emerald-600' : 'text-slate-500'}">${taken}/${total}</span>
-                    <span class="text-slate-400">${Math.round(percent)}%</span>
                 </div>
-                <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-1 sm:h-1.5 bg-slate-200 rounded-full overflow-hidden">
                     <div class="${barColor} h-full transition-all" style="width: ${percent}%"></div>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-1 flex-shrink-0">
-                <button data-action="view-participants" data-id="${s.id}" class="px-3 py-1.5 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition text-xs font-bold flex items-center gap-1">
-                    <i data-lucide="users" class="w-3 h-3 pointer-events-none"></i>
-                    <span class="hidden sm:inline pointer-events-none">Inscrits</span>
+            <div class="flex gap-0.5 flex-shrink-0">
+                <button data-action="view-participants" data-id="${s.id}" class="p-1.5 sm:p-2 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition" title="Inscrits">
+                    <i data-lucide="users" class="w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none"></i>
                 </button>
-                <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition" title="QR Code">
+                <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition hidden sm:block" title="QR">
                     <i data-lucide="qr-code" class="w-4 h-4 pointer-events-none"></i>
                 </button>
             </div>
@@ -403,7 +392,7 @@ function renderTemplateCard(t) {
     const shiftCount = t.shifts_config ? t.shifts_config.length : 0;
 
     return `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-lg transition group">
+    < div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-lg transition group" >
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center text-purple-500">
                     <i data-lucide="layout-template" class="w-6 h-6"></i>
@@ -426,7 +415,7 @@ function renderTemplateCard(t) {
                     <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
                 </button>
             </div>
-        </div>
+        </div >
     `;
 }
 
@@ -438,6 +427,12 @@ async function handleListClick(e) {
     const action = btn?.dataset.action || clickableArea?.dataset.action;
     const id = btn?.dataset.id || clickableArea?.dataset.id;
     if (!action) return;
+
+
+    if (action === 'open-actions-menu') {
+        openActionsMenu(id, btn);
+        return;
+    }
 
     if (action === 'toggle-collapse') {
         if (collapsedEvents.has(parseInt(id))) {
@@ -572,7 +567,7 @@ async function exportPlanning() {
                 e.title,
                 e.location,
                 s.title,
-                `${(s.start_time || '').slice(0, 5)} - ${(s.end_time || '').slice(0, 5)}`,
+                `${(s.start_time || '').slice(0, 5)} - ${(s.end_time || '').slice(0, 5)} `,
                 s.max_slots,
                 s.registrations?.[0]?.count || 0,
                 s.referent_name || 'N/A'
@@ -594,4 +589,146 @@ async function exportPlanning() {
     a.click();
     URL.revokeObjectURL(url);
     showToast("Export téléchargé ✓");
+}
+
+function openActionsMenu(eventId, btnElement) {
+    // Remove existing menu
+    document.getElementById('event-actions-menu')?.remove();
+
+    const menu = document.createElement('div');
+    menu.id = 'event-actions-menu';
+    menu.className = 'fixed inset-0 bg-black/30 z-[100] flex items-end justify-center backdrop-blur-sm animate-fade-in';
+
+    menu.innerHTML = `
+        <div class="bg-white w-full max-w-sm mx-4 mb-4 rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+            <div class="p-3 border-b border-slate-100">
+                <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto"></div>
+            </div>
+            <div class="p-2">
+                <button data-menu-action="edit" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
+                    <div class="w-9 h-9 bg-brand-100 rounded-xl flex items-center justify-center text-brand-600">
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-medium text-slate-700">Modifier</span>
+                </button>
+                <button data-menu-action="duplicate" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
+                    <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-medium text-slate-700">Dupliquer</span>
+                </button>
+                <button data-menu-action="visibility" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition text-left">
+                    <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-medium text-slate-700">Afficher / Masquer</span>
+                </button>
+                <div class="h-px bg-slate-100 my-1"></div>
+                <button data-menu-action="delete" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition text-left">
+                    <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-medium text-red-600">Supprimer</span>
+                </button>
+            </div>
+            <button data-menu-action="close" class="w-full p-4 text-center font-semibold text-slate-400 border-t border-slate-100 hover:bg-slate-50">
+                Annuler
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(menu);
+    createIcons({ icons, root: menu });
+
+    // Close on backdrop click
+    menu.addEventListener('click', (e) => {
+        if (e.target === menu) {
+            menu.remove();
+        }
+    });
+
+    // Handle menu actions
+    menu.querySelectorAll('[data-menu-action]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const action = btn.dataset.menuAction;
+            menu.remove();
+
+            // Find the event card to simulate button clicks
+            const eventCard = document.querySelector(`[data-event-id="${eventId}"]`);
+
+            switch (action) {
+                case 'edit':
+                    toggleLoader(true);
+                    const { data } = await PlanningService.getEventById(eventId);
+                    toggleLoader(false);
+                    if (data) openEventModal(data);
+                    break;
+                case 'duplicate':
+                    document.querySelector(`[data-action="duplicate-event"][data-id="${eventId}"]`)?.click() ||
+                        handleDuplicateEvent(eventId);
+                    break;
+                case 'visibility':
+                    handleToggleVisibility(eventId);
+                    break;
+                case 'delete':
+                    showConfirm("⚠️ Supprimer cet événement ?", async () => {
+                        toggleLoader(true);
+                        await PlanningService.deleteEvent(eventId);
+                        toggleLoader(false);
+                        showToast("Événement supprimé");
+                        loadEvents();
+                    }, { type: 'danger', confirmText: 'Supprimer' });
+                    break;
+                case 'close':
+                    break;
+            }
+        });
+    });
+}
+
+async function handleDuplicateEvent(id) {
+    toggleLoader(true);
+    const { data, error } = await PlanningService.getEventById(id);
+    if (error || !data) {
+        toggleLoader(false);
+        showToast("Erreur", "error");
+        return;
+    }
+
+    const newDate = new Date();
+    newDate.setDate(newDate.getDate() + 7);
+
+    const res = await PlanningService.createEvent({
+        title: data.title + ' (copie)',
+        location: data.location,
+        date: newDate.toISOString().split('T')[0],
+        is_visible: false
+    }, (data.shifts || []).map(s => ({
+        title: s.title,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        max_slots: s.max_slots,
+        reserved_slots: s.reserved_slots,
+        referent_name: s.referent_name,
+        hours_value: s.hours_value
+    })));
+
+    toggleLoader(false);
+    if (res.error) showToast("Erreur duplication", "error");
+    else { showToast("Événement dupliqué ✓"); loadEvents(); }
+}
+
+async function handleToggleVisibility(id) {
+    const card = document.querySelector(`[data-event-id="${id}"]`);
+    const isCurrentlyVisible = !card?.classList.contains('opacity-60');
+
+    toggleLoader(true);
+    const res = await PlanningService.updateEvent(id, { is_visible: !isCurrentlyVisible });
+    toggleLoader(false);
+
+    if (res.error) showToast("Erreur", "error");
+    else {
+        showToast(!isCurrentlyVisible ? "Événement visible" : "Événement masqué");
+        loadEvents();
+    }
 }

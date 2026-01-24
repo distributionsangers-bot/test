@@ -200,10 +200,11 @@ export function initSidebar() {
     }
 
     // 2. Gestion du Toggle Admin (si présent)
-    const btnToggle = document.querySelector('[data-action="toggle-admin"]');
-    if (btnToggle) {
-        btnToggle.addEventListener('click', handleAdminToggle);
-    }
+    // NOTE: Géré globalement dans main.js pour éviter les conflits et reloads inutiles
+    // const btnToggle = document.querySelector('[data-action="toggle-admin"]');
+    // if (btnToggle) {
+    //     btnToggle.addEventListener('click', handleAdminToggle);
+    // }
 }
 
 /**
@@ -267,6 +268,6 @@ export function cleanupSidebar() {
 
     const btnToggle = document.querySelector('[data-action="toggle-admin"]');
     if (btnToggle) {
-        btnToggle.removeEventListener('click', handleAdminToggle);
+        // btnToggle.removeEventListener('click', handleAdminToggle);
     }
 }

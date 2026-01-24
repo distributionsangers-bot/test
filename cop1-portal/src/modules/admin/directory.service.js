@@ -238,28 +238,48 @@ export const DirectoryService = {
      */
     async getProofUrl(userId) {
         try {
-            // Liste les fichiers du bucket 'proofs' contenant l'userId
-            const { data: list, error: listErr } = await supabase
+            // Liste les fichiers du bucket 'proofs'
+            // [FIX] On cherche soit avec le userId comme prefix (si dossier), soit comme nom de fichier
+            // Pour l'instant, on suppose que le fichier est stocké à la racine avec le nom 'userId' ou contient 'userId'
+
+            // Stratégie 1: Chercher si c'est un dossier userId/
+            let { data: list, error: listErr } = await supabase
                 .storage
                 .from(APP_CONFIG.BUCKET_PROOF)
-                .list('', { search: userId });
+                .list(userId + '/');
 
-            if (listErr) throw listErr;
+            let filePath = null;
 
-            if (!list || list.length === 0) {
-                return { signedUrl: null, error: { message: 'Aucun justificatif trouvé' } };
+            if (list && list.length > 0) {
+                // C'est un dossier, on prend le premier fichier
+                filePath = userId + '/' + list[0].name;
+            } else {
+                // Stratégie 2: Chercher à la racine avec le userId dans le nom
+                const { data: rootList, error: rootErr } = await supabase
+                    .storage
+                    .from(APP_CONFIG.BUCKET_PROOF)
+                    .list('', { search: userId });
+
+                if (rootErr) throw rootErr;
+
+                if (rootList && rootList.length > 0) {
+                    // Prend le fichier le plus récent qui correspond
+                    const file = rootList.sort((a, b) =>
+                        new Date(b.created_at) - new Date(a.created_at)
+                    )[0];
+                    filePath = file.name;
+                }
             }
 
-            // Prend le fichier le plus récent
-            const file = list.sort((a, b) =>
-                new Date(b.created_at) - new Date(a.created_at)
-            )[0];
+            if (!filePath) {
+                return { signedUrl: null, error: { message: 'Aucun justificatif trouvé' } };
+            }
 
             // Génère une URL signée (valide 1 heure)
             const { data, error } = await supabase
                 .storage
                 .from(APP_CONFIG.BUCKET_PROOF)
-                .createSignedUrl(file.name, 3600);
+                .createSignedUrl(filePath, 3600);
 
             if (error) throw error;
 
@@ -277,19 +297,34 @@ export const DirectoryService = {
      */
     async deleteProofFile(userId) {
         try {
-            // Liste les fichiers à supprimer
-            const { data: list } = await supabase
+            let filesToRemove = [];
+
+            // 1. Vérifier si c'est un dossier userId/
+            const { data: folderList } = await supabase
                 .storage
                 .from(APP_CONFIG.BUCKET_PROOF)
-                .list('', { search: userId });
+                .list(userId + '/');
 
-            if (!list || list.length === 0) {
+            if (folderList && folderList.length > 0) {
+                // C'est un dossier, on supprime tout ce qu'il y a dedans
+                filesToRemove = folderList.map(f => userId + '/' + f.name);
+            } else {
+                // 2. Vérifier à la racine
+                const { data: rootList } = await supabase
+                    .storage
+                    .from(APP_CONFIG.BUCKET_PROOF)
+                    .list('', { search: userId });
+
+                if (rootList && rootList.length > 0) {
+                    filesToRemove = rootList.map(f => f.name);
+                }
+            }
+
+            if (filesToRemove.length === 0) {
                 return { success: true, error: null };
             }
 
-            const filesToRemove = list.map(x => x.name);
-
-            // Supprime tous les fichiers
+            // Supprime tous les fichiers trouvés
             const { error } = await supabase
                 .storage
                 .from(APP_CONFIG.BUCKET_PROOF)

@@ -180,6 +180,12 @@ function renderSkeletonList() {
 }
 
 window.openTicket = async (id) => {
+    // Unsubscribe from previous ticket if any
+    if (realtimeSubscription) {
+        realtimeSubscription.unsubscribe();
+        realtimeSubscription = null;
+    }
+
     currentTicketId = id;
     const container = document.getElementById('messages-container');
     const inputForm = document.getElementById('chat-input-form');
@@ -210,8 +216,10 @@ window.openTicket = async (id) => {
 
     renderMessages(container, messages);
 
-    // Update Header Info (Simulated since we might not have full ticket object here without refetching or passing it)
-    // We could fetch ticket details or use what we have. For now, keep generic.
+    // --- REALTIME SUBSCRIPTION ---
+    realtimeSubscription = ChatService.subscribeToTicket(id, (newMessage) => {
+        handleNewRealtimeMessage(newMessage);
+    });
 };
 
 function renderMessages(container, messages) {
@@ -242,6 +250,40 @@ function renderMessages(container, messages) {
     container.scrollTop = container.scrollHeight;
 }
 
+/**
+ * Handle a new message received via Realtime
+ * @param {object} newMessage - Raw message payload from Supabase
+ */
+function handleNewRealtimeMessage(newMessage) {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+
+    // Check if this message is from the current user (we already displayed it optimistically)
+    const currentUserId = store.state.user?.id;
+    if (newMessage.user_id === currentUserId) {
+        // Message was already added optimistically, skip to avoid duplicate
+        // We could update the temp message with server data if needed
+        return;
+    }
+
+    // For messages from other users, we need to fetch profile info or use placeholder
+    // Simple approach: append with available info and let next full reload fix it
+    const messageHtml = `
+        <div class="flex w-full mb-4 justify-start animate-fade-in">
+            <div class="max-w-[75%] p-3 rounded-2xl text-sm bg-white border border-slate-100 text-slate-700 rounded-tl-none shadow-sm">
+                <div class="mb-1 text-[10px] opacity-70 text-slate-400 flex justify-between gap-4">
+                    <span>Nouveau message</span>
+                    <span>${formatDate(newMessage.created_at)}</span>
+                </div>
+                <p class="leading-relaxed break-words">${escapeHtml(newMessage.content)}</p>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', messageHtml);
+    container.scrollTop = container.scrollHeight;
+}
+
 
 // --- ACTIONS & EVENTS ---
 
@@ -250,6 +292,11 @@ function setupEventListeners(root) {
     const backBtn = root.querySelector('#btn-back-list');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
+            // Unsubscribe from realtime when leaving conversation
+            if (realtimeSubscription) {
+                realtimeSubscription.unsubscribe();
+                realtimeSubscription = null;
+            }
             document.getElementById('chat-conversation-panel').classList.add('hidden');
             document.getElementById('chat-list-panel').classList.remove('hidden');
             currentTicketId = null;
@@ -265,13 +312,37 @@ function setupEventListeners(root) {
             const content = input.value.trim();
             if (!content || !currentTicketId) return;
 
-            input.value = ''; // UI Optimiste
+            input.value = ''; // Clear input immediately
 
+            // --- OPTIMISTIC UI: Show message immediately ---
+            const container = document.getElementById('messages-container');
+            const profile = store.state.profile;
+            const tempId = `temp-${Date.now()}`;
+
+            const optimisticHtml = `
+                <div id="${tempId}" class="flex w-full mb-4 justify-end animate-fade-in">
+                    <div class="max-w-[75%] p-3 rounded-2xl text-sm bg-brand-600 text-white rounded-tr-none">
+                        <div class="mb-1 text-[10px] opacity-70 text-brand-100 flex justify-between gap-4">
+                            <span>${escapeHtml(profile?.first_name || 'Moi')}</span>
+                            <span>À l'instant</span>
+                        </div>
+                        <p class="leading-relaxed break-words">${escapeHtml(content)}</p>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', optimisticHtml);
+            container.scrollTop = container.scrollHeight;
+
+            // --- SEND TO SERVER ---
             const res = await ChatService.sendMessage(currentTicketId, content);
+
             if (!res.success) {
-                showToast("Échec envoi message", "error");
+                // Remove optimistic message and restore input
+                document.getElementById(tempId)?.remove();
                 input.value = content;
+                showToast("Échec envoi message", "error");
             }
+            // If success, the optimistic message stays. Realtime will ignore our own messages.
         });
     }
 

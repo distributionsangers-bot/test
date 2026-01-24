@@ -19,7 +19,7 @@ export const ChatService = {
                 *,
                 last_message:messages(content, created_at, user_id)
             `)
-            .order('updated_at', { ascending: false });
+            .order('last_message_at', { ascending: false });
 
         if (!isAdmin) {
             query = query.or(`user_id.eq.${user.id},category.eq.announcement`);
@@ -87,8 +87,8 @@ export const ChatService = {
 
         if (error) return { success: false, error };
 
-        // Optionnel : Mettre à jour le 'updated_at' du ticket pour le faire remonter
-        await supabase.from('tickets').update({ updated_at: new Date() }).eq('id', ticketId);
+        // Mettre à jour le 'last_message_at' du ticket pour le faire remonter
+        await supabase.from('tickets').update({ last_message_at: new Date().toISOString() }).eq('id', ticketId);
 
         return { success: true, data };
     },
@@ -105,8 +105,7 @@ export const ChatService = {
             .insert([{
                 user_id: user.id,
                 subject: subject,
-                category: 'support',
-                status: 'open'
+                category: 'support'
             }])
             .select()
             .single();
@@ -135,8 +134,7 @@ export const ChatService = {
             .insert([{
                 user_id: user.id, // L'auteur de l'annonce
                 subject: subject,
-                category: 'announcement',
-                status: 'open'
+                category: 'announcement'
             }])
             .select()
             .single();

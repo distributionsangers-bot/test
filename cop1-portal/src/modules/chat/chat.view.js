@@ -6,7 +6,6 @@ import { createIcons, icons } from 'lucide';
 // État local du module
 let currentTicketId = null;
 let realtimeSubscription = null;
-let isMobileView = window.innerWidth < 768; // Breakpoint MD Tailwind
 
 export async function initChat() {
     // Nettoyage éventuel précédent
@@ -34,7 +33,7 @@ export async function renderChat(container, params = {}) {
                 <!-- Header Liste -->
                 <div class="p-4 border-b border-slate-100 bg-white flex justify-between items-center">
                     <h2 class="font-extrabold text-lg text-slate-800">Messages</h2>
-                    <button onclick="openCreateTicketModal()" class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 transition shadow-sm">
+                    <button id="btn-new-ticket" class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 transition shadow-sm">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -160,12 +159,12 @@ function renderTicketItem(t) {
     const date = formatDate(t.updated_at);
     // Use store.state.user to highlight active if needed (handled in openTicket)
     return `
-        <div onclick="openTicket('${t.id}')" data-ticket-id="${t.id}" class="ticket-item p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition border border-transparent">
-            <div class="flex justify-between mb-1">
+        <div data-action="open-ticket" data-ticket-id="${t.id}" class="ticket-item p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition border border-transparent">
+            <div class="flex justify-between mb-1 pointer-events-none">
                 <span class="font-bold text-slate-900 text-sm truncate">${escapeHtml(t.subject)}</span>
                 <span class="text-[10px] text-slate-400">${date}</span>
             </div>
-            <div class="text-xs text-slate-500 truncate">${escapeHtml(lastMsg)}</div>
+            <div class="text-xs text-slate-500 truncate pointer-events-none">${escapeHtml(lastMsg)}</div>
         </div>
     `;
 }
@@ -179,7 +178,7 @@ function renderSkeletonList() {
     `).join('');
 }
 
-window.openTicket = async (id) => {
+async function openTicket(id) {
     // Unsubscribe from previous ticket if any
     if (realtimeSubscription) {
         realtimeSubscription.unsubscribe();
@@ -228,11 +227,14 @@ function renderMessages(container, messages) {
         return;
     }
 
-    // [CORRECTION] Use store state for current user ID
-    const currentUserId = store.state.user?.id;
+    // [UPDATED] Robust user ID check
+    const currentUserId = store.state.user?.id || store.state.session?.user?.id;
+    if (!currentUserId) {
+        console.warn("Chat: No current user ID found in store");
+    }
 
     container.innerHTML = messages.map(m => {
-        const isMe = m.user_id === currentUserId;
+        const isMe = currentUserId && m.user_id === currentUserId;
         return `
               <div class="flex w-full mb-4 ${isMe ? 'justify-end' : 'justify-start'}">
                    <div class="max-w-[75%] p-3 rounded-2xl text-sm ${isMe ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none shadow-sm'}">
@@ -259,8 +261,8 @@ function handleNewRealtimeMessage(newMessage) {
     if (!container) return;
 
     // Check if this message is from the current user (we already displayed it optimistically)
-    const currentUserId = store.state.user?.id;
-    if (newMessage.user_id === currentUserId) {
+    const currentUserId = store.state.user?.id || store.state.session?.user?.id;
+    if (currentUserId && newMessage.user_id === currentUserId) {
         // Message was already added optimistically, skip to avoid duplicate
         // We could update the temp message with server data if needed
         return;
@@ -300,6 +302,23 @@ function setupEventListeners(root) {
             document.getElementById('chat-conversation-panel').classList.add('hidden');
             document.getElementById('chat-list-panel').classList.remove('hidden');
             currentTicketId = null;
+        });
+    }
+
+    // Gestion New Ticket Modal
+    const btnNewTicket = root.querySelector('#btn-new-ticket');
+    if (btnNewTicket) {
+        btnNewTicket.addEventListener('click', openCreateTicketModal);
+    }
+
+    // Delegation pour les tickets
+    const ticketsContainer = root.querySelector('#tickets-container');
+    if (ticketsContainer) {
+        ticketsContainer.addEventListener('click', (e) => {
+            const ticketItem = e.target.closest('.ticket-item');
+            if (ticketItem && ticketItem.dataset.ticketId) {
+                openTicket(ticketItem.dataset.ticketId);
+            }
         });
     }
 
@@ -349,10 +368,11 @@ function setupEventListeners(root) {
     // --- LOGIQUE MODALE CREATION TICKET ---
 
     // 1. Ouvrir
-    window.openCreateTicketModal = () => {
+    // 1. Ouvrir
+    function openCreateTicketModal() {
         const m = document.getElementById('create-ticket-modal');
         if (m) m.classList.remove('hidden');
-    };
+    }
 
     // 2. Fermer
     const closeBtn = document.getElementById('btn-close-ticket-modal');

@@ -20,7 +20,9 @@ let state = {
     typingUsers: new Set(), // Set of user names
     typingTimeout: null,
     searchQuery: '',
-    editingMessageId: null
+    editingMessageId: null,
+    globalTicketSub: null,
+    heartbeatInterval: null
 };
 
 // =============================================================================
@@ -165,7 +167,8 @@ export function renderChat(container, params = {}) {
 export async function initChat(params = {}) {
     state = {
         tickets: [], activeTicketId: null, subscription: null, loading: false,
-        replyTo: null, typingUsers: new Set(), typingTimeout: null, searchQuery: '', editingMessageId: null
+        replyTo: null, typingUsers: new Set(), typingTimeout: null, searchQuery: '', editingMessageId: null,
+        globalTicketSub: null, heartbeatInterval: null
     };
 
     // Cleanup leftovers
@@ -186,6 +189,7 @@ export async function initChat(params = {}) {
     return () => {
         if (state.subscription) state.subscription.unsubscribe();
         if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
+        if (state.heartbeatInterval) clearInterval(state.heartbeatInterval);
         document.querySelector('.context-menu')?.remove();
     };
 }
@@ -351,46 +355,39 @@ async function openTicket(id) {
     });
 
     // 7. Realtime (Global Tickets Update)
-    // Subscribe to messages table globally to refresh sidebar when ANY message arrives
+    // Subscribe to tickets table (UPDATE) to ensure we get the new last_message_at
+    // This avoids the race condition where we fetch tickets before the timestamp is updated.
     if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
-    
-    const ticketSub = supabase.channel('messages-list-global')
+
+    const ticketSub = supabase.channel('tickets-list-global')
         .on(
             'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'messages' },
-            (payload) => {
-                // On any new message, reload the ticket list to update unread status and order
-                loadTickets().then(() => {
-                    // Re-render to update unread badges and list order
-                    renderTicketList();
-                });
+            { event: '*', schema: 'public', table: 'tickets' },
+            () => {
+                // On ticket update (last_message_at changed), reload the list
+                loadTickets();
             }
         )
         .subscribe();
 
     state.globalTicketSub = ticketSub;
+
+    // 8. Heartbeat: Removed as it shouldn't be necessary with correct subscription
+    if (state.heartbeatInterval) clearInterval(state.heartbeatInterval);
 }
 
 async function handleRealtimeMessage(payload) {
     // 1. If currently viewing this ticket, refresh messages & mark as read immediately
-    if (String(state.activeTicketId) === String(payload.new.ticket_id)) {
+    if (state.activeTicketId && String(state.activeTicketId) === String(payload.new.ticket_id)) {
         // Fetch fresh messages
         const { data } = await ChatService.getMessages(state.activeTicketId);
         renderMessages(data || []);
 
         // Mark as read immediately
         await ChatService.markAsRead(state.activeTicketId);
-        
-        // Update the unread badge in the sidebar for this ticket
-        const ticket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
-        if (ticket) {
-            ticket.is_unread = false;
-            renderTicketList();
-        }
-    } else {
-        // If a message arrives on a ticket we're NOT viewing, reload the list to update unread status
-        await loadTickets();
-        renderTicketList();
+
+        // No need to reload list here, the 'tickets' subscription will trigger it
+        // when the ticket timestamp updates.
     }
 }
 

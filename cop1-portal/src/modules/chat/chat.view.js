@@ -524,7 +524,7 @@ async function loadVolunteersOptions() {
 
 function showOptionsModal() {
     const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
-    const ticket = state.tickets.find(t => t.id === state.activeTicketId);
+    const ticket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
 
     if (!ticket) return;
 

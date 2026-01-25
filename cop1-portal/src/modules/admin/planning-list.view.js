@@ -392,7 +392,7 @@ function renderTemplateCard(t) {
     const shiftCount = t.shifts_config ? t.shifts_config.length : 0;
 
     return `
-    < div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-lg transition group" >
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-lg transition group">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center text-purple-500">
                     <i data-lucide="layout-template" class="w-6 h-6"></i>
@@ -415,7 +415,7 @@ function renderTemplateCard(t) {
                     <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
                 </button>
             </div>
-        </div >
+        </div>
     `;
 }
 

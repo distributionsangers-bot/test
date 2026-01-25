@@ -17,7 +17,7 @@ ADD COLUMN IF NOT EXISTS volunteer_last_read_at TIMESTAMP WITH TIME ZONE DEFAULT
 -- - edited_at : Date de la dernière modification
 -- - deleted_at : Date de suppression (Soft delete)
 ALTER TABLE public.messages
-ADD COLUMN IF NOT EXISTS reply_to_id UUID REFERENCES public.messages(id),
+ADD COLUMN IF NOT EXISTS reply_to_id BIGINT REFERENCES public.messages(id),
 ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
 ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
 

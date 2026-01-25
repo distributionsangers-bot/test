@@ -244,7 +244,7 @@ function renderTicketList() {
         // Avatar & Name Resolution
         let avatar, otherName;
         const user = t.profiles;
-        
+
         if (isAnnouncement) {
             avatar = `<div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center ring-2 ring-white shadow-sm"><i data-lucide="megaphone" class="w-5 h-5"></i></div>`;
             otherName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Administrateur';
@@ -468,6 +468,13 @@ function createMessageHtml(msg) {
     `;
 }
 
+function scrollToBottom() {
+    const container = document.getElementById('messages-list');
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
 // =============================================================================
 // ⚡ ACTIONS & EVENTS
 // =============================================================================
@@ -588,7 +595,7 @@ function bindEvents(container) {
             ta.style.height = 'auto'; // Reset to default
             ta.style.height = Math.min(ta.scrollHeight, 128) + 'px'; // Max 128px (4 rows)
         };
-        
+
         ta.addEventListener('input', autoResize);
         ta.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -596,7 +603,7 @@ function bindEvents(container) {
                 container.querySelector('#chat-form').dispatchEvent(new Event('submit'));
             }
         });
-        
+
         // Initial resize
         autoResize();
     }
@@ -685,18 +692,18 @@ function injectCreateModal() {
     `;
     document.body.appendChild(modal);
     createIcons({ icons, root: modal });
-    
+
     const closeBtn = modal.querySelector('#close-modal');
     const cancelBtn = modal.querySelector('#cancel-modal');
     closeBtn.onclick = () => modal.remove();
     cancelBtn.onclick = () => modal.remove();
-    
+
     // Handle type change for direct messages
     if (isAdmin) {
         const typeSelect = modal.querySelector('#create-type');
         const targetContainer = modal.querySelector('#target-user-container');
         const targetSelect = modal.querySelector('#target-user-select');
-        
+
         typeSelect.addEventListener('change', async (e) => {
             if (e.target.value === 'direct') {
                 // Load volunteers
@@ -712,18 +719,18 @@ function injectCreateModal() {
             }
         });
     }
-    
+
     modal.querySelector('#create-form').onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         const type = fd.get('type');
-        
+
         const payload = {
             type,
             subject: fd.get('subject'),
             content: fd.get('content')
         };
-        
+
         if (type === 'direct') {
             payload.targetUserId = fd.get('targetUserId');
             if (!payload.targetUserId) {
@@ -731,7 +738,7 @@ function injectCreateModal() {
                 return;
             }
         }
-        
+
         const { success, error } = await ChatService.createTicket(payload);
         if (success) {
             showToast("Message envoyé", "success");
@@ -764,21 +771,21 @@ function showEditMessageModal(msgId) {
     `;
     document.body.appendChild(modal);
     createIcons({ icons, root: modal });
-    
+
     // Fetch message content and populate
     ChatService.getMessageById(msgId).then(({ data: msg }) => {
         if (msg) {
             document.getElementById('edit-content').value = msg.content;
         }
     });
-    
+
     modal.querySelector('#close-edit-modal').onclick = () => modal.remove();
     modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-    
+
     modal.querySelector('#edit-form').onsubmit = async (e) => {
         e.preventDefault();
         const newContent = document.getElementById('edit-content').value.trim();
-        
+
         if (newContent) {
             const { success, error } = await ChatService.editMessage(msgId, newContent);
             if (success) {
@@ -791,7 +798,7 @@ function showEditMessageModal(msgId) {
             }
         }
     };
-    
+
     // Auto focus
     document.getElementById('edit-content').focus();
 }
@@ -803,7 +810,7 @@ function showOptionsModal() {
 
     const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
     const isClosed = ticket.status === 'closed';
-    
+
     const sheet = document.createElement('div');
     sheet.id = 'action-sheet';
     sheet.className = "fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4";
@@ -828,16 +835,16 @@ function showOptionsModal() {
     `;
     document.body.appendChild(sheet);
     createIcons({ icons, root: sheet });
-    
+
     sheet.querySelector('#act-cancel').onclick = () => sheet.remove();
-    
+
     sheet.querySelector('#act-hide')?.addEventListener('click', async () => {
         await ChatService.hideTicket(state.activeTicketId);
         showToast("Conversation masquée", "success");
         sheet.remove();
         await loadTickets();
     });
-    
+
     sheet.querySelector('#act-close')?.addEventListener('click', async () => {
         await ChatService.closeTicket(state.activeTicketId);
         showToast("Conversation marquée comme résolue", "success");
@@ -845,7 +852,7 @@ function showOptionsModal() {
         await loadTickets();
         renderTicketList();
     });
-    
+
     sheet.querySelector('#act-reopen')?.addEventListener('click', async () => {
         const { error } = await supabase
             .from('tickets')
@@ -863,12 +870,12 @@ function showOptionsModal() {
 function updateTypingUI() {
     const indicator = document.getElementById('typing-indicator');
     const usersSpan = document.getElementById('typing-users');
-    
+
     if (!indicator) return;
-    
+
     if (state.typingUsers.size > 0) {
         const users = Array.from(state.typingUsers);
-        const text = users.length === 1 
+        const text = users.length === 1
             ? `${users[0]} écrit...`
             : `${users.join(', ')} écrivent...`;
         usersSpan.textContent = text;
@@ -880,17 +887,17 @@ function updateTypingUI() {
 
 function handleTypingEvent(payload) {
     if (!payload?.payload?.userId) return;
-    
+
     // Find the user's name (from last seen in messages)
     const msg = state.tickets
         .find(t => t.id === state.activeTicketId)
         ?.last_message;
     const userName = msg?.profiles?.first_name || 'Quelqu\'un';
-    
+
     // Add user to typing set
     state.typingUsers.add(userName);
     updateTypingUI();
-    
+
     // Clear timeout and set new one
     clearTimeout(state.typingTimeout);
     state.typingTimeout = setTimeout(() => {

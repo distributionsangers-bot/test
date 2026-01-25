@@ -398,6 +398,7 @@ export const storeActions = {
      */
     toggleAdminMode() {
         store.state.adminMode = !store.state.adminMode;
+        localStorage.setItem('cop1_admin_mode', store.state.adminMode);
     },
 
     /**

@@ -23,8 +23,8 @@ export async function renderChat(container, params = {}) {
 
     // PREMIUM GLASSMORPHISM BACKGROUND & LAYOUT
     container.innerHTML = `
-        <!-- Main Container: Fits within layout, preserves bottom nav -->
-        <div class="relative h-[calc(100dvh-90px)] md:h-[calc(100vh-64px)] w-full overflow-hidden flex flex-col md:flex-row md:bg-white/60 md:backdrop-blur-xl md:rounded-3xl md:border md:border-white/50 md:shadow-2xl">
+        <!-- Main Container: Fits within layout, preserves bottom nav (increased offset for mobile tab bar) -->
+        <div class="relative h-[calc(100dvh-140px)] md:h-[calc(100vh-64px)] w-full overflow-hidden flex flex-col md:flex-row md:bg-white/60 md:backdrop-blur-xl md:rounded-3xl md:border md:border-white/50 md:shadow-2xl">
             
             <!-- Animated Blobs Background -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 opacity-40">
@@ -325,12 +325,12 @@ function renderTicketItem(t) {
     }
 
     return `
-        <button class="ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 ${isActive ? 'bg-white shadow-md ring-1 ring-black/5' : 'hover:bg-white/50 hover:shadow-sm border border-transparent'}" data-ticket-id="${t.id}">
+        <div class="ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer ${isActive ? 'bg-white shadow-md ring-1 ring-black/5' : 'hover:bg-white/50 hover:shadow-sm border border-transparent'}" data-ticket-id="${t.id}">
             
             ${avatarHtml}
             
             <!-- Content -->
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 pr-8">
                 <div class="flex items-center justify-between gap-1">
                     <span class="font-bold text-[13px] text-slate-800 truncate ${isActive ? 'text-brand-700' : ''}">${escapeHtml(t.subject)}</span>
                     <span class="text-[10px] font-semibold text-slate-400 flex-shrink-0">${timeAgo}</span>
@@ -340,9 +340,14 @@ function renderTicketItem(t) {
                     ${isClosed ? '<div class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Résolu"></div>' : ''}
                 </div>
             </div>
+
+            <!-- Delete Button (Visible on hover desktop, always on touch if we could but here simpler) -->
+            <button class="btn-delete-item absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-red-500 hover:bg-white transition-all z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Supprimer">
+                 <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
             
             ${isActive ? '<div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-brand-500 rounded-r-full"></div>' : ''}
-        </button>
+        </div>
     `;
 }
 
@@ -396,8 +401,17 @@ async function setupEventListeners(container) {
         currentTicketId = null;
     });
 
-    // Ticket selection
+    // Ticket selection & Delete
     document.getElementById('tickets-container')?.addEventListener('click', async (e) => {
+        // Handle Delete first
+        const deleteBtn = e.target.closest('.btn-delete-item');
+        if (deleteBtn) {
+            e.stopPropagation();
+            const item = deleteBtn.closest('.ticket-item');
+            if (item) handleDeleteTicket(item.dataset.ticketId);
+            return;
+        }
+
         const item = e.target.closest('.ticket-item');
         if (item) {
             const id = item.dataset.ticketId;
@@ -555,13 +569,13 @@ async function openTicket(id) {
     document.querySelectorAll('.ticket-item').forEach(el => {
         const isActive = el.dataset.ticketId === id;
         if (isActive) {
-            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 bg-white shadow-md ring-1 ring-black/5';
-            if (!el.querySelector('.absolute')) {
+            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer bg-white shadow-md ring-1 ring-black/5';
+            if (!el.querySelector('.absolute.left-0')) {
                 el.insertAdjacentHTML('beforeend', '<div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-brand-500 rounded-r-full"></div>');
             }
         } else {
-            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 hover:bg-white/50 hover:shadow-sm border border-transparent';
-            el.querySelector('.absolute')?.remove();
+            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer hover:bg-white/50 hover:shadow-sm border border-transparent';
+            el.querySelector('.absolute.left-0')?.remove();
         }
     });
 

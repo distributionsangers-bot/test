@@ -350,18 +350,45 @@ async function openTicket(id) {
     });
 }
 
+
 async function handleRealtimeMessage(payload) {
-    // Si INSERT
-    if (payload.eventType === 'INSERT') {
-        const { data } = await ChatService.getMessages(state.activeTicketId); // Re-fetch pour avoir les relations (parent, profile)
-        renderMessages(data || []);
-    }
-    // Si UPDATE (edit/delete)
-    else {
+    // 1. If currently viewing this ticket, refresh messages & mark as read
+    if (state.activeTicketId) {
+        // Fetch fresh messages
         const { data } = await ChatService.getMessages(state.activeTicketId);
         renderMessages(data || []);
+
+        // Mark as read again (since a new message just arrived)
+        ChatService.markAsRead(state.activeTicketId);
+
+        // Update the item in the sidebar (tickets list)
+        const ticketIndex = state.tickets.findIndex(t => String(t.id) === String(state.activeTicketId));
+        if (ticketIndex !== -1 && payload.eventType === 'INSERT') {
+            const newMsg = payload.new;
+            // Optimistic update of sidebar
+            state.tickets[ticketIndex].last_message = newMsg.deleted_at ? "🚫 Message supprimé" : newMsg.content;
+            state.tickets[ticketIndex].last_message_date = newMsg.created_at;
+            state.tickets[ticketIndex].is_unread = false; // We are reading it right now
+
+            // Re-sort tickets: move this one to top
+            const updatedTicket = state.tickets.splice(ticketIndex, 1)[0];
+            state.tickets.unshift(updatedTicket);
+
+            renderTicketList();
+        } else {
+            // If not simple insert (e.g. update), just reload list to be safe or update specific fields
+            loadTickets();
+        }
+    } else {
+        // If we are NOT on the ticket (e.g. global listener - though currently we only sub to active),
+        // we would update the list here. 
+        // NOTE: Current implementation only subscribes to ONE ticket (active). 
+        // To have "Unread" badges for other tickets appear while idling, 
+        // we would need a global subscription to 'messages' table filtered by user's tickets.
+        // For now, we stick to updating the active one.
     }
 }
+
 
 function renderMessages(messages) {
     const container = document.getElementById('messages-list');

@@ -21,24 +21,21 @@ export const ChatService = {
         const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
 
         // 1. Base Query
+        // On récupère aussi les timestamps de lecture pour calculer les "non lus"
         let query = supabase
             .from('tickets')
             .select(`
                 *,
-                last_message:messages(content, created_at, user_id),
+                last_message:messages(content, created_at, user_id, deleted_at),
                 profiles:user_id(first_name, last_name, email)
             `)
-            .neq('status', 'deleted') // Exclut les hard-deleted
+            .neq('status', 'deleted')
             .order('last_message_at', { ascending: false });
 
         // 2. Security & Visibility Filters
         if (isAdmin) {
-            // Admin : voit tout SAUF ce qu'il a masqué explicitement pour lui
-            // Note: On utilise 'is.not.true' pour inclure NULL et FALSE
             query = query.not('hidden_for_admin', 'is', true);
         } else {
-            // Bénévole : voit uniquement SES tickets OU les annonces
-            // ET ne doit pas voir ce qu'il a masqué
             query = query.not('hidden_for_volunteer', 'is', true)
                 .or(`user_id.eq.${store.state.user.id},category.eq.announcement`);
         }
@@ -50,19 +47,32 @@ export const ChatService = {
             return { success: false, error };
         }
 
-        // 3. Formatting
-        // On aplatit le "last_message" pour qu'il soit facilement utilisable en UI
+        // 3. Formatting & Unread Count Logic
         const formatted = data.map(t => {
             const msgs = t.last_message;
-            // On prend le plus récent s'il y en a (sécurité extra, même si le select le fait souvent)
+            // On prend le plus récent
             const last = Array.isArray(msgs) && msgs.length > 0
                 ? msgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
                 : null;
 
+            // Calcul "Non lu"
+            const myLastRead = isAdmin ? t.admin_last_read_at : t.volunteer_last_read_at;
+            // Un message est non lu si :
+            // 1. Il existe
+            // 2. Sa date de création est après ma dernière lecture
+            // 3. Ce n'est pas moi qui l'ai envoyé
+            const lastMsgDate = last?.created_at ? new Date(last.created_at) : null;
+            const myLastReadDate = myLastRead ? new Date(myLastRead) : new Date(0);
+            const isUnread = lastMsgDate && !last.deleted_at && lastMsgDate > myLastReadDate && last.user_id !== store.state.user.id;
+
+            // Gestion contenu supprimé
+            const content = last?.deleted_at ? "🚫 Message supprimé" : last?.content;
+
             return {
                 ...t,
-                last_message: last ? last.content : null,
-                last_message_date: last ? last.created_at : t.created_at
+                last_message: content,
+                last_message_date: last ? last.created_at : t.created_at,
+                is_unread: !!isUnread
             };
         });
 
@@ -77,7 +87,8 @@ export const ChatService = {
             .from('messages')
             .select(`
                 *,
-                profiles(first_name, last_name, is_admin)
+                profiles(first_name, last_name, is_admin),
+                parent:reply_to_id(content, profiles(first_name, last_name))
             `)
             .eq('ticket_id', ticketId)
             .order('created_at', { ascending: true });
@@ -87,8 +98,19 @@ export const ChatService = {
     },
 
     /**
-     * Récupère tous les bénévoles pour la recherche (Admin seulement).
+     * Récupère un message spécifique par son ID.
      */
+    async getMessageById(messageId) {
+        const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('id', messageId)
+            .single();
+
+        if (error) return { success: false, error };
+        return { success: true, data };
+    },
+
     async getAllVolunteers() {
         if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
 
@@ -107,9 +129,9 @@ export const ChatService = {
     // =========================================================================
 
     /**
-     * Envoie un message et met à jour le ticket (timestamp + visibilité).
+     * Envoie un message (avec support Reply).
      */
-    async sendMessage(ticketId, content) {
+    async sendMessage(ticketId, content, replyToId = null) {
         if (!content?.trim()) return { success: false };
         const user = store.state.user;
 
@@ -119,22 +141,23 @@ export const ChatService = {
             .insert([{
                 ticket_id: ticketId,
                 user_id: user.id,
-                content: content.trim()
+                content: content.trim(),
+                reply_to_id: replyToId
             }])
             .select()
             .single();
 
         if (error) return { success: false, error };
 
-        // 2. Touch Ticket
-        // On met à jour la date ET on ré-affiche le ticket pour les deux parties
-        // (au cas où l'un d'eux l'aurait masqué)
+        // 2. Touch Ticket updates
         await supabase
             .from('tickets')
             .update({
                 last_message_at: new Date().toISOString(),
                 hidden_for_admin: false,
                 hidden_for_volunteer: false
+                // Note : on ne met PAS à jour le last_read_at ici, 
+                // c'est "markAsRead" quand on ouvre qui le fait.
             })
             .eq('id', ticketId);
 
@@ -142,34 +165,71 @@ export const ChatService = {
     },
 
     /**
-     * Crée une nouvelle conversation (Support, Annonce ou Direct).
+     * Marque la conversation comme lue pour l'utilisateur courant.
      */
+    async markAsRead(ticketId) {
+        const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+        const column = isAdmin ? 'admin_last_read_at' : 'volunteer_last_read_at';
+
+        await supabase
+            .from('tickets')
+            .update({ [column]: new Date().toISOString() })
+            .eq('id', ticketId);
+    },
+
+    async editMessage(messageId, newContent) {
+        if (!newContent?.trim()) return { success: false, error: "Contenu vide" };
+        
+        const { error } = await supabase
+            .from('messages')
+            .update({
+                content: newContent.trim(),
+                edited_at: new Date().toISOString()
+            })
+            .eq('id', messageId)
+            .eq('user_id', store.state.user.id); // Sécurité côté client (RLS doit aussi vérifier)
+
+        return { success: !error, error };
+    },
+
+    async deleteMessage(messageId) {
+        // Soft Key Delete
+        const { error } = await supabase
+            .from('messages')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', messageId)
+            .eq('user_id', store.state.user.id);
+
+        return { success: !error, error };
+    },
+
     async createTicket({ type, subject, content, targetUserId }) {
         const user = store.state.user;
         let payload = {
             subject,
-            category: type, // 'support', 'announcement', 'direct' (via logic UI)
+            category: type,
             user_id: user.id,
             status: 'open'
         };
 
-        // Logique spécifique par type
         if (type === 'announcement') {
             if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
-            // Annonce : user_id reste l'admin créateur
         }
         else if (type === 'direct') {
+            // Direct messages : admin envoie un ticket directement à un bénévole
             if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
-            // Direct : user_id est le BÉNÉVOLE CIBLE
-            payload.user_id = targetUserId;
-            // On set category à 'support' ou 'direct' ? Gardons 'support' pour la simplicité DB, 
-            // ou 'direct' pour différencier si besoin. Le prompt disait 'direct' mais ticket table category enum ?
-            // On suppose 'support' fonctionne pour tout échange privé.
-            // Mais pour coller au prompt : 'direct' si admin initie.
+            if (!targetUserId) return { success: false, error: "Destinataire requis" };
+            payload.user_id = targetUserId; // Le ticket appartient au destinataire
+            payload.category = 'support'; // Les messages directs sont des supports
+        }
+        else if (type === 'support') {
+            // Support normal : bénévole envoie un ticket d'aide
             payload.category = 'support';
         }
+        else {
+            return { success: false, error: "Type de ticket invalide" };
+        }
 
-        // Création Ticket
         const { data: ticket, error } = await supabase
             .from('tickets')
             .insert([payload])
@@ -178,17 +238,14 @@ export const ChatService = {
 
         if (error) return { success: false, error };
 
-        // Envoi premier message
-        if (content) {
+        // Envoie le message initial s'il y a du contenu
+        if (content?.trim()) {
             await this.sendMessage(ticket.id, content);
         }
 
         return { success: true, data: ticket };
     },
 
-    /**
-     * Masquer une conversation (Soft Delete).
-     */
     async hideTicket(ticketId) {
         const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
         const column = isAdmin ? 'hidden_for_admin' : 'hidden_for_volunteer';
@@ -201,17 +258,10 @@ export const ChatService = {
         return { success: !error, error };
     },
 
-    /**
-     * Supprimer définitivement une conversation (Admin Hard Delete).
-     */
     async deleteTicket(ticketId) {
         if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
 
-        // Cascade delete via Supabase (si foreign keys setées CASCADE)
-        // Sinon manuel :
-        // 1. Messages
         await supabase.from('messages').delete().eq('ticket_id', ticketId);
-        // 2. Ticket
         const { error } = await supabase.from('tickets').delete().eq('id', ticketId);
 
         return { success: !error, error };
@@ -231,13 +281,20 @@ export const ChatService = {
         const channel = supabase.channel(`ticket-${ticketId}`)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'messages', filter: `ticket_id=eq.${ticketId}` },
-                (payload) => callback(payload.new)
+                { event: '*', schema: 'public', table: 'messages', filter: `ticket_id=eq.${ticketId}` },
+                (payload) => callback(payload) // On passe tout le payload pour gérer INSERT/UPDATE
             )
             .subscribe();
 
         return {
-            unsubscribe: () => supabase.removeChannel(channel)
+            unsubscribe: () => supabase.removeChannel(channel),
+            sendTyping: () => channel.track({ user: store.state.user.id, typing: true }), // Presence could be better but broadcast is easier for simple signal
+            // ... For simple broadcast typing:
+            broadcastTyping: () => channel.send({
+                type: 'broadcast',
+                event: 'typing',
+                payload: { userId: store.state.user.id }
+            })
         };
     }
 };

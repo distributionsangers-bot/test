@@ -265,8 +265,8 @@ async function handleLogout() {
  */
 function handleToggleAdmin() {
     storeActions.toggleAdminMode();
-    // On recharge pour appliquer les changements partout (Simple & Robuste)
-    window.location.reload();
+    // Redirect to dashboard to reset view context
+    window.location.href = '/dashboard';
 }
 
 /**

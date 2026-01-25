@@ -922,28 +922,34 @@ function showOptionsModal() {
     });
 
     // NOUVEAU: Suppression définitive (pour corriger une erreur d'annonce)
-    sheet.querySelector('#act-delete-forever')?.addEventListener('click', async () => {
-        if (showConfirm("⚠️ ATTENTION : Supprimer pour TOUT LE MONDE ?\n\nCette action est irréversible. Utilisez-la seulement en cas d'erreur.")) {
-            // Loader ?
-            const btn = sheet.querySelector('#act-delete-forever');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="animate-spin w-5 h-5 border-2 border-red-600 rounded-full border-t-transparent"></i> Suppression...';
+    sheet.querySelector('#act-delete-forever')?.addEventListener('click', () => {
+        showConfirm(
+            "⚠️ ATTENTION : Supprimer pour TOUT LE MONDE ?\n\nCette action est irréversible. Utilisez-la seulement en cas d'erreur.",
+            async () => {
+                // Loader visually on button (though modal closes, showing toast is enough usually, but let's be safe)
+                // Actually showConfirm usually closes the modal it opens. The actionsheet is separate.
 
-            const { success, error } = await ChatService.deleteTicket(state.activeTicketId);
+                const btn = sheet.querySelector('#act-delete-forever');
+                if (btn) btn.innerHTML = '<i class="animate-spin w-5 h-5 border-2 border-red-600 rounded-full border-t-transparent"></i> Suppression...';
 
-            if (success) {
-                showToast("Conversation supprimée définitivement", "success");
-                sheet.remove();
-                state.activeTicketId = null;
-                document.getElementById('chat-active').classList.add('hidden');
-                document.getElementById('chat-active').classList.remove('flex'); // Ensure flex is removed
-                document.getElementById('chat-empty').classList.remove('hidden');
-                await loadTickets();
-            } else {
-                btn.innerHTML = originalText;
-                showToast("Erreur lors de la suppression : " + (error?.message || "Inconnue"), "error");
-            }
-        }
+                const { success, error } = await ChatService.deleteTicket(state.activeTicketId);
+
+                if (success) {
+                    showToast("Conversation supprimée définitivement", "success");
+                    sheet.remove();
+                    state.activeTicketId = null;
+                    document.getElementById('chat-active').classList.add('hidden');
+                    document.getElementById('chat-active').classList.remove('flex');
+                    document.getElementById('chat-empty').classList.remove('hidden');
+                    await loadTickets();
+                } else {
+                    if (btn) btn.innerHTML = '<i data-lucide="trash-2" class="w-5 h-5"></i> Supprimer pour tous (Erreur)';
+                    createIcons({ icons, root: sheet }); // Re-render icon
+                    showToast("Erreur lors de la suppression : " + (error?.message || "Inconnue"), "error");
+                }
+            },
+            { type: 'danger', confirmText: 'Supprimer définitivement' }
+        );
     });
 
     sheet.querySelector('#act-close')?.addEventListener('click', async () => {

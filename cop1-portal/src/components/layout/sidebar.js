@@ -117,7 +117,7 @@ export function renderSidebar(profile, currentView, adminMode) {
             <!-- User Card -->
             <div class="px-4 py-4 border-b border-slate-100/50">
                 <div class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/50">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brand-500/25">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brand-500/25">
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">

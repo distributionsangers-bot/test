@@ -23,115 +23,107 @@ export async function renderChat(container, params = {}) {
 
     // PREMIUM GLASSMORPHISM BACKGROUND & LAYOUT
     container.innerHTML = `
-        <!-- Main Container with Animated Background -->
-        <div class="fixed inset-0 z-[100] md:z-auto bg-slate-50 md:relative md:h-[calc(100vh-64px)] md:bg-white overflow-hidden">
+        <!-- Main Container: Fits within layout, preserves bottom nav -->
+        <div class="relative h-[calc(100dvh-90px)] md:h-[calc(100vh-64px)] w-full overflow-hidden flex flex-col md:flex-row md:bg-white/60 md:backdrop-blur-xl md:rounded-3xl md:border md:border-white/50 md:shadow-2xl">
             
-            <!-- Animated Blobs Background (Visible mainly on Mobile/Transparent areas) -->
+            <!-- Animated Blobs Background -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 opacity-40">
                 <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-200 rounded-full blur-[80px] animate-blob"></div>
                 <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200 rounded-full blur-[80px] animate-blob animation-delay-2000"></div>
                 <div class="absolute top-[20%] right-[20%] w-[40%] h-[40%] bg-pink-100 rounded-full blur-[80px] animate-blob animation-delay-4000"></div>
             </div>
 
-            <!-- Content Wrapper (Glass Effect) -->
-            <div class="relative z-10 w-full h-full flex flex-col md:flex-row md:bg-white/60 md:backdrop-blur-xl md:rounded-3xl md:border md:border-white/50 md:shadow-2xl overflow-hidden">
+            <!-- LIST PANEL -->
+            <div id="chat-list-panel" class="absolute md:relative inset-0 z-20 w-full h-full flex flex-col bg-slate-50 md:bg-white/80 md:backdrop-blur-xl md:bg-transparent md:border-r border-white/40 transition-transform duration-300 ${params.id ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}">
                 
-                <!-- LIST PANEL -->
-                <div id="chat-list-panel" class="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col h-full bg-white/70 backdrop-blur-md md:border-r border-white/40 transition-transform duration-300 absolute md:relative inset-0 z-20 ${params.id ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}">
-                    
-                    <!-- Header -->
-                    <div class="px-5 py-4 pt-safe flex justify-between items-center bg-white/50 border-b border-white/40 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
-                        <div>
-                            <h1 class="font-extrabold text-2xl text-slate-800 tracking-tight">Messages</h1>
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Vos conversations</p>
-                        </div>
-                        <button id="btn-new-ticket" class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center hover:shadow-lg hover:shadow-brand-500/30 hover:scale-105 transition active:scale-95">
-                            <i data-lucide="plus" class="w-5 h-5"></i>
-                        </button>
+                <!-- Header (Immersive Gradient like Missions) -->
+                <div class="px-6 py-6 pt-safe flex justify-between items-center bg-gradient-to-br from-brand-600 to-brand-400 shadow-lg shadow-brand-500/20 md:rounded-tl-2xl flex-shrink-0">
+                    <div>
+                        <h1 class="font-extrabold text-2xl text-white tracking-tight flex items-center gap-2">
+                            <i data-lucide="message-circle" class="w-6 h-6 text-brand-100"></i>
+                            Messages
+                        </h1>
+                        <p class="text-xs font-medium text-brand-100 uppercase tracking-widest mt-1 opacity-90">Vos échanges</p>
                     </div>
-
-                    <!-- Filter / Status (Optional placeholder) -->
-                    <!-- <div class="px-5 py-2">...</div> -->
-
-                    <!-- Tickets List -->
-                    <div id="tickets-container" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2">
-                        ${renderSkeletonList()}
-                    </div>
+                    <button id="btn-new-ticket" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 flex items-center justify-center hover:bg-white/30 transition active:scale-95 shadow-inner">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
                 </div>
 
-                <!-- CONVERSATION PANEL -->
-                <div id="chat-conversation-panel" class="absolute md:relative inset-0 z-30 w-full h-full flex flex-col bg-slate-50/50 backdrop-blur-sm transition-transform duration-300 ${params.id ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}">
+                <!-- Tickets List -->
+                <div id="tickets-container" class="flex-1 overflow-y-auto no-scrollbar pt-2 pb-20 md:pb-3 space-y-2 px-2 bg-slate-50/50">
+                    ${renderSkeletonList()}
+                </div>
+            </div>
+
+            <!-- CONVERSATION PANEL -->
+            <div id="chat-conversation-panel" class="absolute md:relative inset-0 z-30 w-full h-full flex flex-col bg-slate-50/80 backdrop-blur-md transition-transform duration-300 ${params.id ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}">
+                
+                <!-- Empty State (Desktop only) -->
+                <div id="chat-empty-state" class="hidden md:flex absolute inset-0 flex-col items-center justify-center text-center p-8 z-0">
+                    <div class="w-24 h-24 bg-gradient-to-br from-slate-100 to-white rounded-3xl shadow-xl flex items-center justify-center mb-6 rotate-3">
+                        <i data-lucide="message-square" class="w-10 h-10 text-slate-300"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Sélectionnez une conversation</h2>
+                </div>
+
+                <!-- Active Conversation -->
+                <div id="active-conversation-wrapper" class="flex flex-col h-full w-full relative z-10 ${!params.id ? 'hidden md:flex opacity-0 pointer-events-none' : ''}">
                     
-                    <!-- Empty State (Desktop only) -->
-                    <div id="chat-empty-state" class="hidden md:flex absolute inset-0 flex-col items-center justify-center text-center p-8 z-0">
-                        <div class="w-24 h-24 bg-gradient-to-br from-slate-100 to-white rounded-3xl shadow-xl flex items-center justify-center mb-6 rotate-3">
-                            <i data-lucide="message-square" class="w-10 h-10 text-slate-300"></i>
+                    <!-- Header -->
+                    <div id="chat-header" class="px-4 py-3 pt-safe bg-white/90 backdrop-blur-md border-b border-slate-200/60 shadow-sm flex items-center justify-between flex-shrink-0 z-20">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <button id="btn-back-list" class="md:hidden w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-full transition active:scale-95 -ml-2">
+                                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                            </button>
+                            
+                            <div id="active-ticket-info" class="flex items-center gap-3 overflow-hidden">
+                                <!-- Dynamic Content -->
+                            </div>
                         </div>
-                        <h2 class="text-xl font-bold text-slate-800 mb-2">Sélectionnez une conversation</h2>
-                        <p class="text-slate-500 max-w-xs">Retrouvez ici tous vos échanges avec l'équipe et les autres bénévoles.</p>
+                        
+                         <div class="relative">
+                            <button id="btn-chat-options" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
+                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                            </button>
+                            <div id="chat-options-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 hidden transform origin-top-right transition-all">
+                                <div id="ticket-actions-container"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Active Conversation -->
-                    <div id="active-conversation-wrapper" class="flex flex-col h-full w-full relative z-10 ${!params.id ? 'hidden md:flex opacity-0 pointer-events-none' : ''}">
-                        
-                        <!-- Header -->
-                        <div id="chat-header" class="px-4 py-3 pt-safe bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm flex items-center justify-between flex-shrink-0 z-20">
-                            <div class="flex items-center gap-3 overflow-hidden">
-                                <button id="btn-back-list" class="md:hidden w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition active:scale-95 -ml-2">
-                                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                                </button>
-                                
-                                <div id="active-ticket-info" class="flex items-center gap-3 overflow-hidden">
-                                    <!-- Dynamic Content -->
+                    <!-- Messages Area -->
+                    <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 overscroll-contain space-y-4 scroll-smooth">
+                        <!-- Loading / Messages -->
+                    </div>
+
+                    <!-- Input Area (Anchored Solid Bar) -->
+                    <form id="chat-input-form" class="flex-shrink-0 bg-white border-t border-slate-200 px-3 py-2 z-30">
+                        <div class="flex items-end gap-2 max-w-4xl mx-auto">
+                            <!-- Emoji Button -->
+                            <button type="button" id="btn-emoji" class="w-10 h-10 text-slate-400 hover:text-amber-500 rounded-full flex items-center justify-center transition flex-shrink-0">
+                                <i data-lucide="smile" class="w-6 h-6"></i>
+                            </button>
+
+                            <!-- Input Field -->
+                            <div class="flex-1 bg-slate-100 rounded-[24px] border border-transparent focus-within:border-brand-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/10 transition-all">
+                                <input id="message-input" type="text" autocomplete="off" placeholder="Message..." 
+                                    class="w-full px-4 py-2.5 bg-transparent text-[15px] text-slate-800 placeholder-slate-400 outline-none leading-relaxed">
+                            </div>
+
+                            <!-- Emoji Picker (Positioned above bar) -->
+                            <div id="emoji-picker" class="absolute bottom-full left-2 mb-2 p-3 bg-white rounded-2xl shadow-2xl border border-slate-100 hidden z-50 animate-slide-up origin-bottom-left w-64">
+                                <div class="grid grid-cols-6 gap-1">
+                                    ${EMOJI_LIST.map(e => `<button type="button" class="emoji-btn w-9 h-9 text-lg hover:bg-slate-100 rounded-lg transition flex items-center justify-center active:scale-90">${e}</button>`).join('')}
                                 </div>
                             </div>
                             
-                            <!-- Actions Menu -->
-                             <div class="relative">
-                                <button id="btn-chat-options" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
-                                    <i data-lucide="more-vertical" class="w-5 h-5"></i>
-                                </button>
-                                <!-- Dropdown -->
-                                <div id="chat-options-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 hidden transform origin-top-right transition-all">
-                                    <div id="ticket-actions-container">
-                                        <!-- Actions injected here -->
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Send Button -->
+                            <button type="submit" id="btn-send" class="w-10 h-10 bg-brand-600 text-white rounded-full flex items-center justify-center shadow-md hover:bg-brand-700 transition active:scale-90 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i data-lucide="send-horizontal" class="w-5 h-5 ml-0.5"></i>
+                            </button>
                         </div>
-
-                        <!-- Messages Area -->
-                        <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-6 overscroll-contain space-y-4 scroll-smooth">
-                            <!-- Loading / Messages -->
-                        </div>
-
-                        <!-- Input Area -->
-                        <form id="chat-input-form" class="px-4 py-3 pb-safe bg-white/80 backdrop-blur-md border-t border-white/40 z-20">
-                            <div class="flex items-end gap-2 max-w-4xl mx-auto">
-                                <div class="flex-1 relative bg-slate-100/80 rounded-3xl border border-transparent focus-within:border-brand-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-500/10 transition-all shadow-inner">
-                                    <div class="flex items-center px-4 py-3 gap-2">
-                                        <input id="message-input" type="text" autocomplete="off" placeholder="Écrivez votre message..." 
-                                            class="flex-1 bg-transparent text-sm font-medium text-slate-800 placeholder-slate-400 outline-none min-w-0">
-                                        
-                                        <button type="button" id="btn-emoji" class="w-8 h-8 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-full flex items-center justify-center transition">
-                                            <i data-lucide="smile" class="w-5 h-5"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Emoji Picker -->
-                                    <div id="emoji-picker" class="absolute bottom-full right-0 mb-4 mr-0 p-3 bg-white rounded-2xl shadow-2xl border border-slate-100 hidden z-50 animate-slide-up origin-bottom-right w-64">
-                                        <div class="grid grid-cols-6 gap-1">
-                                            ${EMOJI_LIST.map(e => `<button type="button" class="emoji-btn w-9 h-9 text-lg hover:bg-slate-100 rounded-lg transition flex items-center justify-center active:scale-90">${e}</button>`).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" id="btn-send" class="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-brand-500/30 hover:shadow-xl hover:scale-105 transition active:scale-95 flex-shrink-0">
-                                    <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -268,7 +260,16 @@ async function loadTicketsList() {
 
     const { data: tickets, error } = await ChatService.getTickets();
     if (error) {
-        container.innerHTML = `<div class="p-6 text-center text-red-400 text-sm font-bold">Impossible de charger les messages</div>`;
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 text-center opacity-60">
+                 <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                    <i data-lucide="alert-circle" class="w-8 h-8 text-red-400"></i>
+                </div>
+                <p class="text-slate-500 text-sm font-bold">Erreur de chargement</p>
+                <button onclick="window.location.reload()" class="mt-2 text-xs text-brand-500 font-bold hover:underline">Réessayer</button>
+            </div>
+        `;
+        createIcons({ icons, root: container });
         return;
     }
     ticketsCache = tickets || [];

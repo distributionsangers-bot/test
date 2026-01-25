@@ -225,7 +225,10 @@ export class Router {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            // 12. Met à jour le store avec la vue actuelle
+            // 12. Notify global listeners (Active Nav Links updates)
+            window.dispatchEvent(new CustomEvent('route-changed', { detail: { path } }));
+
+            // 13. Met à jour le store avec la vue actuelle
             const viewName = path.replace('/', '').split('/')[0] || 'login';
             store.state.view = viewName;
 

@@ -4,7 +4,7 @@ import { store } from './core/store.js';
 import { router } from './core/router.js';
 import { renderSidebar, updateActiveNavLink, initSidebar } from './components/layout/sidebar.js';
 import { renderHeader, initHeader } from './components/layout/header.js';
-import { renderMobileNav, initMobileNav } from './components/layout/mobile-nav.js';
+import { renderMobileNav, initMobileNav, updateActiveNavLink as updateActiveMobileNav } from './components/layout/mobile-nav.js';
 import { toggleLoader, showToast, showConfirm } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
@@ -192,8 +192,7 @@ function attachGlobalListeners() {
 
             router.navigateTo(path);
 
-            // Mise à jour visuelle Sidebar sans re-render total (si la sidebar existe)
-            updateActiveNavLink(viewName);
+
         }
 
         // Admin Toggle
@@ -225,6 +224,13 @@ function attachGlobalListeners() {
 
     // Custom Events
     document.addEventListener('auth:login-success', () => init());
+
+    // Navigation Updates Listener
+    window.addEventListener('route-changed', (e) => {
+        const path = e.detail.path;
+        updateActiveNavLink(path); // Update Desktop Sidebar
+        updateActiveMobileNav(path); // Update Mobile Bottom Bar
+    });
 }
 
 // Lancement de l'application

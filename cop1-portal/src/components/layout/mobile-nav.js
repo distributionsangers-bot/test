@@ -3,7 +3,7 @@
  * MOBILE NAVIGATION COMPONENT - Premium Bottom Bar
  * ============================================
  * Design moderne avec :
- * - Pill-style active indicator
+ * - Pill-style active indicator (Animated)
  * - Glassmorphism effect
  * - Smooth animations
  * - Premium bottom sheet menu
@@ -37,43 +37,21 @@ export function renderMobileNav(profile, currentView, adminMode) {
     const isProfileAdmin = profile?.is_admin || false;
     const isEffectiveAdmin = isProfileAdmin && adminMode;
     const navItems = isEffectiveAdmin ? MOBILE_NAV_ITEMS.admin : MOBILE_NAV_ITEMS.volunteer;
+
+    // Normalize view for initial render
     const normalizedView = currentView.startsWith('/') ? currentView.substring(1) : currentView;
 
     const navHtml = navItems.map(item => {
         if (item.id === 'MENU') {
             const isMenuPageActive = MENU_PAGES.includes(normalizedView) || normalizedView === 'profile';
-            return `
-                <button 
-                    data-action="open-mobile-menu"
-                    aria-label="Menu"
-                    class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isMenuPageActive ? 'text-brand-600' : 'text-slate-400'}"
-                >
-                    ${isMenuPageActive ? '<div class="absolute top-0 w-10 h-1 bg-brand-600 rounded-full"></div>' : ''}
-                    <div class="relative w-10 h-10 flex items-center justify-center rounded-xl ${isMenuPageActive ? 'bg-brand-50' : ''} transition-all">
-                        <i data-lucide="${item.icon}" class="w-6 h-6 ${isMenuPageActive ? 'stroke-[2.5px]' : ''}"></i>
-                    </div>
-                    <span class="text-[10px] font-semibold">${item.label}</span>
-                </button>
-            `;
+            return renderNavItem(item, isMenuPageActive, true);
         }
 
         const normalizedItemId = item.id.startsWith('/') ? item.id.substring(1) : item.id;
+        // Check if active (exact match or subpath)
         const isActive = normalizedView === normalizedItemId || normalizedView.startsWith(normalizedItemId + '/');
 
-        return `
-            <button 
-                data-link="${item.id}" 
-                aria-label="${item.label}"
-                class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isActive ? 'text-brand-600' : 'text-slate-400'}"
-            >
-                ${isActive ? '<div class="absolute top-0 w-10 h-1 bg-brand-600 rounded-full"></div>' : ''}
-                <div class="relative w-10 h-10 flex items-center justify-center rounded-xl ${isActive ? 'bg-brand-50' : ''} transition-all">
-                    <i data-lucide="${item.icon}" class="w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}"></i>
-                    ${item.badge ? '<span id="mobile-chat-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>' : ''}
-                </div>
-                <span class="text-[10px] font-semibold">${item.label}</span>
-            </button>
-        `;
+        return renderNavItem(item, isActive, false);
     }).join('');
 
     return `
@@ -88,6 +66,109 @@ export function renderMobileNav(profile, currentView, adminMode) {
             </div>
         </nav>
     `;
+}
+
+/**
+ * Helper to render a single nav item
+ */
+function renderNavItem(item, isActive, isMenu) {
+    const actionAttr = isMenu ? 'data-action="open-mobile-menu"' : `data-link="${item.id}"`;
+
+    return `
+        <button 
+            ${actionAttr}
+            aria-label="${item.label}"
+            aria-current="${isActive ? 'page' : 'false'}"
+            class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isActive ? 'text-brand-600' : 'text-slate-400'}"
+        >
+            <!-- Animated Pill Indicator (Always present, toggled via classes) -->
+            <div class="active-pill absolute top-0 w-10 h-1 bg-brand-600 rounded-full transition-all duration-300 ease-out origin-center ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}"></div>
+            
+            <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50' : 'bg-transparent'}">
+                <i data-lucide="${item.icon}" class="w-6 h-6 transition-all duration-200 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}"></i>
+                ${item.badge ? '<span id="mobile-chat-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>' : ''}
+            </div>
+            
+            <span class="text-[10px] font-semibold transition-colors duration-200">${item.label}</span>
+        </button>
+    `;
+}
+
+/**
+ * Updates the active state of mobile navigation links
+ * Called by main.js on route-changed event
+ */
+export function updateActiveNavLink(path) {
+    const nav = document.getElementById('mobile-nav');
+    if (!nav) return;
+
+    const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+    const allButtons = nav.querySelectorAll('.nav-item');
+
+    allButtons.forEach(btn => {
+        // Determine if this button should be active
+        let isActive = false;
+
+        // Check for specific link
+        if (btn.hasAttribute('data-link')) {
+            const linkPath = btn.dataset.link; // e.g. "/events"
+            const linkNormalized = linkPath.startsWith('/') ? linkPath.substring(1) : linkPath;
+
+            // Logic: exact match or subpath (e.g. events/123 -> events)
+            isActive = normalizedPath === linkNormalized || normalizedPath.startsWith(linkNormalized + '/');
+        }
+        // Check for Menu button
+        else if (btn.dataset.action === 'open-mobile-menu') {
+            isActive = MENU_PAGES.includes(normalizedPath) || normalizedPath === 'profile';
+        }
+
+        // Apply visual updates
+        if (isActive) {
+            btn.classList.remove('text-slate-400');
+            btn.classList.add('text-brand-600');
+            btn.setAttribute('aria-current', 'page');
+        } else {
+            btn.classList.remove('text-brand-600');
+            btn.classList.add('text-slate-400');
+            btn.setAttribute('aria-current', 'false');
+        }
+
+        // Update Pill
+        const pill = btn.querySelector('.active-pill');
+        if (pill) {
+            if (isActive) {
+                pill.classList.remove('scale-0', 'opacity-0');
+                pill.classList.add('scale-100', 'opacity-100');
+            } else {
+                pill.classList.remove('scale-100', 'opacity-100');
+                pill.classList.add('scale-0', 'opacity-0');
+            }
+        }
+
+        // Update Icon Container
+        const iconContainer = btn.querySelector('.icon-container');
+        if (iconContainer) {
+            if (isActive) {
+                iconContainer.classList.remove('bg-transparent');
+                iconContainer.classList.add('bg-brand-50');
+            } else {
+                iconContainer.classList.remove('bg-brand-50');
+                iconContainer.classList.add('bg-transparent');
+            }
+
+            // Update Icon
+            const icon = iconContainer.querySelector('svg') || iconContainer.querySelector('i');
+            if (icon) {
+                if (isActive) {
+                    icon.classList.remove('stroke-2');
+                    icon.classList.add('stroke-[2.5px]');
+                } else {
+                    icon.classList.remove('stroke-[2.5px]');
+                    icon.classList.add('stroke-2');
+                }
+            }
+        }
+    });
 }
 
 export function initMobileNav() {

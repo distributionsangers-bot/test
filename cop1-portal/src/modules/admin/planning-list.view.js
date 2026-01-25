@@ -377,7 +377,7 @@ function renderShiftItem(s, eventId) {
 
             <!-- Actions -->
             <div class="flex gap-0.5 flex-shrink-0">
-                <button data-action="view-participants" data-id="${s.id}" class="p-1.5 sm:p-2 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition" title="Inscrits">
+                <button data-action="view-participants" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition" title="Inscrits">
                     <i data-lucide="users" class="w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none"></i>
                 </button>
                 <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition hidden sm:block" title="QR">
@@ -523,7 +523,7 @@ async function handleListClick(e) {
         }
 
     } else if (action === 'view-participants') {
-        openParticipantsModal(id);
+        openParticipantsModal(id, btn.dataset.title);
 
     } else if (action === 'qr-shift') {
         QRDisplayView.showShiftQR(id, btn.dataset.title);

@@ -82,7 +82,7 @@ async function exportParticipantsCSV(shiftId, title) {
         const url = URL.createObjectURL(blob);
 
         link.setAttribute('href', url);
-        link.setAttribute('download', `participants_${title.replace(/\s+/g, '_')}_${Date.now()}.csv`);
+        link.setAttribute('download', `participants_${(title || 'export').replace(/\s+/g, '_')}_${Date.now()}.csv`);
         link.style.visibility = 'hidden';
 
         document.body.appendChild(link);

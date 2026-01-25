@@ -62,7 +62,24 @@ export const ChatService = {
                 profiles(first_name, last_name, is_admin)
             `)
             .eq('ticket_id', ticketId)
+            .eq('ticket_id', ticketId)
             .order('created_at', { ascending: true }); // Chronologique
+
+        if (error) return { success: false, error };
+        return { success: true, data };
+    },
+
+    /**
+     * Récupère la liste des bénévoles (pour Admin)
+     */
+    async getAllVolunteers() {
+        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, email')
+            .eq('status', 'approved')
+            .order('first_name');
 
         if (error) return { success: false, error };
         return { success: true, data };

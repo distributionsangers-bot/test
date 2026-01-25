@@ -19,7 +19,7 @@ export async function initChat() {
 }
 
 export async function renderChat(container, params = {}) {
-    const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+    const isAdmin = !!store.state.profile?.is_admin;
 
     // PREMIUM GLASSMORPHISM BACKGROUND & LAYOUT
     container.innerHTML = `
@@ -147,11 +147,12 @@ async function appendNewTicketModal(isAdmin) {
     // ... Volunteer fetch logic (Keep existing logic) ...
     let volunteersHtml = '';
     if (isAdmin) {
-        const { data: volunteers } = await import('../../services/supabase.js').then(m =>
-            m.supabase.from('profiles').select('id, first_name, last_name, email').eq('status', 'approved').order('first_name')
-        );
-        if (volunteers && volunteers.length > 0) {
-            volunteersHtml = `
+        try {
+            const res = await ChatService.getAllVolunteers();
+            const volunteers = res.data || [];
+
+            if (volunteers && volunteers.length > 0) {
+                volunteersHtml = `
                 <div id="volunteer-selector-wrapper" class="hidden animate-fade-in">
                     <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Destinataire</label>
                     <div class="relative group">
@@ -185,6 +186,9 @@ async function appendNewTicketModal(isAdmin) {
                     </div>
                 </div>
             `;
+            }
+        } catch (e) {
+            console.error("Error loading volunteers:", e);
         }
     }
 
@@ -355,15 +359,31 @@ function renderTicketItem(t) {
     `;
 }
 
+// Global handler reference for cleanup
+let clickHandler = null;
+
 // ... event listeners update ...
 async function setupEventListeners(container) {
-    // Event Delegation for persistent elements
-    container.addEventListener('click', (e) => {
-        // New Ticket Button
+    // Remove previous listener if any
+    if (clickHandler) {
+        document.removeEventListener('click', clickHandler);
+    }
+
+    clickHandler = (e) => {
+        // New Ticket Button - Global Check
         if (e.target.closest('#btn-new-ticket')) {
             document.getElementById('create-ticket-modal')?.classList.remove('hidden');
         }
-    });
+
+        // Options Dropdown handling
+        if (!e.target.closest('#btn-chat-options') && !e.target.closest('#chat-options-dropdown')) {
+            document.getElementById('chat-options-dropdown')?.classList.add('hidden');
+        }
+    };
+
+    document.addEventListener('click', clickHandler);
+
+    // New ticket (Direct ID check removed in favor of global delegator above)
 
     // Close modal (updated ID)
     document.getElementById('btn-close-modal')?.addEventListener('click', () => {
@@ -447,11 +467,8 @@ async function setupEventListeners(container) {
         optsMenu.classList.toggle('hidden');
     });
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#btn-chat-options') && !e.target.closest('#chat-options-dropdown')) {
-            optsMenu?.classList.add('hidden');
-        }
-    });
+    // Cleanup handled by global clickHandler for closing
+
 
     // Send Message
     document.getElementById('chat-input-form')?.addEventListener('submit', handleSendMessage);
@@ -890,5 +907,9 @@ function formatTimeAgo(dateStr) {
 export function cleanup() {
     if (realtimeSubscription) {
         realtimeSubscription.unsubscribe();
+    }
+    if (clickHandler) {
+        document.removeEventListener('click', clickHandler);
+        clickHandler = null;
     }
 }

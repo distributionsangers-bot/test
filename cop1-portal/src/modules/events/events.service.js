@@ -24,6 +24,27 @@ export const EventsService = {
     },
 
     /**
+     * Retrieves global stats (counts) for future shifts via secure RPC
+     * Bypasses RLS to show correct availability
+     */
+    async getShiftCounts() {
+        try {
+            const { data, error } = await supabase.rpc('get_future_shift_counts');
+            if (error) throw error;
+            // Convert array to map for O(1) lookup: { shiftId: count }
+            const map = {};
+            (data || []).forEach(item => {
+                map[item.shift_id] = item.count;
+            });
+            return { data: map, error: null };
+        } catch (error) {
+            console.error("EventsService.getShiftCounts error:", error);
+            // Fallback: return empty object, UI will fallback to length based count
+            return { data: {}, error };
+        }
+    },
+
+    /**
      * Retrieves the list of shift IDs the current user is registered for.
      */
     async getMyRegistrations(userId) {

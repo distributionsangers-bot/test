@@ -12,16 +12,23 @@ export async function renderEvents() {
     try {
         const userId = store.state.user?.id;
 
-        const { data: shifts, error } = await supabase
-            .from('shifts')
-            .select(`
-                *,
-                events!inner ( id, title, date, location, is_visible, publish_at ),
-                registrations ( user_id ),
-                bookings:registrations(count)
-            `)
-            .gte('events.date', new Date().toISOString().split('T')[0])
-            .order('start_time', { ascending: true });
+        // Parallel Data Fetching: Events + Real Counts
+        const [eventsRes, countsRes] = await Promise.all([
+            supabase
+                .from('shifts')
+                .select(`
+                    *,
+                    events!inner ( id, title, date, location, is_visible, publish_at ),
+                    registrations ( user_id )
+                `)
+                .gte('events.date', new Date().toISOString().split('T')[0])
+                .order('start_time', { ascending: true }),
+
+            EventsService.getShiftCounts()
+        ]);
+
+        const { data: shifts, error } = eventsRes;
+        const realCounts = countsRes.data || {}; // { shift_id: count }
 
         if (error) throw error;
 
@@ -71,7 +78,7 @@ export async function renderEvents() {
                 }
                 return true;
             })
-            .map(group => renderEventGroup(group, userId))
+            .map(group => renderEventGroup(group, userId, realCounts))
             .join('');
 
         return `
@@ -171,7 +178,7 @@ function renderNextMissionBanner(shift) {
     `;
 }
 
-function renderEventGroup(group, userId) {
+function renderEventGroup(group, userId, countsMap) {
     const { event, shifts } = group;
     const date = new Date(event.date);
     const dayNum = date.getDate();
@@ -186,7 +193,7 @@ function renderEventGroup(group, userId) {
     const diffHours = (date - now) / (1000 * 60 * 60);
     const isSoon = diffHours <= 48 && diffHours > 0;
 
-    const shiftsHtml = shifts.map(s => renderShiftCard(s, userId)).join('');
+    const shiftsHtml = shifts.map(s => renderShiftCard(s, userId, countsMap)).join('');
 
     return `
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden ${hasRegistration ? 'ring-2 ring-emerald-400' : ''}">
@@ -221,11 +228,15 @@ function renderEventGroup(group, userId) {
     `;
 }
 
-function renderShiftCard(shift, userId) {
+function renderShiftCard(shift, userId, countsMap) {
     const isRegistered = shift.registrations.some(r => r.user_id === userId);
     const total = shift.max_slots || 0;
-    // Prefer Supabase count aggregation if available, fallback to length (e.g. if RLS allows reading rows)
-    const taken = shift.bookings?.[0]?.count ?? shift.registrations.length;
+
+    // Use Real Count (Global) or fallback to local registrations (if user registered and RPC failed)
+    // countsMap[shift.id] provides the true count from DB ignoring RLS
+    const globalCount = countsMap ? countsMap[shift.id] : undefined;
+    const taken = globalCount !== undefined ? globalCount : shift.registrations.length;
+
     const remaining = total - taken;
     const isFull = remaining <= 0;
     const isAlmostFull = remaining <= 2 && remaining > 0;

@@ -378,7 +378,13 @@ async function setupEventListeners(container) {
 
         const wrapper = document.getElementById('volunteer-selector-wrapper');
         if (wrapper) {
-            type === 'direct' ? wrapper.classList.remove('hidden') : wrapper.classList.add('hidden');
+            if (type === 'direct') {
+                wrapper.classList.remove('hidden');
+                // Auto-focus search for better UX
+                setTimeout(() => document.getElementById('volunteer-search')?.focus(), 100);
+            } else {
+                wrapper.classList.add('hidden');
+            }
         }
     };
 
@@ -835,9 +841,12 @@ function handleDeleteTicket(id) {
         else {
             showToast("Supprimé");
 
-            // Optimistic UI Update: Remove immediately
+            // Optimistic UI Update: Remove immediately from DOM
             const item = document.querySelector(`.ticket-item[data-ticket-id="${id}"]`);
             item?.remove();
+
+            // CRITICAL: Remove from local cache immediately so loadTicketsList doesn't resurrect it
+            ticketsCache = ticketsCache.filter(t => t.id !== id);
 
             // Reset UI
             if (window.innerWidth < 768) {
@@ -849,8 +858,8 @@ function handleDeleteTicket(id) {
             }
 
             currentTicketId = null;
-            // Background refresh
-            loadTicketsList();
+            // No need to await, we updated cache manually and DOM manually
+            // loadTicketsList(); // Optional: re-sync later if needed, but manual update is cleaner
         }
     }, { type: 'danger', confirmText: 'Supprimer' });
 }

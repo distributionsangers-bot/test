@@ -20,7 +20,8 @@ export const ChatService = {
                 last_message:messages(content, created_at, user_id),
                 profiles:user_id(first_name, last_name, email)
             `)
-            .order('last_message_at', { ascending: false });
+            .order('last_message_at', { ascending: false })
+            .neq('status', 'deleted');
 
         if (!isAdmin) {
             query = query.or(`user_id.eq.${user.id},category.eq.announcement`);
@@ -276,14 +277,28 @@ export const ChatService = {
         }
 
         // 2. Supprimer le ticket
-        const { error: ticketErr } = await supabase
+        const { error: ticketErr, count } = await supabase
             .from('tickets')
-            .delete()
+            .delete({ count: 'exact' })
             .eq('id', ticketId);
 
         if (ticketErr) {
             console.error("Error deleting ticket:", ticketErr);
             return { success: false, error: ticketErr };
+        }
+
+        // If no rows were deleted (RLS blocked hard delete for Admin?), try Soft Delete
+        if (count === 0) {
+            console.warn("Hard delete failed (0 rows). Attempting Soft Delete (status=deleted)...");
+            const { error: softErr } = await supabase
+                .from('tickets')
+                .update({ status: 'deleted' })
+                .eq('id', ticketId);
+
+            if (softErr) {
+                console.error("Soft delete failed:", softErr);
+                return { success: false, error: "Impossible de supprimer (Permissions insuffisantes)" };
+            }
         }
 
         return { success: true };

@@ -357,11 +357,12 @@ function bindEvents(container) {
         showOptionsModal();
     });
 
-    // 8. TICKET LIST DELEGATION (Fix for click issues)
-    const list = container.querySelector('#ticket-list');
-    list?.addEventListener('click', (e) => {
+    // 8. TICKET LIST DELEGATION (Global for robustness)
+    // We attach to body/document to ensure we catch it even if DOM was replaced weirdly
+    document.addEventListener('click', (e) => {
         const btn = e.target.closest('.ticket-btn');
         if (btn) {
+            e.preventDefault();
             const id = btn.dataset.ticketId;
             openTicket(id);
         }
@@ -454,7 +455,6 @@ function injectCreateModal() {
         e.preventDefault();
         const fd = new FormData(e.target);
 
-        // This was crashing because toggleLoader was missing in imports
         if (typeof toggleLoader === 'function') toggleLoader(true);
 
         const res = await ChatService.createTicket({
@@ -469,7 +469,11 @@ function injectCreateModal() {
         if (res.success) {
             modal.remove();
             showToast('Conversation créée');
-            loadTickets();
+            await loadTickets();
+            // AUTO OPEN NEWLY CREATED TICKET
+            if (res.data && res.data.id) {
+                openTicket(res.data.id);
+            }
         } else {
             showToast('Erreur: ' + (res.error?.message || 'Inconnue'), 'error');
         }

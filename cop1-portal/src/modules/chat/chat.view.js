@@ -1,7 +1,7 @@
 import { ChatService } from './chat.service.js';
 import { store } from '../../core/store.js';
 import { createIcons, icons } from 'lucide';
-import { showToast, showConfirm, escapeHtml } from '../../services/utils.js';
+import { showToast, showConfirm, escapeHtml, toggleLoader } from '../../services/utils.js';
 
 // =============================================================================
 // 🎨 CONSTANTS & CONFIG
@@ -30,9 +30,6 @@ export async function initChat() {
 
 export async function renderChat(container, params = {}) {
     // 1. Static Layout (Premium Glassmorphism)
-    // Structure: 
-    // - Mobile: Full height minus nav (85px bottom space)
-    // - Desktop: Card style floating
     container.innerHTML = `
         <div class="relative w-full h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden md:p-6 gap-6">
             
@@ -192,7 +189,7 @@ function renderTicketList() {
         }
 
         return `
-            <button onclick="handleTicketClick('${t.id}')" class="w-full text-left p-3 rounded-2xl transition-all duration-200 flex items-center gap-3 group relative ${isActive ? 'bg-white shadow-md shadow-slate-200 ring-1 ring-slate-100' : 'hover:bg-white/60 hover:shadow-sm'}">
+            <button data-ticket-id="${t.id}" class="ticket-btn w-full text-left p-3 rounded-2xl transition-all duration-200 flex items-center gap-3 group relative ${isActive ? 'bg-white shadow-md shadow-slate-200 ring-1 ring-slate-100' : 'hover:bg-white/60 hover:shadow-sm'}">
                 ${avatar}
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-center mb-0.5">
@@ -207,8 +204,6 @@ function renderTicketList() {
         `;
     }).join('');
 
-    // Attach Global Helper for onclick
-    window.handleTicketClick = (id) => openTicket(id);
     createIcons({ icons, root: list });
 }
 
@@ -218,7 +213,7 @@ async function openTicket(id) {
 
     // Switch View Steps
     const ticket = state.tickets.find(t => t.id === id);
-    if (!ticket) return; // Should fetch via ID if not in list, but keep simple
+    if (!ticket) return;
 
     // 1. Mobile & Desktop Transition
     document.getElementById('chat-list-panel').classList.add('-translate-x-full');
@@ -276,7 +271,7 @@ function appendMessage(msg) {
 
     const div = document.createElement('div');
     div.innerHTML = createMessageHtml(msg);
-    container.appendChild(div.firstElementChild); // createMessageHtml returns string wrapper
+    container.appendChild(div.firstElementChild);
 }
 
 function createMessageHtml(msg) {
@@ -317,16 +312,16 @@ function bindEvents(container) {
         state.activeTicketId = null;
     });
 
-    // 2. New Ticket Modal (Sync Injection Fix)
+    // 2. New Ticket Modal
     container.querySelector('#btn-new')?.addEventListener('click', () => {
         injectCreateModal();
     });
 
-    // 3. Send Message
+    // 3. Send Message (Bottom Chat Input)
     container.querySelector('#chat-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = document.getElementById('msg-input');
-        const content = input.value.trim();
+        const content = input?.value.trim();
         if (!content || !state.activeTicketId) return;
 
         input.value = '';
@@ -348,7 +343,6 @@ function bindEvents(container) {
     });
 
     // 6. Emoji Click
-    // Delegated at container level for dynamic emojis
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-emoji')) {
             const input = document.getElementById('msg-input');
@@ -359,9 +353,18 @@ function bindEvents(container) {
 
     // 7. Options Menu (Delete / Close)
     container.querySelector('#btn-options')?.addEventListener('click', (e) => {
-        // Simple native confirm for speed and robustness on mobile
         e.stopPropagation();
         showOptionsModal();
+    });
+
+    // 8. TICKET LIST DELEGATION (Fix for click issues)
+    const list = container.querySelector('#ticket-list');
+    list?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.ticket-btn');
+        if (btn) {
+            const id = btn.dataset.ticketId;
+            openTicket(id);
+        }
     });
 }
 
@@ -370,15 +373,14 @@ function bindEvents(container) {
  * MOAL CREATION - SYNC & ROBUST
  */
 function injectCreateModal() {
-    // Cleanup
     document.getElementById('create-ticket-modal')?.remove();
 
     const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
 
-    // SKELETON HTML
     const modal = document.createElement('div');
     modal.id = 'create-ticket-modal';
     modal.className = "fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in";
+
     modal.innerHTML = `
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-slide-up ring-1 ring-white/50">
             <!-- Header -->
@@ -392,7 +394,6 @@ function injectCreateModal() {
             <form id="create-form" class="p-6 space-y-4">
                 
                 ${isAdmin ? `
-                <!-- Admin Type Selector -->
                 <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl">
                     <label class="cursor-pointer">
                         <input type="radio" name="type" value="support" class="peer hidden" checked>
@@ -408,7 +409,6 @@ function injectCreateModal() {
                     </label>
                 </div>
 
-                <!-- Async Volunteer Select -->
                 <div id="volunteer-field" class="hidden">
                      <select name="targetUserId" id="volunteer-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-brand-500 transition">
                         <option value="">Chargement...</option>
@@ -431,7 +431,7 @@ function injectCreateModal() {
     document.body.appendChild(modal);
     createIcons({ icons, root: modal });
 
-    // Events
+    // Close Event
     document.getElementById('close-modal').onclick = () => modal.remove();
 
     // Type Change Logic (Admin)
@@ -442,7 +442,7 @@ function injectCreateModal() {
         typeRadios.forEach(r => r.addEventListener('change', (e) => {
             if (e.target.value === 'direct') {
                 vField.classList.remove('hidden');
-                loadVolunteersOptions(); // Async load only if needed
+                loadVolunteersOptions();
             } else {
                 vField.classList.add('hidden');
             }
@@ -454,14 +454,17 @@ function injectCreateModal() {
         e.preventDefault();
         const fd = new FormData(e.target);
 
-        toggleLoader(true);
+        // This was crashing because toggleLoader was missing in imports
+        if (typeof toggleLoader === 'function') toggleLoader(true);
+
         const res = await ChatService.createTicket({
             type: fd.get('type'),
             subject: fd.get('subject'),
             content: fd.get('content'),
             targetUserId: fd.get('targetUserId')
         });
-        toggleLoader(false);
+
+        if (typeof toggleLoader === 'function') toggleLoader(false);
 
         if (res.success) {
             modal.remove();
@@ -490,14 +493,10 @@ async function loadVolunteersOptions() {
 }
 
 function showOptionsModal() {
-    // Quick Native-like Modal for Actions
     const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
     const ticket = state.tickets.find(t => t.id === state.activeTicketId);
 
     if (!ticket) return;
-
-    // Use native confirm/prompt for simplicity/speed or custom if needed. 
-    // Given "Premium" requirement, let's inject a nice ActionSheet
 
     document.getElementById('action-sheet')?.remove();
     const sheet = document.createElement('div');
@@ -542,7 +541,6 @@ function showOptionsModal() {
         sheet.remove();
         toggleLoader(true);
         if (isAdmin) {
-            // Admin: Ask confirmation hard delete
             if (confirm("Supprimer pour tout le monde ? Irréversible.")) {
                 await ChatService.deleteTicket(state.activeTicketId);
             }
@@ -551,7 +549,7 @@ function showOptionsModal() {
         }
         toggleLoader(false);
         state.activeTicketId = null;
-        loadTickets(); // Refresh
+        loadTickets();
         // Reset View
         document.getElementById('chat-active').classList.add('hidden');
         document.getElementById('chat-empty').classList.remove('hidden');

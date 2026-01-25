@@ -501,8 +501,10 @@ function createMessageHtml(msg) {
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
                     
                     <!-- Name (if not me) -->
-                    ${!isMe && isAdmin ? `<span class="text-[10px] text-brand-600 font-bold ml-1 mb-0.5 flex items-center gap-0.5"><i data-lucide="shield" class="w-3 h-3"></i> Admin</span>` : ''}
-                    ${!isMe && !isAdmin ? `<span class="text-[10px] text-slate-400 font-bold ml-1 mb-0.5">${name}</span>` : ''}
+                    ${!isMe ? `<span class="text-[10px] text-slate-500 font-bold ml-1 mb-0.5 flex items-center gap-1">
+                        ${name}
+                        ${isAdmin ? `<span class="bg-brand-100 text-brand-600 text-[9px] px-1 rounded flex items-center gap-0.5"><i data-lucide="shield" class="w-2.5 h-2.5"></i> Admin</span>` : ''}
+                    </span>` : ''}
 
                     <!-- Bubble -->
                     <div class="msg-bubble relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm cursor-pointer transition-transform active:scale-[0.98]
@@ -896,8 +898,13 @@ function showOptionsModal() {
                 </button>
             ` : ''}
             <button id="act-hide" class="w-full p-3 text-slate-600 font-bold hover:bg-slate-50 rounded-xl flex items-center gap-2 justify-center">
-                <i data-lucide="eye-off" class="w-5 h-5"></i> Masquer
+                <i data-lucide="eye-off" class="w-5 h-5"></i> Masquer (Pour moi)
             </button>
+            ${isAdmin ? `
+                <button id="act-delete-forever" class="w-full p-3 text-red-600 font-bold hover:bg-red-50 rounded-xl flex items-center gap-2 justify-center">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i> Supprimer pour tous (Erreur)
+                </button>
+            ` : ''}
             <hr class="my-1 border-slate-100">
             <button id="act-cancel" class="w-full p-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">Fermer</button>
         </div>
@@ -912,6 +919,19 @@ function showOptionsModal() {
         showToast("Conversation masquée", "success");
         sheet.remove();
         await loadTickets();
+    });
+
+    // NOUVEAU: Suppression définitive (pour corriger une erreur d'annonce)
+    sheet.querySelector('#act-delete-forever')?.addEventListener('click', async () => {
+        if (showConfirm("⚠️ ATTENTION : Supprimer pour TOUT LE MONDE ?\n\nCette action est irréversible. Utilisez-la seulement en cas d'erreur.")) {
+            await ChatService.deleteTicket(state.activeTicketId);
+            showToast("Conversation supprimée définitivement", "success");
+            sheet.remove();
+            state.activeTicketId = null;
+            document.getElementById('chat-active').classList.add('hidden');
+            document.getElementById('chat-empty').classList.remove('hidden');
+            await loadTickets();
+        }
     });
 
     sheet.querySelector('#act-close')?.addEventListener('click', async () => {

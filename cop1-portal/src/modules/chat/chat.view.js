@@ -359,16 +359,40 @@ async function openTicket(id) {
     // This avoids the race condition where we fetch tickets before the timestamp is updated.
     if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
 
-    const ticketSub = supabase.channel('tickets-list-global')
+    // 7. Realtime (Global Listener)
+    // We listen to MESSAGES inserts because it's more reliable than TICKETS updates in some contexts.
+    // To avoid the "race condition" (fetching list before ticket timestamp update),
+    // we simply wait a short delay before reloading the list.
+    if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
+
+    // START NEW LOGIC
+    const ticketSub = supabase.channel('global-messages-listener')
         .on(
             'postgres_changes',
-            { event: '*', schema: 'public', table: 'tickets' },
-            () => {
-                // On ticket update (last_message_at changed), reload the list
-                loadTickets();
+            { event: 'INSERT', schema: 'public', table: 'messages' },
+            async (payload) => {
+                // 1. Handle Active Conversation Immediately
+                if (state.activeTicketId && String(state.activeTicketId) === String(payload.new.ticket_id)) {
+                    // It's for us!
+                    const { data } = await ChatService.getMessages(state.activeTicketId);
+                    renderMessages(data || []);
+                    ChatService.markAsRead(state.activeTicketId);
+
+                    // Optimistic Read Status Update
+                    const ticket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
+                    if (ticket) {
+                        ticket.is_unread = false;
+                        // We don't re-render list yet, wait for the reload below to sort it
+                    }
+                }
+
+                // 2. Schedule List Reload (Wait for DB Trigger/Update to propagate to tickets table)
+                // 500ms delay is usually enough
+                setTimeout(() => loadTickets(), 500);
             }
         )
         .subscribe();
+    // END NEW LOGIC
 
     state.globalTicketSub = ticketSub;
 
@@ -377,6 +401,22 @@ async function openTicket(id) {
 }
 
 async function handleRealtimeMessage(payload) {
+    // Legacy / Active Sub Handler
+    // We can leave this empty or duplicate safe logic.
+    // Ideally we rely on the Global Handler for everything message related to ensure consistency.
+    // But let's verify if `subscribe` (lines 344) calls this.
+    // YES.
+    // So we will double render if we do both.
+    // Let's make handleRealtimeMessage lighter.
+
+    // ACTUALLY, simpler path:
+    // Active Sub -> Handles displaying the bubble in the chat view.
+    // Global Sub -> Handles reloading the list on the left.
+    // This separates concerns perfectly.
+
+    // So handleRealtimeMessage stays as is (fetching active messages), 
+    // AND Global Sub reloads the list after 500ms.
+    // This is the most robust way.
     // 1. If currently viewing this ticket, refresh messages & mark as read immediately
     if (state.activeTicketId && String(state.activeTicketId) === String(payload.new.ticket_id)) {
         // Fetch fresh messages

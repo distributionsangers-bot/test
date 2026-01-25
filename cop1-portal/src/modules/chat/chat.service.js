@@ -245,7 +245,21 @@ export const ChatService = {
      * @returns {Promise<{success, error}>}
      */
     async deleteTicket(ticketId) {
-        if (!store.state.profile?.is_admin) {
+        const user = store.state.user;
+        const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+
+        // Check ownership first
+        const { data: ticket, error: checkErr } = await supabase
+            .from('tickets')
+            .select('user_id')
+            .eq('id', ticketId)
+            .single();
+
+        if (checkErr) return { success: false, error: checkErr };
+
+        const isOwner = ticket.user_id === user.id;
+
+        if (!isAdmin && !isOwner) {
             return { success: false, error: "Non autorisé" };
         }
 

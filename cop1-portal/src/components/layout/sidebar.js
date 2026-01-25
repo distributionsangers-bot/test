@@ -208,9 +208,10 @@ export function updateActiveNavLink(path) {
             const navItems = store.state.adminMode ? NAV_ITEMS.admin : NAV_ITEMS.volunteer;
             const navItem = navItems.find(item => item.id === btnPath);
             const colorClass = navItem?.color || 'from-brand-500 to-brand-600';
+            const colors = colorClass.split(' ');
 
             btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
-            btn.classList.add('bg-gradient-to-r', colorClass, 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+            btn.classList.add('bg-gradient-to-r', ...colors, 'text-white', 'shadow-lg', 'shadow-brand-500/25');
             btn.setAttribute('aria-current', 'page');
 
             if (iconContainer) {

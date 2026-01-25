@@ -227,11 +227,14 @@ async function openTicket(id) {
     const ticket = state.tickets.find(t => String(t.id) === String(id));
     if (!ticket) return;
 
-    // 1. Mobile & Desktop Transition
-    document.getElementById('chat-list-panel').classList.add('-translate-x-full');
-    document.getElementById('chat-list-panel').classList.remove('translate-x-0');
+    // 1. Mobile & Desktop Transition (Mobile only)
+    const isMobile = window.innerWidth < 768; // md breakpoint
+    if (isMobile) {
+        document.getElementById('chat-list-panel').classList.add('-translate-x-full');
+        document.getElementById('chat-list-panel').classList.remove('translate-x-0');
+        document.getElementById('chat-content-panel').classList.remove('translate-x-full');
+    }
 
-    document.getElementById('chat-content-panel').classList.remove('translate-x-full');
     document.getElementById('chat-empty').classList.add('hidden');
 
     const activeContainer = document.getElementById('chat-active');
@@ -319,8 +322,11 @@ function scrollToBottom() {
 function bindEvents(container) {
     // 1. Back Button (Mobile)
     container.querySelector('#btn-back')?.addEventListener('click', () => {
-        document.getElementById('chat-list-panel').classList.remove('-translate-x-full');
-        document.getElementById('chat-content-panel').classList.add('translate-x-full');
+        const isMobile = window.innerWidth < 768; // md breakpoint
+        if (isMobile) {
+            document.getElementById('chat-list-panel').classList.remove('-translate-x-full');
+            document.getElementById('chat-content-panel').classList.add('translate-x-full');
+        }
         state.activeTicketId = null;
     });
 

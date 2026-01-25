@@ -351,44 +351,46 @@ async function openTicket(id) {
     });
 
     // 7. Realtime (Global Tickets Update)
-    // Subscribe to tickets table to refresh sidebar order/unread status
-    // independent of the active chat.
-    const ticketSub = supabase.channel('tickets-list-global')
+    // Subscribe to messages table globally to refresh sidebar when ANY message arrives
+    if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
+    
+    const ticketSub = supabase.channel('messages-list-global')
         .on(
             'postgres_changes',
-            { event: '*', schema: 'public', table: 'tickets' },
-            () => {
-                // On any ticket change (new message updates last_message_at), reload the list
+            { event: 'INSERT', schema: 'public', table: 'messages' },
+            (payload) => {
+                // On any new message, reload the ticket list to update unread status and order
                 loadTickets().then(() => {
-                    // If we are on a ticket, ensure we keep it marked as read if needed
-                    if (state.activeTicketId) {
-                        // logic handled in openTicket or handleRealtimeMessage
-                    }
+                    // Re-render to update unread badges and list order
+                    renderTicketList();
                 });
             }
         )
         .subscribe();
 
-    // Store it to unsubscribe later? 
-    // Ideally we should have a global subscription manager. 
-    // For now, we attach it to state to clean up on exit, 
-    // but typically initChat is called once or heavily managed.
-    // Let's add it to a tracking array if needed or just let it be for this view session.
     state.globalTicketSub = ticketSub;
 }
 
 async function handleRealtimeMessage(payload) {
-    // 1. If currently viewing this ticket, refresh messages & mark as read
-    if (state.activeTicketId) {
+    // 1. If currently viewing this ticket, refresh messages & mark as read immediately
+    if (String(state.activeTicketId) === String(payload.new.ticket_id)) {
         // Fetch fresh messages
         const { data } = await ChatService.getMessages(state.activeTicketId);
         renderMessages(data || []);
 
-        // Mark as read again
-        ChatService.markAsRead(state.activeTicketId);
-
-        // Note: Sidebar update is now handled by the 'tickets' subscription above,
-        // which triggers loadTickets(). 
+        // Mark as read immediately
+        await ChatService.markAsRead(state.activeTicketId);
+        
+        // Update the unread badge in the sidebar for this ticket
+        const ticket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
+        if (ticket) {
+            ticket.is_unread = false;
+            renderTicketList();
+        }
+    } else {
+        // If a message arrives on a ticket we're NOT viewing, reload the list to update unread status
+        await loadTickets();
+        renderTicketList();
     }
 }
 

@@ -195,19 +195,7 @@ function attachGlobalListeners() {
 
         }
 
-        // Admin Toggle
-        const adminToggle = e.target.closest('[data-action="toggle-admin"]');
-        if (adminToggle) {
-            store.state.adminMode = !store.state.adminMode;
-            localStorage.setItem('cop1_admin_mode', store.state.adminMode);
 
-            // Redirection selon mode
-            const dest = '/dashboard';
-            store.state.view = dest.replace('/', '');
-
-            router.navigateTo(dest);
-            renderAppLayout(); // Re-render complet nécessaire pour changer le menu
-        }
 
         // Logout
         const logoutBtn = e.target.closest('[data-action="logout"]');

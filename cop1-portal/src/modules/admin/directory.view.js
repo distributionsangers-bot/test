@@ -250,7 +250,7 @@ function renderUserCard(u) {
                             title="${isApproved ? 'Désactiver' : 'Valider'}">
                             <i data-lucide="${isApproved ? 'check-circle' : 'circle'}" class="w-5 h-5 pointer-events-none"></i>
                         </button>
-                        <button data-action="toggle-admin" data-id="${u.id}" data-is-admin="${isAdmin}" 
+                        <button data-action="toggle-role" data-id="${u.id}" data-is-admin="${isAdmin}" 
                             class="p-2.5 rounded-xl transition ${isAdmin ? 'text-rose-600 bg-rose-50 hover:bg-rose-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" 
                             title="${isAdmin ? 'Retirer Admin' : 'Passer Admin'}">
                             <i data-lucide="shield" class="w-5 h-5 pointer-events-none"></i>
@@ -383,7 +383,7 @@ function setupEventListeners(container) {
                 showToast(newStatus === 'approved' ? "Compte validé ✓" : "Compte désactivé");
                 loadUsers();
             }
-        } else if (action === 'toggle-admin') {
+        } else if (action === 'toggle-role') {
             const isAdmin = btn.dataset.isAdmin === 'true';
             const newAdmin = !isAdmin;
 

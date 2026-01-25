@@ -188,6 +188,10 @@ async function appendNewTicketModal(isAdmin) {
         }
     }
 
+    // Prevent duplicates
+    const existingModal = document.getElementById('create-ticket-modal');
+    if (existingModal) existingModal.remove();
+
     const modal = document.createElement('div');
     modal.id = 'create-ticket-modal';
     modal.className = 'fixed inset-0 bg-slate-900/60 z-[100] flex items-end md:items-center justify-center backdrop-blur-sm hidden animate-fade-in';

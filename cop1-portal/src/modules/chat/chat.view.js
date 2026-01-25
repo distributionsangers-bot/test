@@ -357,9 +357,12 @@ function renderTicketItem(t) {
 
 // ... event listeners update ...
 async function setupEventListeners(container) {
-    // New ticket
-    document.getElementById('btn-new-ticket')?.addEventListener('click', () => {
-        document.getElementById('create-ticket-modal')?.classList.remove('hidden');
+    // Event Delegation for persistent elements
+    container.addEventListener('click', (e) => {
+        // New Ticket Button
+        if (e.target.closest('#btn-new-ticket')) {
+            document.getElementById('create-ticket-modal')?.classList.remove('hidden');
+        }
     });
 
     // Close modal (updated ID)

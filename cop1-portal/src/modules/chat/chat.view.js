@@ -140,7 +140,7 @@ export function renderChat(container, params = {}) {
                                 <i data-lucide="smile" class="w-6 h-6"></i>
                             </button>
 
-                            <textarea id="msg-input" rows="1" placeholder="Votre message..." class="flex-1 bg-transparent border-0 focus:ring-0 text-slate-800 placeholder:text-slate-400 resize-none py-2.5 max-h-32 text-sm leading-relaxed"></textarea>
+                            <textarea id="msg-input" rows="1" placeholder="Votre message..." class="flex-1 bg-transparent border-0 focus:ring-0 text-slate-800 placeholder:text-slate-400 resize-none py-2.5 max-h-32 text-sm leading-relaxed overflow-hidden"></textarea>
                             
                             <button type="submit" class="w-10 h-10 flex-shrink-0 bg-brand-600 text-white rounded-full flex items-center justify-center hover:bg-brand-700 active:scale-95 transition shadow-md shadow-brand-500/20">
                                 <i data-lucide="send-horizontal" class="w-5 h-5 ml-0.5"></i>
@@ -185,6 +185,7 @@ export async function initChat(params = {}) {
 
     return () => {
         if (state.subscription) state.subscription.unsubscribe();
+        if (state.globalTicketSub) state.globalTicketSub.unsubscribe();
         document.querySelector('.context-menu')?.remove();
     };
 }
@@ -339,17 +340,42 @@ async function openTicket(id) {
     const { data: msgs } = await ChatService.getMessages(id);
     renderMessages(msgs || []);
 
-    // 6. Realtime
+
+    // 6. Realtime (Active Chat)
     state.subscription = ChatService.subscribe(id, (payload) => {
         if (payload.event === 'typing') {
-            handleTypingEvent(payload); // Fictif : à adapter selon format réel
+            handleTypingEvent(payload);
         } else {
-            // Message update
             handleRealtimeMessage(payload);
         }
     });
-}
 
+    // 7. Realtime (Global Tickets Update)
+    // Subscribe to tickets table to refresh sidebar order/unread status
+    // independent of the active chat.
+    const ticketSub = supabase.channel('tickets-list-global')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'tickets' },
+            () => {
+                // On any ticket change (new message updates last_message_at), reload the list
+                loadTickets().then(() => {
+                    // If we are on a ticket, ensure we keep it marked as read if needed
+                    if (state.activeTicketId) {
+                        // logic handled in openTicket or handleRealtimeMessage
+                    }
+                });
+            }
+        )
+        .subscribe();
+
+    // Store it to unsubscribe later? 
+    // Ideally we should have a global subscription manager. 
+    // For now, we attach it to state to clean up on exit, 
+    // but typically initChat is called once or heavily managed.
+    // Let's add it to a tracking array if needed or just let it be for this view session.
+    state.globalTicketSub = ticketSub;
+}
 
 async function handleRealtimeMessage(payload) {
     // 1. If currently viewing this ticket, refresh messages & mark as read
@@ -358,34 +384,11 @@ async function handleRealtimeMessage(payload) {
         const { data } = await ChatService.getMessages(state.activeTicketId);
         renderMessages(data || []);
 
-        // Mark as read again (since a new message just arrived)
+        // Mark as read again
         ChatService.markAsRead(state.activeTicketId);
 
-        // Update the item in the sidebar (tickets list)
-        const ticketIndex = state.tickets.findIndex(t => String(t.id) === String(state.activeTicketId));
-        if (ticketIndex !== -1 && payload.eventType === 'INSERT') {
-            const newMsg = payload.new;
-            // Optimistic update of sidebar
-            state.tickets[ticketIndex].last_message = newMsg.deleted_at ? "🚫 Message supprimé" : newMsg.content;
-            state.tickets[ticketIndex].last_message_date = newMsg.created_at;
-            state.tickets[ticketIndex].is_unread = false; // We are reading it right now
-
-            // Re-sort tickets: move this one to top
-            const updatedTicket = state.tickets.splice(ticketIndex, 1)[0];
-            state.tickets.unshift(updatedTicket);
-
-            renderTicketList();
-        } else {
-            // If not simple insert (e.g. update), just reload list to be safe or update specific fields
-            loadTickets();
-        }
-    } else {
-        // If we are NOT on the ticket (e.g. global listener - though currently we only sub to active),
-        // we would update the list here. 
-        // NOTE: Current implementation only subscribes to ONE ticket (active). 
-        // To have "Unread" badges for other tickets appear while idling, 
-        // we would need a global subscription to 'messages' table filtered by user's tickets.
-        // For now, we stick to updating the active one.
+        // Note: Sidebar update is now handled by the 'tickets' subscription above,
+        // which triggers loadTickets(). 
     }
 }
 

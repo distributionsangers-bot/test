@@ -93,9 +93,9 @@ async function init() {
                 if (window.location.pathname !== '/rejected') router.navigateTo('/rejected');
                 else router.handleLocation();
             } else {
-                // Redirection depuis Login/Register si connecté
+                // Redirection depuis Login/Register/Pending/Rejected si connecté et validé
                 const currentPath = window.location.pathname;
-                if (['/login', '/register', '/'].includes(currentPath)) {
+                if (['/login', '/register', '/', '/pending', '/rejected'].includes(currentPath)) {
                     const dest = '/dashboard';
                     window.history.pushState({}, '', dest);
                 }

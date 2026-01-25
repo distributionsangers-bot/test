@@ -55,8 +55,11 @@ export function renderLogin() {
                                 <i data-lucide="lock" class="w-5 h-5"></i>
                             </div>
                             <input id="login-password" type="password" autocomplete="current-password" required 
-                                class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" 
+                                class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" 
                                 placeholder="••••••••">
+                            <button type="button" id="toggle-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
                         </div>
                     </div>
                     
@@ -88,6 +91,26 @@ export function initLogin() {
     const forgotBtn = document.getElementById('btn-forgot-password');
     if (forgotBtn) {
         forgotBtn.addEventListener('click', handleForgotPassword);
+    }
+
+    // 3. Password Toggle
+    const toggleBtn = document.getElementById('toggle-password');
+    const passInput = document.getElementById('login-password');
+    if (toggleBtn && passInput) {
+        toggleBtn.addEventListener('click', () => {
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+
+            // Update Icon
+            const icon = toggleBtn.querySelector('svg') || toggleBtn.querySelector('i'); // Lucide replaces with svg, check both
+            if (icon) {
+                // Re-render icon logic or simple attribute switch if Lucide supports it
+                // Since Lucide replaces the node, we might need to recreate it. 
+                // Easier: Just change innerHTML because 'eye-off' is a different icon
+                toggleBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
+                createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
+            }
+        });
     }
 }
 

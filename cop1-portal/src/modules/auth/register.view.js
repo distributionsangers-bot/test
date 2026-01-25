@@ -64,9 +64,12 @@ export function renderRegister() {
 
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
-                        <div class="relative">
+                        <div class="relative group">
                             <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                            <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                            <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-10 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                            <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
                         </div>
                     </div>
                     
@@ -135,6 +138,20 @@ export function initRegister() {
     const def = document.getElementById('upload-default');
     const suc = document.getElementById('upload-success');
     const nameDisplay = document.getElementById('file-name-display');
+
+    // 0. Password Toggle
+    const toggleBtn = document.getElementById('toggle-reg-password');
+    const passInput = document.getElementById('reg-pass');
+    if (toggleBtn && passInput) {
+        toggleBtn.addEventListener('click', () => {
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+
+            // Update Icon
+            toggleBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
+            createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
+        });
+    }
 
     // 1. Gestion du clic sur la zone d'upload
     if (uploadZone && fileInput) {

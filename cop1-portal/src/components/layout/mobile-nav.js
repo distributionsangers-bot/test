@@ -353,9 +353,14 @@ async function handleLogout() {
             await supabase.auth.signOut();
             store.state.user = null;
             store.state.profile = null;
+            // On garde le mode admin en mémoire ou non ? Le main.js ne l'enlève pas.
+            // Par sécurité, on peut le laisser ou l'enlever.
             localStorage.removeItem('cop1_admin_mode');
+
             showToast('Déconnexion réussie');
-            window.location.href = '/';
+
+            // Force reload vers login pour purger l'état
+            window.location.href = '/login';
         } catch (error) {
             console.error('Logout error:', error);
             showToast('Erreur déconnexion', 'error');

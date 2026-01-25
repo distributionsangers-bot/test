@@ -230,14 +230,16 @@ export function updateActiveNavLink(path) {
 /**
  * Initialise les événements de la sidebar
  */
-const btnLogout = document.querySelector('aside [data-action="logout"]');
-if (btnLogout) {
-    btnLogout.addEventListener('click', handleLogout);
-}
+export function initSidebar() {
+    const btnLogout = document.querySelector('aside [data-action="logout"]');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', handleLogout);
+    }
 
-const btnToggle = document.querySelector('aside [data-action="toggle-admin"]');
-if (btnToggle) {
-    btnToggle.addEventListener('click', handleToggleAdmin);
+    const btnToggle = document.querySelector('aside [data-action="toggle-admin"]');
+    if (btnToggle) {
+        btnToggle.addEventListener('click', handleToggleAdmin);
+    }
 }
 
 /**

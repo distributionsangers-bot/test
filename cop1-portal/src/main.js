@@ -228,8 +228,8 @@ function attachGlobalListeners() {
     // Navigation Updates Listener
     window.addEventListener('route-changed', (e) => {
         const path = e.detail.path;
-        updateActiveNavLink(path); // Update Desktop Sidebar
-        updateActiveMobileNav(path); // Update Mobile Bottom Bar
+        try { updateActiveNavLink(path); } catch (err) { console.error('Sidebar update error:', err); }
+        try { updateActiveMobileNav(path); } catch (err) { console.error('Mobile nav update error:', err); }
     });
 }
 

@@ -162,13 +162,17 @@ export function renderSidebar(profile, currentView, adminMode) {
  * Vérifie si un item de navigation est actif
  */
 function isItemActive(itemPath, currentView) {
-    const normalizedItem = itemPath.startsWith('/') ? itemPath : `/${itemPath}`;
-    const normalizedView = currentView.startsWith('/') ? currentView : `/${currentView}`;
+    // 1. Nettoyage basique (retrait des slashs début/fin pour comparaison neutre)
+    const p1 = itemPath.replace(/^\/|\/$/g, '');
+    const p2 = currentView.replace(/^\/|\/$/g, '');
 
-    if (normalizedItem === normalizedView) return true;
+    // 2. Correspondance exacte
+    if (p1 === p2) return true;
 
-    const viewRoot = `/${normalizedView.split('/')[1]}`;
-    return normalizedItem === viewRoot;
+    // 3. Correspondance parent/enfant (ex: messages/1 est enfant de messages)
+    if (p2.startsWith(p1 + '/')) return true;
+
+    return false;
 }
 
 /**

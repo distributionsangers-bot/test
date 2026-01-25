@@ -38,19 +38,15 @@ export function renderMobileNav(profile, currentView, adminMode) {
     const isEffectiveAdmin = isProfileAdmin && adminMode;
     const navItems = isEffectiveAdmin ? MOBILE_NAV_ITEMS.admin : MOBILE_NAV_ITEMS.volunteer;
 
-    // Normalize view for initial render
-    const normalizedView = currentView.startsWith('/') ? currentView.substring(1) : currentView;
-
     const navHtml = navItems.map(item => {
+        // Special Case: Menu
         if (item.id === 'MENU') {
-            const isMenuPageActive = MENU_PAGES.includes(normalizedView) || normalizedView === 'profile';
+            const isMenuPageActive = isPageInMenu(currentView);
             return renderNavItem(item, isMenuPageActive, true);
         }
 
-        const normalizedItemId = item.id.startsWith('/') ? item.id.substring(1) : item.id;
-        // Check if active (exact match or subpath)
-        const isActive = normalizedView === normalizedItemId || normalizedView.startsWith(normalizedItemId + '/');
-
+        // Standard Links
+        const isActive = isItemActive(item.id, currentView);
         return renderNavItem(item, isActive, false);
     }).join('');
 
@@ -69,6 +65,26 @@ export function renderMobileNav(profile, currentView, adminMode) {
 }
 
 /**
+ * Helper: Strict Path Matching Logic
+ */
+function isItemActive(itemPath, currentView) {
+    const p1 = itemPath.replace(/^\/|\/$/g, '');
+    const p2 = currentView.replace(/^\/|\/$/g, '');
+    if (p1 === p2) return true;
+    if (p2.startsWith(p1 + '/')) return true;
+    return false;
+}
+
+/**
+ * Helper: Check if current view belongs to Menu
+ */
+function isPageInMenu(currentView) {
+    // Also clean view for comparison
+    const viewName = currentView.replace(/^\/|\/$/g, '');
+    return MENU_PAGES.includes(viewName) || MENU_PAGES.some(p => viewName.startsWith(p + '/'));
+}
+
+/**
  * Helper to render a single nav item
  */
 function renderNavItem(item, isActive, isMenu) {
@@ -81,7 +97,7 @@ function renderNavItem(item, isActive, isMenu) {
             aria-current="${isActive ? 'page' : 'false'}"
             class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isActive ? 'text-brand-600' : 'text-slate-400'}"
         >
-            <!-- Animated Pill Indicator (Always present, toggled via classes) -->
+            <!-- Animated Pill Indicator -->
             <div class="active-pill absolute top-0 w-10 h-1 bg-brand-600 rounded-full transition-all duration-300 ease-out origin-center ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}"></div>
             
             <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50' : 'bg-transparent'}">
@@ -102,24 +118,15 @@ export function updateActiveNavLink(path) {
     const nav = document.getElementById('mobile-nav');
     if (!nav) return;
 
-    const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
     const allButtons = nav.querySelectorAll('.nav-item');
 
     allButtons.forEach(btn => {
-        // Determine if this button should be active
         let isActive = false;
 
-        // Check for specific link
         if (btn.hasAttribute('data-link')) {
-            const linkPath = btn.dataset.link; // e.g. "/events"
-            const linkNormalized = linkPath.startsWith('/') ? linkPath.substring(1) : linkPath;
-
-            // Logic: exact match or subpath (e.g. events/123 -> events)
-            isActive = normalizedPath === linkNormalized || normalizedPath.startsWith(linkNormalized + '/');
-        }
-        // Check for Menu button
-        else if (btn.dataset.action === 'open-mobile-menu') {
-            isActive = MENU_PAGES.includes(normalizedPath) || normalizedPath === 'profile';
+            isActive = isItemActive(btn.dataset.link, path);
+        } else if (btn.dataset.action === 'open-mobile-menu') {
+            isActive = isPageInMenu(path);
         }
 
         // Apply visual updates

@@ -373,9 +373,13 @@ function setupEventListeners(container) {
     document.getElementById('chat-input-form')?.addEventListener('submit', handleSendMessage);
     const createForm = document.getElementById('form-create-ticket');
     // Important: Re-bind this if modal was re-created
-    // But modal is global, handled below.
+    // But modal is global, handled below via delegation or static bind? 
+    // Wait, modal is recreated, so listeners on form need re-binding OR delegation.
+    // Delegating submit:
     document.addEventListener('submit', (e) => {
-        if (e.target.id === 'form-create-ticket') handleCreateTicket(e);
+        if (e.target.id === 'form-create-ticket') {
+            handleCreateTicket(e);
+        }
     });
 
     // Emoji Picker Toggles
@@ -679,58 +683,25 @@ function renderEmptyListState(container) {
 }
 
 // Reuse helper for Modal
-async function appendNewTicketModal(isAdmin) {
-    let volunteersHtml = '';
-    if (isAdmin) {
-        try {
-            const res = await ChatService.getAllVolunteers();
-            const volunteers = res.data || [];
-
-            if (volunteers && volunteers.length > 0) {
-                volunteersHtml = `
-                <div id="volunteer-selector-wrapper" class="hidden animate-fade-in">
-                    <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Destinataire</label>
-                    <div class="relative group">
-                        <i data-lucide="search" class="absolute left-3 top-3.5 w-4 h-4 text-slate-400 group-focus-within:text-brand-500 transition"></i>
-                        <input type="text" id="volunteer-search" placeholder="Rechercher un bénévole..." 
-                            class="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl text-sm font-semibold border border-slate-200 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition">
-                    </div>
-                     <div id="volunteers-dropdown" class="mt-2 max-h-48 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl hidden custom-scrollbar">
-                        ${volunteers.map(v => `
-                            <button type="button" class="volunteer-option w-full text-left px-4 py-3 hover:bg-brand-50 transition flex items-center gap-3 border-b border-slate-50 last:border-0" data-id="${v.id}" data-name="${v.first_name || ''} ${v.last_name || ''}">
-                                <div class="w-8 h-8 bg-gradient-to-br from-brand-100 to-indigo-100 text-brand-600 rounded-full flex items-center justify-center text-xs font-black shadow-sm flex-shrink-0">
-                                    ${(v.first_name || '?')[0].toUpperCase()}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="text-sm font-bold text-slate-700 truncate">${v.first_name || ''} ${v.last_name || ''}</div>
-                                    <div class="text-[10px] text-slate-400 truncate">${v.email}</div>
-                                </div>
-                            </button>
-                        `).join('')}
-                    </div>
-                    <input type="hidden" name="target_user_id" id="input-target-user">
-                    <div id="selected-volunteer" class="hidden mt-3 p-3 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                             <div class="w-2 h-2 rounded-full bg-brand-500"></div>
-                             <span class="text-sm font-bold text-brand-700" id="selected-volunteer-name"></span>
-                        </div>
-                        <button type="button" id="btn-clear-volunteer" class="w-6 h-6 rounded-full hover:bg-brand-100 text-brand-500 flex items-center justify-center transition">
-                            <i data-lucide="x" class="w-3 h-3"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            }
-        } catch (e) {
-            console.error("Error loading volunteers:", e);
-        }
-    }
-
+function appendNewTicketModal(isAdmin) {
+    // 1. Remove existing
     document.getElementById('create-ticket-modal')?.remove();
 
+    // 2. Create Modal Structure Synchronously
     const modal = document.createElement('div');
     modal.id = 'create-ticket-modal';
     modal.className = 'fixed inset-0 bg-slate-900/60 z-[100] flex items-end md:items-center justify-center backdrop-blur-sm hidden animate-fade-in';
+
+    // Skeleton or Default Content for Admin
+    const volunteerSection = isAdmin ? `
+        <div id="volunteer-loading" class="p-4 flex items-center justify-center text-slate-400 gap-2 bg-slate-50 rounded-xl mb-4">
+            <div class="w-4 h-4 border-2 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
+            <span class="text-xs font-bold">Chargement des bénévoles...</span>
+        </div>
+        <div id="volunteer-selector-wrapper" class="hidden animate-fade-in">
+            <!-- Filled Async -->
+        </div>
+    ` : '';
 
     modal.innerHTML = `
         <div class="bg-white w-full md:max-w-lg md:rounded-3xl rounded-t-3xl p-6 pb-8 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
@@ -746,13 +717,13 @@ async function appendNewTicketModal(isAdmin) {
             
             <form id="form-create-ticket" class="space-y-5">
                 ${isAdmin ? `
-                <div class="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-xl">
+                <div class="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-xl mb-2">
                     <button type="button" data-type="support" class="btn-type-select py-2.5 text-xs font-bold rounded-lg bg-white text-slate-800 shadow-sm ring-1 ring-black/5 transition">💬 Support</button>
                     <button type="button" data-type="direct" class="btn-type-select py-2.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition">👤 Direct</button>
                     <button type="button" data-type="announcement" class="btn-type-select py-2.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition">📢 Annonce</button>
                     <input type="hidden" name="type" id="input-ticket-type" value="support">
                 </div>
-                ${volunteersHtml}
+                ${volunteerSection}
                 ` : '<input type="hidden" name="type" value="support">'}
 
                 <div class="space-y-1">
@@ -776,9 +747,69 @@ async function appendNewTicketModal(isAdmin) {
             </form>
         </div>
     `;
+
+    // 3. Append to DOM Immediately
     document.body.appendChild(modal);
     createIcons({ icons, root: modal });
-    if (isAdmin) setupVolunteerSearch(modal);
+
+    // 4. Load Volunteers ASYNC (if admin)
+    if (isAdmin) {
+        loadVolunteersIntoModal(modal);
+    }
+}
+
+async function loadVolunteersIntoModal(modal) {
+    try {
+        const res = await ChatService.getAllVolunteers();
+        const volunteers = res.data || [];
+
+        // Remove Loader
+        modal.querySelector('#volunteer-loading')?.remove();
+
+        const wrapper = modal.querySelector('#volunteer-selector-wrapper');
+        if (!wrapper) return;
+
+        if (volunteers.length > 0) {
+            wrapper.innerHTML = `
+                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Destinataire</label>
+                <div class="relative group">
+                    <i data-lucide="search" class="absolute left-3 top-3.5 w-4 h-4 text-slate-400 group-focus-within:text-brand-500 transition"></i>
+                    <input type="text" id="volunteer-search" placeholder="Rechercher un bénévole..." 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl text-sm font-semibold border border-slate-200 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition">
+                </div>
+                    <div id="volunteers-dropdown" class="mt-2 max-h-48 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl hidden custom-scrollbar">
+                    ${volunteers.map(v => `
+                        <button type="button" class="volunteer-option w-full text-left px-4 py-3 hover:bg-brand-50 transition flex items-center gap-3 border-b border-slate-50 last:border-0" data-id="${v.id}" data-name="${v.first_name || ''} ${v.last_name || ''}">
+                            <div class="w-8 h-8 bg-gradient-to-br from-brand-100 to-indigo-100 text-brand-600 rounded-full flex items-center justify-center text-xs font-black shadow-sm flex-shrink-0">
+                                ${(v.first_name || '?')[0].toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm font-bold text-slate-700 truncate">${v.first_name || ''} ${v.last_name || ''}</div>
+                                <div class="text-[10px] text-slate-400 truncate">${v.email}</div>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+                <input type="hidden" name="target_user_id" id="input-target-user">
+                <div id="selected-volunteer" class="hidden mt-3 p-3 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-brand-500"></div>
+                            <span class="text-sm font-bold text-brand-700" id="selected-volunteer-name"></span>
+                    </div>
+                    <button type="button" id="btn-clear-volunteer" class="w-6 h-6 rounded-full hover:bg-brand-100 text-brand-500 flex items-center justify-center transition">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            `;
+            // Init Logic
+            createIcons({ icons, root: wrapper });
+            setupVolunteerSearch(modal); // Re-bind events to new elements
+        }
+    } catch (e) {
+        console.error("Volunteers load error:", e);
+        const loading = modal.querySelector('#volunteer-loading');
+        if (loading) loading.innerHTML = `<span class="text-red-400 text-xs">Erreur chargement liste</span>`;
+    }
 }
 
 function setupVolunteerSearch(modal) {

@@ -164,15 +164,10 @@ export function updateActiveNavLink(path) {
             }
 
             // Update Icon
+            // (Stroke manipulation removed for stability)
             const icon = iconContainer.querySelector('svg') || iconContainer.querySelector('i');
             if (icon) {
-                if (isActive) {
-                    icon.classList.remove('stroke-2');
-                    icon.classList.add('stroke-[2.5px]');
-                } else {
-                    icon.classList.remove('stroke-[2.5px]');
-                    icon.classList.add('stroke-2');
-                }
+                // Optional: Add other stable manipulations if needed
             }
         }
     });

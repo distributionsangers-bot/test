@@ -96,7 +96,7 @@ async function init() {
                 // Redirection depuis Login/Register si connecté
                 const currentPath = window.location.pathname;
                 if (['/login', '/register', '/'].includes(currentPath)) {
-                    const dest = store.state.adminMode ? '/dashboard' : '/events';
+                    const dest = '/dashboard';
                     window.history.pushState({}, '', dest);
                 }
                 renderAppLayout();
@@ -202,7 +202,7 @@ function attachGlobalListeners() {
             localStorage.setItem('cop1_admin_mode', store.state.adminMode);
 
             // Redirection selon mode
-            const dest = store.state.adminMode ? '/dashboard' : '/events';
+            const dest = '/dashboard';
             store.state.view = dest.replace('/', '');
 
             router.navigateTo(dest);

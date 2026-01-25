@@ -24,7 +24,7 @@ let state = {
 export function renderChat(container, params = {}) {
     // 1. Static Layout (Premium Glassmorphism)
     return `
-        <div id="chat-view" class="relative w-full h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden md:p-6 gap-6">
+        <div id="chat-view" class="relative w-full h-[calc(100dvh-160px)] md:h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden md:p-6 gap-6">
             
             <!-- BLUR BACKDROP (Desktop) -->
             <div class="absolute inset-0 pointer-events-none hidden md:block">

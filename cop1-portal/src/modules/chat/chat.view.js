@@ -21,17 +21,10 @@ let state = {
 // 🚀 PUBLIC API
 // =============================================================================
 
-export async function initChat() {
-    state = { tickets: [], activeTicketId: null, subscription: null, loading: false };
-    // Cleanup leftovers if any
-    document.getElementById('create-ticket-modal')?.remove();
-    document.getElementById('chat-options-dropdown')?.remove();
-}
-
-export async function renderChat(container, params = {}) {
+export function renderChat(container, params = {}) {
     // 1. Static Layout (Premium Glassmorphism)
-    container.innerHTML = `
-        <div class="relative w-full h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden md:p-6 gap-6">
+    return `
+        <div id="chat-view" class="relative w-full h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden md:p-6 gap-6">
             
             <!-- BLUR BACKDROP (Desktop) -->
             <div class="absolute inset-0 pointer-events-none hidden md:block">
@@ -129,9 +122,21 @@ export async function renderChat(container, params = {}) {
                 </div>
             </div>
         </div>
+        </div>
     `;
+}
 
-    createIcons({ icons, root: container });
+export async function initChat(params = {}) {
+    state = { tickets: [], activeTicketId: null, subscription: null, loading: false };
+    // Cleanup leftovers if any
+    document.getElementById('create-ticket-modal')?.remove();
+    document.getElementById('chat-options-dropdown')?.remove();
+
+    const container = document.getElementById('chat-view');
+    if (!container) {
+        console.warn("Chat container not found");
+        return;
+    }
 
     // 2. Logic Bindings
     bindEvents(container);
@@ -139,6 +144,13 @@ export async function renderChat(container, params = {}) {
     // 3. Load Data
     await loadTickets();
     if (params.id) openTicket(params.id);
+
+    return () => {
+        // Cleanup function
+        if (state.subscription) {
+            state.subscription.unsubscribe();
+        }
+    };
 }
 
 // =============================================================================

@@ -175,7 +175,7 @@ function renderTicketList() {
     }
 
     list.innerHTML = state.tickets.map(t => {
-        const isActive = t.id === state.activeTicketId;
+        const isActive = String(t.id) === String(state.activeTicketId);
         const isClosed = t.status === 'closed';
         const isAnnouncement = t.category === 'announcement';
 
@@ -212,7 +212,7 @@ async function openTicket(id) {
     state.activeTicketId = id;
 
     // Switch View Steps
-    const ticket = state.tickets.find(t => t.id === id);
+    const ticket = state.tickets.find(t => String(t.id) === String(id));
     if (!ticket) return;
 
     // 1. Mobile & Desktop Transition

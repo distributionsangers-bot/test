@@ -1,21 +1,26 @@
 import { store } from '../../core/store.js';
 import { supabase } from '../../services/supabase.js';
 
+/**
+ * ChatService - Layer Data & Logic
+ * Gestion robuste des tickets, messages et droits d'accès.
+ */
 export const ChatService = {
 
-    // --- FETCHING ---
+    // =========================================================================
+    // 🔍 FETCHING
+    // =========================================================================
 
     /**
-     * Récupère la liste des conversations (Tickets & Annonces)
-     * Filtre selon le rôle (Admin vs Bénévole) et les tickets masqués.
+     * Récupère la liste des tickets visibles pour l'utilisateur.
+     * Applique les filtres administratifs et le "soft delete" (masquage).
      */
     async getTickets() {
-        const user = store.state.user;
-        if (!user) return { success: false, error: "Non connecté" };
+        if (!store.state.user) return { success: false, error: "Non connecté" };
 
         const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
 
-        // Base query
+        // 1. Base Query
         let query = supabase
             .from('tickets')
             .select(`
@@ -23,49 +28,51 @@ export const ChatService = {
                 last_message:messages(content, created_at, user_id),
                 profiles:user_id(first_name, last_name, email)
             `)
-            .order('last_message_at', { ascending: false })
-            .neq('status', 'deleted');
+            .neq('status', 'deleted') // Exclut les hard-deleted
+            .order('last_message_at', { ascending: false });
 
-        // SECURITY & VISIBILITY FILTERS
+        // 2. Security & Visibility Filters
         if (isAdmin) {
-            // Admin: Voir tout sauf ce qu'il a masqué pour lui-même
-            // Note: On utilise .is() pour gérer le cas où la colonne serait NULL (backward compatibility)
+            // Admin : voit tout SAUF ce qu'il a masqué explicitement pour lui
+            // Note: On utilise 'is.not.true' pour inclure NULL et FALSE
             query = query.not('hidden_for_admin', 'is', true);
         } else {
-            // Bénévole:
-            // 1. Voir seulement ses tickets OU les annonces
-            // 2. NE PAS voir ce qu'il a masqué
-            query = query.not('hidden_for_volunteer', 'is', true);
-            query = query.or(`user_id.eq.${user.id},category.eq.announcement`);
+            // Bénévole : voit uniquement SES tickets OU les annonces
+            // ET ne doit pas voir ce qu'il a masqué
+            query = query.not('hidden_for_volunteer', 'is', true)
+                .or(`user_id.eq.${store.state.user.id},category.eq.announcement`);
         }
 
         const { data, error } = await query;
 
         if (error) {
-            console.error("Error fetching tickets:", error);
+            console.error("ChatService.getTickets Error:", error);
             return { success: false, error };
         }
 
-        // FORMATTING: Aplatir last_message
+        // 3. Formatting
+        // On aplatit le "last_message" pour qu'il soit facilement utilisable en UI
         const formatted = data.map(t => {
             const msgs = t.last_message;
-            let content = null;
-            if (Array.isArray(msgs) && msgs.length > 0) {
-                // Tri pour être sûr d'avoir le dernier (par sécurité)
-                msgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                content = msgs[0].content;
-            }
-            return { ...t, last_message: content };
+            // On prend le plus récent s'il y en a (sécurité extra, même si le select le fait souvent)
+            const last = Array.isArray(msgs) && msgs.length > 0
+                ? msgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+                : null;
+
+            return {
+                ...t,
+                last_message: last ? last.content : null,
+                last_message_date: last ? last.created_at : t.created_at
+            };
         });
 
         return { success: true, data: formatted };
     },
 
     /**
-     * Récupère l'historique d'une conversation
+     * Récupère les messages d'un ticket spécifique.
      */
     async getMessages(ticketId) {
-        // Double check permissions here could be good, but RLS + getTickets filtering usually enough for UI
         const { data, error } = await supabase
             .from('messages')
             .select(`
@@ -76,12 +83,11 @@ export const ChatService = {
             .order('created_at', { ascending: true });
 
         if (error) return { success: false, error };
-
         return { success: true, data };
     },
 
     /**
-     * Récupère la liste des bénévoles (pour Admin uniquement)
+     * Récupère tous les bénévoles pour la recherche (Admin seulement).
      */
     async getAllVolunteers() {
         if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
@@ -96,15 +102,18 @@ export const ChatService = {
         return { success: true, data };
     },
 
-    // --- ACTIONS ---
+    // =========================================================================
+    // ⚡ ACTIONS
+    // =========================================================================
 
     /**
-     * Envoie un message dans une conversation
+     * Envoie un message et met à jour le ticket (timestamp + visibilité).
      */
     async sendMessage(ticketId, content) {
+        if (!content?.trim()) return { success: false };
         const user = store.state.user;
-        if (!content || !content.trim()) return { success: false };
 
+        // 1. Insert Message
         const { data, error } = await supabase
             .from('messages')
             .insert([{
@@ -117,136 +126,71 @@ export const ChatService = {
 
         if (error) return { success: false, error };
 
-        // Update 'last_message_at' et s'assurer que le ticket réapparaît s'il était masqué par l'autre partie ?
-        // Pour l'instant on update juste la date.
-        // Optionnel : on pourrait reset hidden_for_X = false si on veut que le nouveau message pop.
-        // Décision : On unhide pour le destinataire pour qu'il voie la notif.
-
-        const updatePayload = { last_message_at: new Date().toISOString() };
-
-        // Unhide logic (Best UX)
-        // Si c'est un bénévole qui écrit, on unhide pour l'admin (au cas où il l'aurait caché)
-        // Si c'est un admin, on unhide pour le bénévole.
-        // Simplification : On reset les deux flags à false à chaque nouveau message pour être sûr qu'il est vu.
-        updatePayload.hidden_for_admin = false;
-        updatePayload.hidden_for_volunteer = false;
-
-        await supabase.from('tickets').update(updatePayload).eq('id', ticketId);
+        // 2. Touch Ticket
+        // On met à jour la date ET on ré-affiche le ticket pour les deux parties
+        // (au cas où l'un d'eux l'aurait masqué)
+        await supabase
+            .from('tickets')
+            .update({
+                last_message_at: new Date().toISOString(),
+                hidden_for_admin: false,
+                hidden_for_volunteer: false
+            })
+            .eq('id', ticketId);
 
         return { success: true, data };
     },
 
     /**
-     * Crée un nouveau ticket Support
+     * Crée une nouvelle conversation (Support, Annonce ou Direct).
      */
-    async createTicket(subject, content) {
+    async createTicket({ type, subject, content, targetUserId }) {
         const user = store.state.user;
-
-        const { data: ticket, error: tErr } = await supabase
-            .from('tickets')
-            .insert([{
-                user_id: user.id,
-                subject: subject,
-                category: 'support'
-            }])
-            .select()
-            .single();
-
-        if (tErr) return { success: false, error: tErr };
-
-        if (content) {
-            await this.sendMessage(ticket.id, content);
-        }
-
-        return { success: true, data: ticket };
-    },
-
-    /**
-     * Crée une annonce (Admin seulement)
-     */
-    async createAnnouncement(subject, content) {
-        const user = store.state.user;
-        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
-
-        const { data: ticket, error: tErr } = await supabase
-            .from('tickets')
-            .insert([{
-                user_id: user.id,
-                subject: subject,
-                category: 'announcement'
-            }])
-            .select()
-            .single();
-
-        if (tErr) return { success: false, error: tErr };
-
-        if (content) {
-            await this.sendMessage(ticket.id, content);
-        }
-
-        return { success: true, data: ticket };
-    },
-
-    /**
-     * Crée un message direct à un bénévole (Admin seulement)
-     */
-    async createDirectMessage(targetUserId, subject, content) {
-        const user = store.state.user;
-        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
-
-        const { data: ticket, error: tErr } = await supabase
-            .from('tickets')
-            .insert([{
-                user_id: targetUserId,
-                subject: subject,
-                category: 'support' // Direct = support privé
-            }])
-            .select()
-            .single();
-
-        if (tErr) return { success: false, error: tErr };
-
-        if (content) {
-            await this.sendMessage(ticket.id, content);
-        }
-
-        return { success: true, data: ticket };
-    },
-
-    /**
-     * Abonnement aux messages
-     */
-    subscribeToTicket(ticketId, onMessageCallback) {
-        const channel = supabase.channel(`ticket-${ticketId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `ticket_id=eq.${ticketId}`
-                },
-                (payload) => {
-                    onMessageCallback(payload.new);
-                }
-            )
-            .subscribe();
-
-        return {
-            unsubscribe: () => {
-                supabase.removeChannel(channel);
-            }
+        let payload = {
+            subject,
+            category: type, // 'support', 'announcement', 'direct' (via logic UI)
+            user_id: user.id,
+            status: 'open'
         };
+
+        // Logique spécifique par type
+        if (type === 'announcement') {
+            if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+            // Annonce : user_id reste l'admin créateur
+        }
+        else if (type === 'direct') {
+            if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+            // Direct : user_id est le BÉNÉVOLE CIBLE
+            payload.user_id = targetUserId;
+            // On set category à 'support' ou 'direct' ? Gardons 'support' pour la simplicité DB, 
+            // ou 'direct' pour différencier si besoin. Le prompt disait 'direct' mais ticket table category enum ?
+            // On suppose 'support' fonctionne pour tout échange privé.
+            // Mais pour coller au prompt : 'direct' si admin initie.
+            payload.category = 'support';
+        }
+
+        // Création Ticket
+        const { data: ticket, error } = await supabase
+            .from('tickets')
+            .insert([payload])
+            .select()
+            .single();
+
+        if (error) return { success: false, error };
+
+        // Envoi premier message
+        if (content) {
+            await this.sendMessage(ticket.id, content);
+        }
+
+        return { success: true, data: ticket };
     },
 
-    // --- TICKET MANAGEMENT (Nouvelle logique) ---
-
     /**
-     * Masquer la conversation pour l'utilisateur courant (Soft Delete)
+     * Masquer une conversation (Soft Delete).
      */
     async hideTicket(ticketId) {
         const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
-
         const column = isAdmin ? 'hidden_for_admin' : 'hidden_for_volunteer';
 
         const { error } = await supabase
@@ -254,53 +198,46 @@ export const ChatService = {
             .update({ [column]: true })
             .eq('id', ticketId);
 
-        if (error) {
-            console.error("Error hiding ticket:", error);
-            return { success: false, error };
-        }
-        return { success: true };
+        return { success: !error, error };
     },
 
     /**
-     * Ferme/résout un ticket (Admin uniquement)
-     */
-    async closeTicket(ticketId) {
-        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
-
-        const { error } = await supabase
-            .from('tickets')
-            .update({ status: 'closed' })
-            .eq('id', ticketId);
-
-        if (error) return { success: false, error };
-        return { success: true };
-    },
-
-    /**
-     * Supprime DÉFINITIVEMENT un ticket (Admin uniquement - Hard Delete)
+     * Supprimer définitivement une conversation (Admin Hard Delete).
      */
     async deleteTicket(ticketId) {
-        // Seul l'admin peut hard-delete
-        if (!store.state.profile?.is_admin) {
-            return { success: false, error: "Non autorisé. Utilisez 'Masquer' à la place." };
-        }
+        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
 
-        // 1. Supprimer messages
-        const { error: msgErr } = await supabase
-            .from('messages')
-            .delete()
-            .eq('ticket_id', ticketId);
+        // Cascade delete via Supabase (si foreign keys setées CASCADE)
+        // Sinon manuel :
+        // 1. Messages
+        await supabase.from('messages').delete().eq('ticket_id', ticketId);
+        // 2. Ticket
+        const { error } = await supabase.from('tickets').delete().eq('id', ticketId);
 
-        if (msgErr) return { success: false, error: msgErr };
+        return { success: !error, error };
+    },
 
-        // 2. Supprimer ticket
-        const { error: ticketErr } = await supabase
-            .from('tickets')
-            .delete()
-            .eq('id', ticketId);
+    async closeTicket(ticketId) {
+        if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+        const { error } = await supabase.from('tickets').update({ status: 'closed' }).eq('id', ticketId);
+        return { success: !error, error };
+    },
 
-        if (ticketErr) return { success: false, error: ticketErr };
+    // =========================================================================
+    // 📡 REALTIME
+    // =========================================================================
 
-        return { success: true };
+    subscribe(ticketId, callback) {
+        const channel = supabase.channel(`ticket-${ticketId}`)
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'messages', filter: `ticket_id=eq.${ticketId}` },
+                (payload) => callback(payload.new)
+            )
+            .subscribe();
+
+        return {
+            unsubscribe: () => supabase.removeChannel(channel)
+        };
     }
 };

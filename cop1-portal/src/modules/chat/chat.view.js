@@ -357,16 +357,24 @@ function bindEvents(container) {
         showOptionsModal();
     });
 
-    // 8. TICKET LIST DELEGATION (Global for robustness)
-    // We attach to body/document to ensure we catch it even if DOM was replaced weirdly
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.ticket-btn');
-        if (btn) {
-            e.preventDefault();
-            const id = btn.dataset.ticketId;
-            openTicket(id);
-        }
-    });
+    // 8. TICKET LIST DELEGATION (Scoped for correctness)
+    const ticketList = container.querySelector('#ticket-list');
+    if (ticketList) {
+        ticketList.addEventListener('click', (e) => {
+            const btn = e.target.closest('.ticket-btn');
+
+            if (btn) {
+                e.preventDefault();
+                const id = btn.dataset.ticketId;
+
+                if (id) {
+                    openTicket(id);
+                } else {
+                    console.error("ID de ticket manquant sur le bouton");
+                }
+            }
+        });
+    }
 }
 
 

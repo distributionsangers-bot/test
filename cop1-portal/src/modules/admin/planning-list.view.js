@@ -380,7 +380,7 @@ function renderShiftItem(s, eventId) {
                 <button data-action="view-participants" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition" title="Inscrits">
                     <i data-lucide="users" class="w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none"></i>
                 </button>
-                <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition hidden sm:block" title="QR">
+                <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition" title="QR">
                     <i data-lucide="qr-code" class="w-4 h-4 pointer-events-none"></i>
                 </button>
             </div>

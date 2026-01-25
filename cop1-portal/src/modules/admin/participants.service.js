@@ -95,15 +95,11 @@ export const ParticipantsService = {
      */
     async updateAttendance(regId, isPresent) {
         try {
-            const { data, error } = await supabase
-                .from('registrations')
-                .update({
-                    attended: isPresent,
-                    checked_in_at: isPresent ? new Date().toISOString() : null
-                })
-                .eq('id', regId)
-                .select()
-                .single();
+            // Use RPC to handle hours calculation atomically
+            const { data, error } = await supabase.rpc('toggle_attendance', {
+                p_reg_id: regId,
+                p_is_present: isPresent
+            });
 
             if (error) throw error;
 

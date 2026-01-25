@@ -37,41 +37,42 @@ export async function renderChat(container, params = {}) {
             <div id="chat-list-panel" class="absolute md:relative inset-0 z-20 w-full h-full flex flex-col bg-slate-50 md:bg-white/80 md:backdrop-blur-xl md:bg-transparent md:border-r border-white/40 transition-transform duration-300 ${params.id ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}">
                 
                 <!-- Header (Immersive Gradient like Missions) -->
-                <div class="px-6 py-6 pt-safe flex justify-between items-center bg-gradient-to-br from-brand-600 to-brand-400 shadow-lg shadow-brand-500/20 md:rounded-tl-2xl flex-shrink-0">
+                <div class="px-5 py-5 pt-safe flex justify-between items-center bg-gradient-to-br from-brand-600 to-brand-500 shadow-lg shadow-brand-500/20 md:rounded-tl-2xl flex-shrink-0 z-10">
                     <div>
                         <h1 class="font-extrabold text-2xl text-white tracking-tight flex items-center gap-2">
                             <i data-lucide="message-circle" class="w-6 h-6 text-brand-100"></i>
                             Messages
                         </h1>
-                        <p class="text-xs font-medium text-brand-100 uppercase tracking-widest mt-1 opacity-90">Vos échanges</p>
+                        <p class="text-xs font-medium text-brand-100 uppercase tracking-widest mt-0.5 opacity-90">Vos échanges</p>
                     </div>
-                    <button id="btn-new-ticket" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 flex items-center justify-center hover:bg-white/30 transition active:scale-95 shadow-inner">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    <button id="btn-new-ticket" class="w-10 h-10 rounded-full bg-white text-brand-600 border border-white/50 flex items-center justify-center hover:bg-brand-50 transition active:scale-95 shadow-lg">
+                        <i data-lucide="plus" class="w-5 h-5 font-bold"></i>
                     </button>
                 </div>
 
                 <!-- Tickets List -->
-                <div id="tickets-container" class="flex-1 overflow-y-auto no-scrollbar pt-2 pb-20 md:pb-3 space-y-2 px-2 bg-slate-50/50">
+                <div id="tickets-container" class="flex-1 overflow-y-auto no-scrollbar py-2 space-y-1 px-2 bg-slate-50/50">
                     ${renderSkeletonList()}
                 </div>
             </div>
 
             <!-- CONVERSATION PANEL -->
-            <div id="chat-conversation-panel" class="absolute md:relative inset-0 z-30 w-full h-full flex flex-col bg-slate-50/80 backdrop-blur-md transition-transform duration-300 ${params.id ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}">
+            <div id="chat-conversation-panel" class="absolute md:relative inset-0 z-30 w-full h-full flex flex-col bg-white transition-transform duration-300 ${params.id ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}">
                 
                 <!-- Empty State (Desktop only) -->
-                <div id="chat-empty-state" class="hidden md:flex absolute inset-0 flex-col items-center justify-center text-center p-8 z-0">
+                <div id="chat-empty-state" class="hidden md:flex absolute inset-0 flex-col items-center justify-center text-center p-8 z-0 bg-white">
                     <div class="w-24 h-24 bg-gradient-to-br from-slate-100 to-white rounded-3xl shadow-xl flex items-center justify-center mb-6 rotate-3">
                         <i data-lucide="message-square" class="w-10 h-10 text-slate-300"></i>
                     </div>
                     <h2 class="text-xl font-bold text-slate-800 mb-2">Sélectionnez une conversation</h2>
+                    <p class="text-slate-400 text-sm">Choisissez un échange dans la liste à gauche</p>
                 </div>
 
                 <!-- Active Conversation -->
-                <div id="active-conversation-wrapper" class="flex flex-col h-full w-full relative z-10 ${!params.id ? 'hidden md:flex opacity-0 pointer-events-none' : ''}">
+                <div id="active-conversation-wrapper" class="flex flex-col h-full w-full relative z-10 bg-white ${!params.id ? 'hidden' : ''}">
                     
                     <!-- Header -->
-                    <div id="chat-header" class="px-4 py-3 pt-safe bg-white/90 backdrop-blur-md border-b border-slate-200/60 shadow-sm flex items-center justify-between flex-shrink-0 z-20">
+                    <div id="chat-header" class="px-4 py-3 pt-safe bg-white/95 backdrop-blur-md border-b border-slate-200/60 shadow-sm flex items-center justify-between flex-shrink-0 z-20">
                         <div class="flex items-center gap-3 overflow-hidden">
                             <button id="btn-back-list" class="md:hidden w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-full transition active:scale-95 -ml-2">
                                 <i data-lucide="chevron-left" class="w-6 h-6"></i>
@@ -86,22 +87,22 @@ export async function renderChat(container, params = {}) {
                             <button id="btn-chat-options" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
                                 <i data-lucide="more-vertical" class="w-5 h-5"></i>
                             </button>
-                            <div id="chat-options-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 hidden transform origin-top-right transition-all">
+                            <div id="chat-options-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 hidden transform origin-top-right transition-all z-50">
                                 <div id="ticket-actions-container"></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Messages Area -->
-                    <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 overscroll-contain space-y-4 scroll-smooth">
+                    <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 overscroll-contain space-y-4 scroll-smooth bg-slate-50">
                         <!-- Loading / Messages -->
                     </div>
 
                     <!-- Input Area (Anchored Solid Bar) -->
-                    <form id="chat-input-form" class="flex-shrink-0 bg-white border-t border-slate-200 px-3 py-2 z-30">
+                    <form id="chat-input-form" class="flex-shrink-0 bg-white border-t border-slate-200 px-3 py-3 z-30">
                         <div class="flex items-end gap-2 max-w-4xl mx-auto">
                             <!-- Emoji Button -->
-                            <button type="button" id="btn-emoji" class="w-10 h-10 text-slate-400 hover:text-amber-500 rounded-full flex items-center justify-center transition flex-shrink-0">
+                            <button type="button" id="btn-emoji" class="w-10 h-10 text-slate-400 hover:text-amber-500 rounded-full flex items-center justify-center transition flex-shrink-0 hover:bg-slate-50">
                                 <i data-lucide="smile" class="w-6 h-6"></i>
                             </button>
 
@@ -294,44 +295,53 @@ function renderTicketItem(t) {
     const isActive = currentTicketId === t.id;
     const isClosed = t.status === 'closed';
 
-    const lastMsg = t.messages?.[0] || {};
     // Fallback if data structure slightly different, handled in service normally
-    const preview = t.last_message ? escapeHtml(t.last_message).slice(0, 45) + (t.last_message.length > 45 ? '...' : '') : 'Nouvelle conversation';
-
+    const preview = t.last_message ? escapeHtml(t.last_message).slice(0, 35) + (t.last_message.length > 35 ? '...' : '') : 'Nouvelle conversation';
     const timeAgo = formatTimeAgo(t.updated_at || t.created_at);
 
     // Avatar Logic
-    let avatarIcon = 'message-circle';
-    let avatarClass = 'from-brand-400 to-brand-600 text-white';
+    let avatarHtml = '';
 
     if (isAnnouncement) {
-        avatarIcon = 'megaphone';
-        avatarClass = 'from-amber-400 to-amber-600 text-white';
-    } else if (isClosed) {
-        avatarClass = 'from-slate-200 to-slate-300 text-slate-500';
+        avatarHtml = `
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                <i data-lucide="megaphone" class="w-5 h-5"></i>
+            </div>
+        `;
+    } else {
+        // Initials Logic
+        let initials = '?';
+        if (t.profiles) {
+            const first = t.profiles.first_name?.[0] || '';
+            const last = t.profiles.last_name?.[0] || '';
+            initials = (first + last).toUpperCase() || '?';
+        }
+
+        avatarHtml = `
+            <div class="w-10 h-10 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm shadow-sm border border-brand-200">
+                ${initials}
+            </div>
+        `;
     }
 
     return `
-        <button class="ticket-item w-full group relative flex items-center gap-3 p-3 rounded-2xl text-left transition-all duration-200 ${isActive ? 'bg-white shadow-md border-transparent ring-2 ring-brand-500/10' : 'hover:bg-white/60 hover:shadow-sm border border-transparent'}" data-ticket-id="${t.id}">
+        <button class="ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 ${isActive ? 'bg-white shadow-md ring-1 ring-black/5' : 'hover:bg-white/50 hover:shadow-sm border border-transparent'}" data-ticket-id="${t.id}">
             
-            <!-- Avatar -->
-            <div class="w-12 h-12 bg-gradient-to-br ${avatarClass} rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/5 transform group-hover:scale-105 transition-transform duration-300">
-                <i data-lucide="${avatarIcon}" class="w-5 h-5"></i>
-            </div>
+            ${avatarHtml}
             
             <!-- Content -->
             <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="font-bold text-sm text-slate-800 truncate ${isActive ? 'text-brand-900' : ''}">${escapeHtml(t.subject)}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 flex-shrink-0 bg-white/50 px-1.5 py-0.5 rounded-md">${timeAgo}</span>
+                <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-[13px] text-slate-800 truncate ${isActive ? 'text-brand-700' : ''}">${escapeHtml(t.subject)}</span>
+                    <span class="text-[10px] font-semibold text-slate-400 flex-shrink-0">${timeAgo}</span>
                 </div>
-                <div class="flex items-center justify-between gap-2 mt-0.5">
+                <div class="flex items-center justify-between gap-2">
                     <span class="text-xs text-slate-500 truncate font-medium group-hover:text-slate-600 transition-colors">${preview}</span>
-                    ${isClosed ? '<div class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" title="Résolu"></div>' : ''}
+                    ${isClosed ? '<div class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Résolu"></div>' : ''}
                 </div>
             </div>
             
-            ${isActive ? '<div class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-500 rounded-l-full"></div>' : ''}
+            ${isActive ? '<div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-brand-500 rounded-r-full"></div>' : ''}
         </button>
     `;
 }
@@ -545,12 +555,12 @@ async function openTicket(id) {
     document.querySelectorAll('.ticket-item').forEach(el => {
         const isActive = el.dataset.ticketId === id;
         if (isActive) {
-            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-3 rounded-2xl text-left transition-all duration-200 bg-white shadow-md border-transparent ring-2 ring-brand-500/10';
+            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 bg-white shadow-md ring-1 ring-black/5';
             if (!el.querySelector('.absolute')) {
-                el.insertAdjacentHTML('beforeend', '<div class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-500 rounded-l-full"></div>');
+                el.insertAdjacentHTML('beforeend', '<div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-brand-500 rounded-r-full"></div>');
             }
         } else {
-            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-3 rounded-2xl text-left transition-all duration-200 hover:bg-white/60 hover:shadow-sm border border-transparent';
+            el.className = 'ticket-item w-full group relative flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200 hover:bg-white/50 hover:shadow-sm border border-transparent';
             el.querySelector('.absolute')?.remove();
         }
     });
@@ -811,6 +821,10 @@ function handleDeleteTicket(id) {
         else {
             showToast("Supprimé");
 
+            // Optimistic UI Update: Remove immediately
+            const item = document.querySelector(`.ticket-item[data-ticket-id="${id}"]`);
+            item?.remove();
+
             // Reset UI
             if (window.innerWidth < 768) {
                 document.getElementById('chat-list-panel').classList.remove('-translate-x-full');
@@ -821,7 +835,8 @@ function handleDeleteTicket(id) {
             }
 
             currentTicketId = null;
-            await loadTicketsList();
+            // Background refresh
+            loadTicketsList();
         }
     }, { type: 'danger', confirmText: 'Supprimer' });
 }

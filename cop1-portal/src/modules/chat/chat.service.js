@@ -17,7 +17,8 @@ export const ChatService = {
             .from('tickets')
             .select(`
                 *,
-                last_message:messages(content, created_at, user_id)
+                last_message:messages(content, created_at, user_id),
+                profiles:user_id(first_name, last_name, email)
             `)
             .order('last_message_at', { ascending: false });
 

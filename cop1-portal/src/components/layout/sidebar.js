@@ -13,7 +13,7 @@
 
 import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
-import { store } from '../../core/store.js';
+import { store, storeActions } from '../../core/store.js';
 import { showConfirm, showToast } from '../../services/utils.js';
 
 /**
@@ -230,11 +230,14 @@ export function updateActiveNavLink(path) {
 /**
  * Initialise les événements de la sidebar
  */
-export function initSidebar() {
-    const btnLogout = document.querySelector('aside [data-action="logout"]');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', handleLogout);
-    }
+const btnLogout = document.querySelector('aside [data-action="logout"]');
+if (btnLogout) {
+    btnLogout.addEventListener('click', handleLogout);
+}
+
+const btnToggle = document.querySelector('aside [data-action="toggle-admin"]');
+if (btnToggle) {
+    btnToggle.addEventListener('click', handleToggleAdmin);
 }
 
 /**
@@ -256,11 +259,24 @@ async function handleLogout() {
 }
 
 /**
+ * Gère le basculement Admin/Bénévole
+ */
+function handleToggleAdmin() {
+    storeActions.toggleAdminMode();
+    // On recharge pour appliquer les changements partout (Simple & Robuste)
+    window.location.reload();
+}
+
+/**
  * Cleanup
  */
 export function cleanupSidebar() {
     const btnLogout = document.querySelector('aside [data-action="logout"]');
     if (btnLogout) {
         btnLogout.removeEventListener('click', handleLogout);
+    }
+    const btnToggle = document.querySelector('aside [data-action="toggle-admin"]');
+    if (btnToggle) {
+        btnToggle.removeEventListener('click', handleToggleAdmin);
     }
 }

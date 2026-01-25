@@ -17,7 +17,8 @@ export async function renderEvents() {
             .select(`
                 *,
                 events!inner ( id, title, date, location, is_visible, publish_at ),
-                registrations ( user_id )
+                registrations ( user_id ),
+                bookings:registrations(count)
             `)
             .gte('events.date', new Date().toISOString().split('T')[0])
             .order('start_time', { ascending: true });
@@ -223,7 +224,8 @@ function renderEventGroup(group, userId) {
 function renderShiftCard(shift, userId) {
     const isRegistered = shift.registrations.some(r => r.user_id === userId);
     const total = shift.max_slots || 0;
-    const taken = shift.registrations.length;
+    // Prefer Supabase count aggregation if available, fallback to length (e.g. if RLS allows reading rows)
+    const taken = shift.bookings?.[0]?.count ?? shift.registrations.length;
     const remaining = total - taken;
     const isFull = remaining <= 0;
     const isAlmostFull = remaining <= 2 && remaining > 0;

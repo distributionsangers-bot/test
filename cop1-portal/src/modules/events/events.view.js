@@ -245,7 +245,8 @@ function renderShiftCard(shift, userId, countsMap) {
 
     // Check Reserved Availability
     const reservedRemaining = Math.max(0, reservedTotal - reservedTaken);
-    const isReserveFull = reservedTotal > 0 && reservedRemaining <= 0;
+    // If reservedTotal is 0, remaining is 0, so it IS full (effectively 0 slots available for students)
+    const isReserveFull = reservedRemaining <= 0;
 
     // Status badge
     let statusBadge = '';

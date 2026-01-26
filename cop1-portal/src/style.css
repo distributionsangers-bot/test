@@ -348,3 +348,19 @@ input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
     box-shadow: inset 0 0 20px 20px #f8fafc;
 }
+
+@keyframes slide-up-subtle {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up-subtle {
+    animation: slide-up-subtle 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

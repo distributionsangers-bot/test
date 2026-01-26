@@ -307,8 +307,8 @@ async function renderAdminDashboard(container) {
                             <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold border border-amber-500/30">🛡️ Administrateur</span>
                         </div>
                     </div>
-                    <button id="btn-announcement" class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center hover:bg-purple-500/30 transition border border-purple-500/30">
-                        <i data-lucide="megaphone" class="w-5 h-5"></i>
+                    <button data-link="/profile" class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition border border-white/30">
+                        <i data-lucide="user" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
@@ -390,35 +390,6 @@ async function renderAdminDashboard(container) {
                     </div>
                 </div>
             </div>
-
-            <!-- Announcement Modal -->
-            ${renderAnnouncementModal()}
-        </div>
-    `;
-}
-
-function renderAnnouncementModal() {
-    return `
-        <div id="announcement-modal" class="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in hidden">
-            <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up border-t-4 border-purple-500">
-                <h3 class="font-extrabold text-lg mb-4 text-purple-900 flex items-center gap-2">
-                    <i data-lucide="megaphone" class="w-5 h-5"></i>
-                    Faire une annonce
-                </h3>
-                <p class="text-xs text-slate-500 mb-4">Ce message sera visible par TOUS les bénévoles.</p>
-                <form id="form-create-announcement" class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Titre</label>
-                        <input name="subject" required class="w-full p-3 bg-purple-50 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Message</label>
-                        <textarea name="content" rows="4" required class="w-full p-3 bg-purple-50 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg hover:bg-purple-700 transition">Publier l'annonce</button>
-                    <button type="button" id="btn-close-announcement" class="w-full py-3 text-slate-400 font-bold text-sm hover:bg-slate-50 rounded-xl">Annuler</button>
-                </form>
-            </div>
         </div>
     `;
 }
@@ -427,29 +398,6 @@ async function attachAdminListeners(container) {
     // Create Event
     container.querySelector('#btn-create-event')?.addEventListener('click', () => {
         import('../admin/planning-form.view.js').then(({ openEventModal }) => openEventModal());
-    });
-
-    // Announcement Modal
-    const modal = container.querySelector('#announcement-modal');
-    container.querySelector('#btn-announcement')?.addEventListener('click', () => modal?.classList.remove('hidden'));
-    modal?.querySelector('#btn-close-announcement')?.addEventListener('click', () => modal?.classList.add('hidden'));
-
-    modal?.querySelector('form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        toggleLoader(true);
-
-        const { ChatService } = await import('../chat/chat.service.js');
-        const res = await ChatService.createAnnouncement(fd.get('subject'), fd.get('content'));
-
-        toggleLoader(false);
-        if (res.success) {
-            showToast('Annonce publiée !');
-            modal.classList.add('hidden');
-            e.target.reset();
-        } else {
-            showToast(res.error?.message || "Erreur publication", "error");
-        }
     });
 }
 

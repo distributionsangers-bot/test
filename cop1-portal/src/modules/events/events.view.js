@@ -74,7 +74,9 @@ export async function renderEvents() {
         }
 
         // Render events HTML
+        // Render events HTML
         const eventsHtml = Object.values(eventGroups)
+            .sort((a, b) => new Date(a.event.date) - new Date(b.event.date))
             .filter(group => {
                 if (currentFilter === 'mine') {
                     return group.shifts.some(s => s.registrations.some(r => r.user_id === userId));
@@ -123,11 +125,11 @@ export async function renderEvents() {
 
                 <!-- FILTERS -->
                 <div class="flex gap-2 mb-6">
-                    <button data-filter="all" class="filter-btn ${currentFilter === 'all' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition">
-                        📅 Toutes <span class="opacity-60">(${totalMissions})</span>
+                    <button data-filter="all" class="filter-btn ${currentFilter === 'all' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition min-h-[44px] flex items-center justify-center">
+                        📅 Toutes <span class="opacity-60 ml-1">(${totalMissions})</span>
                     </button>
-                    <button data-filter="mine" class="filter-btn ${currentFilter === 'mine' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition">
-                        ✓ Mes inscriptions <span class="opacity-60">(${myMissionsCount})</span>
+                    <button data-filter="mine" class="filter-btn ${currentFilter === 'mine' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition min-h-[44px] flex items-center justify-center">
+                        ✓ Mes inscriptions <span class="opacity-60 ml-1">(${myMissionsCount})</span>
                     </button>
                 </div>
 
@@ -307,7 +309,7 @@ function renderShiftCard(shift, userId, countsMap) {
             : isFull
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
-        }"
+        } min-h-[44px] flex items-center justify-center"
             >
                 ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
             </button>

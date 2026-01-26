@@ -364,3 +364,52 @@ input:-webkit-autofill:active {
 .animate-slide-up-subtle {
     animation: slide-up-subtle 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* =========================================
+   PREMIUM MODAL ANIMATIONS
+   ========================================= */
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes scale-out {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-scale-in {
+    animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-out {
+    animation: scale-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+    animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

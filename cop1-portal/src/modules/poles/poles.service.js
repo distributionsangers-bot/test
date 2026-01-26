@@ -1,75 +1,203 @@
 import { supabase } from '../../services/supabase.js';
 
 export const PolesService = {
+    /**
+     * Récupère tous les pôles
+     */
     async getAllTeams() {
-        const { data, error } = await supabase.from('teams').select('*').order('name');
-        if (error) throw error;
+        const { data, error } = await supabase
+            .from('teams')
+            .select('*')
+            .order('name');
+
+        if (error) {
+            console.error(error);
+            return [];
+        }
         return data;
     },
 
+    /**
+     * Récupère les responsables (ceux qui ont un pole_id défini)
+     */
     async getLeaders() {
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role_title, pole_id')
-            .not('pole_id', 'is', null)
-            .not('role_title', 'is', null);
+            .select('id, first_name, last_name, pole_id, role_title, photo_url')
+            .not('pole_id', 'is', null);
 
-        if (error) throw error;
+        if (error) {
+            console.error(error);
+            return [];
+        }
         return data;
     },
 
+    /**
+     * Récupère les intérêts de l'utilisateur courant (IDs des pôles)
+     */
     async getMyInterests(userId) {
+        if (!userId) return [];
         const { data, error } = await supabase
             .from('pole_interests')
             .select('team_id')
             .eq('user_id', userId);
 
-        if (error) throw error;
-        return data ? data.map(i => i.team_id) : [];
+        if (error) return [];
+        return data.map(i => i.team_id);
     },
 
-    async toggleInterest(userId, teamId, isCurrentlyInterested) {
-        if (isCurrentlyInterested) {
+    /**
+     * Signale ou retire l'intérêt pour un pôle
+     */
+    async toggleInterest(userId, teamId, isInterested) {
+        if (isInterested) {
+            // Remove
             const { error } = await supabase
                 .from('pole_interests')
                 .delete()
                 .eq('user_id', userId)
                 .eq('team_id', teamId);
             if (error) throw error;
-            return false; // New state: Not interested
         } else {
+            // Add
             const { error } = await supabase
                 .from('pole_interests')
                 .insert([{ user_id: userId, team_id: teamId }]);
             if (error) throw error;
-            return true; // New state: Interested
         }
     },
 
-    async createTeam(teamData) {
-        const { data, error } = await supabase.from('teams').insert([teamData]).select().single();
+    /**
+     * Supprime complètement un intérêt (Action Admin)
+     */
+    async removeCandidateInterest(userId, teamId) {
+        const { error } = await supabase
+            .from('pole_interests')
+            .delete()
+            .eq('user_id', userId)
+            .eq('team_id', teamId);
         if (error) throw error;
-        return data;
     },
 
-    async updateTeam(id, teamData) {
-        const { error } = await supabase.from('teams').update(teamData).eq('id', id);
+    /**
+     * Crée un nouveau pôle
+     */
+    async createTeam(poleData) {
+        const { error } = await supabase
+            .from('teams')
+            .insert([poleData]);
         if (error) throw error;
     },
 
+    /**
+     * Met à jour un pôle
+     */
+    async updateTeam(id, poleData) {
+        const { error } = await supabase
+            .from('teams')
+            .update(poleData)
+            .eq('id', id);
+        if (error) throw error;
+    },
+
+    /**
+     * Supprime un pôle
+     */
     async deleteTeam(id) {
-        const { error } = await supabase.from('teams').delete().eq('id', id);
+        // Nettoyage préalable des liens
+        await supabase.from('pole_interests').delete().eq('team_id', id);
+        // Les profiles.pole_id seront mis à NULL automatiquement si ON DELETE SET NULL, 
+        // sinon on doit le faire manuellement :
+        await supabase.from('profiles').update({ pole_id: null, role_title: null }).eq('pole_id', id);
+
+        const { error } = await supabase
+            .from('teams')
+            .delete()
+            .eq('id', id);
         if (error) throw error;
     },
 
+    /**
+     * Récupère les candidats intéressés par un pôle
+     */
     async getCandidates(teamId) {
         const { data, error } = await supabase
             .from('pole_interests')
-            .select('created_at, profiles(id, first_name, last_name, phone, email, status)')
+            .select('created_at, user_id, profiles!inner(*)')
             .eq('team_id', teamId)
             .order('created_at', { ascending: false });
 
+        if (error) {
+            console.error(error);
+            return [];
+        }
+        return data; // returns array of { created_at, profiles: {...} }
+    },
+
+    /**
+     * Assigne un utilisateur comme responsable d'un pôle
+     */
+    async assignLeader(userId, poleId, roleTitle = 'Responsable') {
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                pole_id: poleId,
+                role_title: roleTitle
+            })
+            .eq('id', userId);
         if (error) throw error;
+    },
+
+    /**
+     * Retire un responsable de son pôle
+     */
+    async removeLeader(userId) {
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                pole_id: null,
+                role_title: null // ou garder le titre ? Généralement on retire tout.
+            })
+            .eq('id', userId);
+        if (error) throw error;
+    },
+
+    /**
+     * Met à jour le titre du poste d'un responsable
+     */
+    async updateLeaderTitle(userId, newTitle) {
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                role_title: newTitle
+            })
+            .eq('id', userId);
+        if (error) throw error;
+    },
+
+    /**
+     * Recherche de bénévoles pour assignation (Autocomplétion)
+     */
+    async searchVolunteers(query) {
+        if (!query || query.length < 2) return [];
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, email, photo_url')
+            .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+            .limit(10);
+
+        if (error) {
+            console.error(error);
+            return [];
+        }
         return data;
-    }
+    },
+
+    /**
+     * Récupère ou créée une conversation avec un utilisateur (pour le contacter)
+     * Utilise ChatService.createTicket si nécessaire, mais ici on retourne juste l'info
+     * On peut déléguer ça au ChatService directement depuis la vue.
+     */
 };

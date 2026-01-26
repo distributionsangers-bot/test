@@ -27,7 +27,7 @@ export const PlanningService = {
 
             let query = supabase
                 .from('events')
-                .select('*, shifts(*, registrations(count))')
+                .select('*, shifts(*)') // OPTIMIZATION: Removed registrations(count) to rely on shifts.total_registrations
                 .order('date', { ascending: filter === 'upcoming' });
 
             if (filter === 'upcoming') {
@@ -37,8 +37,15 @@ export const PlanningService = {
             }
 
             const { data, error } = await query;
-
             if (error) throw error;
+
+            if (data) {
+                data.forEach(event => {
+                    if (event.shifts) {
+                        event.shifts.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+                    }
+                });
+            }
 
             return { data, error: null };
         } catch (error) {
@@ -293,6 +300,24 @@ export const PlanningService = {
         } catch (error) {
             console.error('❌ Erreur suppression template:', error);
             return { success: false, error };
+        }
+    },
+
+    async updateTemplate(id, templateData) {
+        try {
+            const { data, error } = await supabase
+                .from('event_templates')
+                .update(templateData)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            return { data, error: null };
+        } catch (error) {
+            console.error('❌ Erreur mise à jour template:', error);
+            return { data: null, error };
         }
     },
 

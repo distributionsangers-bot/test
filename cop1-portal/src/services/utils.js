@@ -44,7 +44,7 @@ export function showToast(msg, type = 'success') {
 
     el.innerHTML = `
         <i data-lucide="${s.icon}" class="w-6 h-6 ${s.iconColor} flex-shrink-0"></i>
-        <span class="font-bold text-sm">${msg}</span>
+        <span class="font-bold text-sm">${escapeHtml(msg)}</span>
     `;
 
     container.appendChild(el);
@@ -124,7 +124,7 @@ export function showConfirm(message, onConfirm, options = {}) {
     el.innerHTML = `
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-slate-100">
             <h3 class="text-xl font-bold text-slate-800 mb-2">${title}</h3>
-            <p class="text-slate-600 mb-6">${message}</p>
+            <p class="text-slate-600 mb-6 whitespace-pre-line">${escapeHtml(message)}</p>
             <div class="flex justify-end gap-3">
                 <button id="confirm-cancel-btn" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium transition-colors">
                     ${cancelText}
@@ -189,7 +189,7 @@ export function showPrompt(message, onConfirm, options = {}) {
     el.innerHTML = `
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-slate-100">
             <h3 class="text-xl font-bold text-slate-800 mb-2">${title}</h3>
-            <p class="text-slate-600 mb-4">${message}</p>
+            <p class="text-slate-600 mb-4">${escapeHtml(message)}</p>
             <input type="${inputType}" id="prompt-input" value="${escapeHtml(defaultValue)}" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none mb-6 transition-all" placeholder="${placeholder}">
             <div class="flex justify-end gap-3">
                 <button id="prompt-cancel-btn" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium transition-colors">

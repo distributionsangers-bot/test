@@ -2,7 +2,8 @@ import { PlanningService } from './planning.service.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { supabase } from '../../services/supabase.js';
 import { createIcons, icons } from 'lucide';
-import { openEventModal } from './planning-form.view.js';
+import { openEventModal } from './event-modal.view.js';
+import { openTemplateModal } from './templates-modal.view.js';
 import { openParticipantsModal } from './participants.view.js';
 import { QRDisplayView } from './qr-display.view.js';
 
@@ -28,16 +29,16 @@ export function renderPlanningList() {
                     </div>
                     
                     <!-- Stats -->
-                    <div id="planning-stats" class="flex gap-3">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20">
+                    <div id="planning-stats" class="flex flex-wrap gap-3">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
                             <div id="stat-events" class="text-xl font-black text-white">-</div>
                             <div class="text-[9px] font-bold text-white/60 uppercase">Événements</div>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
                             <div id="stat-urgent" class="text-xl font-black text-amber-300">-</div>
                             <div class="text-[9px] font-bold text-white/60 uppercase">À pourvoir</div>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
                             <div id="stat-fill" class="text-xl font-black text-emerald-300">-</div>
                             <div class="text-[9px] font-bold text-white/60 uppercase">Rempli</div>
                         </div>
@@ -125,7 +126,17 @@ export async function initPlanningList() {
     });
 
     // Create button
-    document.getElementById('btn-create-event')?.addEventListener('click', () => openEventModal(), { signal });
+    document.getElementById('btn-create-event')?.addEventListener('click', () => {
+        if (currentTab === 'templates') {
+            openTemplateModal();
+        } else {
+            openEventModal();
+        }
+    }, { signal });
+
+    // Listen for template saves
+    window.addEventListener('templateSaved', () => loadEvents(), { signal });
+    window.addEventListener('eventSaved', () => loadEvents(), { signal });
 
     // Search
     let searchTimeout;
@@ -393,7 +404,8 @@ function updateStats(data) {
         if (e.shifts) {
             e.shifts.forEach(s => {
                 totalShifts++;
-                const taken = s.registrations?.[0]?.count || 0;
+                // FIX N+1: Use pre-calculated
+                const taken = (s.total_registrations !== undefined) ? s.total_registrations : (s.registrations?.[0]?.count || 0);
                 const max = s.max_slots || 0;
                 totalSlots += max;
                 filledSlots += taken;
@@ -435,7 +447,8 @@ function renderEventCard(e) {
     let filledSlots = 0;
     (e.shifts || []).forEach(s => {
         totalSlots += s.max_slots || 0;
-        filledSlots += s.registrations?.[0]?.count || 0;
+        // FIX N+1: Use pre-calculated column if available, else fallback
+        filledSlots += (s.total_registrations !== undefined) ? s.total_registrations : (s.registrations?.[0]?.count || 0);
     });
     const fillRate = totalSlots > 0 ? Math.round((filledSlots / totalSlots) * 100) : 0;
     const fillColor = fillRate >= 80 ? 'emerald' : fillRate >= 50 ? 'amber' : 'red';
@@ -512,7 +525,8 @@ function renderEventCard(e) {
 
 function renderShiftItem(s, eventId) {
     const total = s.max_slots || 0;
-    const taken = s.registrations?.[0]?.count || 0;
+    // FIX N+1: Prioritize pre-calculated column
+    const taken = (s.total_registrations !== undefined) ? s.total_registrations : (s.registrations?.[0]?.count || 0);
     const available = Math.max(0, total - taken);
     const percent = total > 0 ? (taken / total) * 100 : 0;
     const isFull = taken >= total;
@@ -595,8 +609,11 @@ function renderTemplateCard(t) {
             </div>
             
             <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                <button data-action="use-template" data-id="${t.id}" class="px-4 py-2 bg-brand-50 text-brand-600 text-sm font-bold rounded-xl hover:bg-brand-100 transition">
+                <button data-action="use-template" data-id="${t.id}" class="px-3 py-2 bg-brand-50 text-brand-600 text-sm font-bold rounded-xl hover:bg-brand-100 transition">
                     Utiliser
+                </button>
+                <button data-action="edit-template" data-id="${t.id}" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition" title="Modifier">
+                    <i data-lucide="pencil" class="w-5 h-5 pointer-events-none"></i>
                 </button>
                 <button data-action="delete-template" data-id="${t.id}" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition" title="Supprimer">
                     <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
@@ -648,6 +665,11 @@ async function handleListClick(e) {
             if (res.error) showToast("Erreur suppression", "error");
             else { showToast("Modèle supprimé"); loadEvents(); }
         }, { type: 'danger' });
+
+    } else if (action === 'edit-template') {
+        const { data: tmpls } = await PlanningService.getTemplates();
+        const template = tmpls?.find(t => t.id == id);
+        if (template) openTemplateModal(template);
 
     } else if (action === 'edit-event') {
         toggleLoader(true);

@@ -88,8 +88,8 @@ export const EventsService = {
                 return { success: true, action: 'unregister', error: null };
             } else {
                 // REGISTER (Secure RPC)
+                // Force update: ensuring singular argument
                 const { error } = await supabase.rpc('register_to_shift', {
-                    p_user_id: userId,
                     p_shift_id: shiftId
                 });
 

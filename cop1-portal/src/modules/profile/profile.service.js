@@ -1,32 +1,38 @@
 import { supabase } from '../../services/supabase.js';
 import { APP_CONFIG } from '../../core/constants.js';
+import { DirectoryService } from '../admin/directory.service.js';
 
 export const ProfileService = {
     /**
      * Fetches Profile AND History for a given User ID
-     * Joins with Shifts and Events to get full details
+     * Shows ALL registrations (attended or not) with calculated hours for attended ones
      */
     async getProfileAndHistory(userId) {
         try {
             // 1. Fetch Profile
-            const profilePromise = supabase
+            const profileRes = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single();
 
-            // 2. Fetch History (Registrations -> Shift -> Event)
-            const historyPromise = supabase
+            if (profileRes.error) throw profileRes.error;
+
+            // 2. Fetch ALL History (registrations with shift & event details)
+            // This includes all registrations, whether attended or not
+            const historyRes = await supabase
                 .from('registrations')
                 .select(`
-                    *,
-                    shifts (
+                    id,
+                    created_at,
+                    attended,
+                    counts_for_hours,
+                    hours_counted,
+                    shift:shifts (
                         id,
-                        title,
                         start_time,
                         end_time,
-                        hours_value,
-                        events (
+                        event:events (
                             id,
                             title,
                             date,
@@ -37,14 +43,42 @@ export const ProfileService = {
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false });
 
-            const [profileRes, historyRes] = await Promise.all([profilePromise, historyPromise]);
-
-            if (profileRes.error) throw profileRes.error;
             if (historyRes.error) throw historyRes.error;
 
+            // 3. Fetch history with proper hour calculation for total
+            const { data: attendedHistory, totalHours } = await DirectoryService.getUserHistory(userId);
+
+            // 4. Transform all registrations to include calculated hours where applicable
+            const history = (historyRes.data || []).map(reg => {
+                const shift = reg.shift;
+                const event = shift?.event;
+                if (!shift || !event) return null;
+
+                // Use the DB calculated hours (source of truth)
+                // If null (old records not yet backfilled), defaults to 0
+                const hoursVal = reg.hours_counted !== null ? Number(reg.hours_counted) : 0;
+
+                return {
+                    id: reg.id,
+                    eventName: event.title,
+                    date: event.date,
+                    location: event.location,
+                    startTime: shift.start_time.slice(0, 5),
+                    endTime: shift.end_time.slice(0, 5),
+                    hours: parseFloat(hoursVal.toFixed(2)),
+                    attended: reg.attended,
+                    validated: reg.counts_for_hours
+                };
+            }).filter(item => item !== null);
+
+            // 5. Enhance profile with calculated total hours
+            const profile = { ...profileRes.data };
+            profile.calculated_total_hours = totalHours;
+
             return {
-                profile: profileRes.data,
-                history: historyRes.data || []
+                profile,
+                history,
+                totalHours
             };
 
         } catch (error) {

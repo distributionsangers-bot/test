@@ -461,61 +461,111 @@ async function viewUserDetails(uid) {
                 ${isAdmin ? `<span class="inline-block mt-3 px-3 py-1 bg-white/20 rounded-full text-xs font-bold">🛡️ Administrateur</span>` : ''}
             </div>
 
-            <!-- Stats -->
-            <div class="grid grid-cols-3 gap-3 p-6 bg-slate-50 border-b border-slate-100">
-                <div class="text-center">
-                    <div class="text-2xl font-black text-emerald-600">${hours}h</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Heures</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-2xl font-black text-slate-700">${hasPermit ? '✓' : '—'}</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Permis</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-2xl font-black text-slate-700">${isMandatory ? '🎓' : '💚'}</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Type</div>
-                </div>
+            <!-- TABS -->
+            <div class="flex border-b border-slate-100 bg-white sticky top-0 z-10">
+                <button id="tab-info" class="flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition hover:bg-slate-50">
+                    Informations
+                </button>
+                <button id="tab-history" class="flex-1 py-4 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600 hover:bg-slate-50 transition">
+                    Historique
+                </button>
             </div>
 
-            <!-- Details -->
-            <div class="p-6 space-y-4 max-h-[40vh] overflow-y-auto">
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm text-slate-400">Téléphone</span>
-                    <span class="font-bold text-slate-700">${u.phone || 'Non renseigné'}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm text-slate-400">Statut</span>
-                    <span class="font-bold ${u.status === 'approved' ? 'text-emerald-600' : u.status === 'pending' ? 'text-amber-600' : 'text-red-500'}">${u.status === 'approved' ? 'Validé' : u.status === 'pending' ? 'En attente' : 'Refusé'}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm text-slate-400">Inscription</span>
-                    <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm text-slate-400">Type de profil</span>
-                    <button id="btn-toggle-type" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${isMandatory ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-brand-50 text-brand-600 hover:bg-brand-100'}" title="Cliquez pour changer">
-                        ${isMandatory ? '🎓 Scolaire (Heures obligatoires)' : '💚 Bénévole Simple'}
-                        <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <!-- CONTENT -->
+            <div id="content-area" class="max-h-[50vh] overflow-y-auto custom-scrollbar bg-slate-50">
+                
+                <!-- TAB: INFO -->
+                <div id="view-info" class="space-y-4 p-6">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                            <div class="text-2xl font-black text-emerald-600">${hours}h</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                            <div class="text-2xl font-black text-slate-700">${hasPermit ? '✓' : '—'}</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permis</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                            <div class="text-2xl font-black text-slate-700">${isMandatory ? '🎓' : '💚'}</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Téléphone</span>
+                            <span class="font-bold text-slate-700 font-mono">${u.phone || '—'}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Statut</span>
+                            <span class="font-bold px-2 py-0.5 rounded text-xs ${u.status === 'approved' ? 'text-emerald-700 bg-emerald-50' : u.status === 'pending' ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50'}">
+                                ${u.status === 'approved' ? 'Validé' : u.status === 'pending' ? 'En attente' : 'Refusé'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Inscription</span>
+                            <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        
+                        <!-- Toggle Type -->
+                        <div class="flex justify-between items-center py-2 px-2 hover:bg-slate-50 transition rounded-lg">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type Profil</span>
+                            <button id="btn-toggle-type" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm border ${isMandatory ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' : 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100'}" title="Cliquez pour changer">
+                                ${isMandatory ? '🎓 Scolaire' : '💚 Bénévole'}
+                                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    ${u.status === 'pending' ? `
+                    <button id="btn-view-proof" class="group w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-blue-500/25 transition active:scale-[0.98] flex items-center justify-center gap-2">
+                        <i data-lucide="file-text" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                        Voir le justificatif
                     </button>
+                    ` : ''}
+
+                    <!-- Admin Note -->
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200/50">
+                        <label class="text-[10px] font-bold text-amber-700 uppercase mb-2 flex items-center gap-1.5 tracking-wide">
+                            <i data-lucide="sticky-note" class="w-3 h-3"></i> Note interne
+                        </label>
+                        <textarea id="admin-note-input" class="w-full bg-white/50 focus:bg-white p-3 rounded-xl text-sm outline-none border border-amber-200 focus:border-amber-400 text-slate-700 resize-none transition placeholder:text-amber-300" rows="3" placeholder="Ajouter une note...">${u.admin_note || ''}</textarea>
+                        <button id="btn-save-note" class="mt-2 w-full py-2.5 bg-amber-400 text-amber-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition shadow-sm">
+                            Enregistrer la note
+                        </button>
+                    </div>
                 </div>
 
-                ${u.status === 'pending' ? `
-                <button id="btn-view-proof" class="w-full py-3 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2">
-                    <i data-lucide="file-text" class="w-5 h-5"></i>
-                    Voir le justificatif
-                </button>
-                ` : ''}
+                <!-- TAB: HISTORY (Hidden by default) -->
+                <div id="view-history" class="hidden p-6 space-y-5">
+                    
+                    <!-- Filters -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                <i data-lucide="calendar-range" class="w-4 h-4 text-brand-500"></i> Période
+                            </h3>
+                            <span id="history-total-hours" class="text-xs font-bold text-white bg-emerald-500 px-2 py-1 rounded-lg shadow-sm shadow-emerald-500/20">0h sur la période</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="date" id="hist-start" class="w-1/2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none">
+                            <input type="date" id="hist-end" class="w-1/2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none">
+                        </div>
+                        <button id="btn-filter-history" class="w-full py-2 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition active:scale-[0.98]">
+                            Filtrer
+                        </button>
+                    </div>
 
-                <!-- Admin Note -->
-                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
-                    <label class="text-[10px] font-bold text-amber-700 uppercase mb-2 block flex items-center gap-1">
-                        <i data-lucide="sticky-note" class="w-3 h-3"></i> Note interne
-                    </label>
-                    <textarea id="admin-note-input" class="w-full bg-white p-3 rounded-xl text-sm outline-none border border-amber-200 text-slate-700 resize-none" rows="3" placeholder="Note sur ce bénévole...">${u.admin_note || ''}</textarea>
-                    <button id="btn-save-note" class="mt-2 w-full py-2.5 bg-amber-400 text-amber-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition">
-                        Enregistrer la note
-                    </button>
+                    <!-- List -->
+                    <div id="history-list" class="space-y-3">
+                        <div class="text-center py-8 text-slate-400">
+                            <div class="animate-spin w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full mx-auto mb-2"></div>
+                            <p class="text-xs">Chargement...</p>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     `;
@@ -527,6 +577,135 @@ async function viewUserDetails(uid) {
     modal.querySelector('#close-details-btn').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
+    // TABS LOGIC
+    const tabInfo = modal.querySelector('#tab-info');
+    const tabHistory = modal.querySelector('#tab-history');
+    const viewInfo = modal.querySelector('#view-info');
+    const viewHistory = modal.querySelector('#view-history');
+
+    const switchTab = (tab) => {
+        if (tab === 'info') {
+            tabInfo.className = 'flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition hover:bg-slate-50';
+            tabHistory.className = 'flex-1 py-4 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600 hover:bg-slate-50 transition';
+            viewInfo.classList.remove('hidden');
+            viewHistory.classList.add('hidden');
+        } else {
+            tabHistory.className = 'flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition hover:bg-slate-50';
+            tabInfo.className = 'flex-1 py-4 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600 hover:bg-slate-50 transition';
+            viewHistory.classList.remove('hidden');
+            viewInfo.classList.add('hidden');
+            // Load history if empty
+            if (viewHistory.querySelector('#history-list').innerHTML.includes('Chargement')) {
+                loadHistory();
+            }
+        }
+    };
+
+    tabInfo.addEventListener('click', () => switchTab('info'));
+    tabHistory.addEventListener('click', () => switchTab('history'));
+
+    // HISTORY LOGIC
+    const loadHistory = async () => {
+        let start = modal.querySelector('#hist-start').value;
+        const end = modal.querySelector('#hist-end').value || null;
+
+        // Default UI preset if empty (matching service logic)
+        if (!start && !end) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - 6);
+            start = d.toISOString().split('T')[0];
+            modal.querySelector('#hist-start').value = start;
+        }
+
+        const listContainer = modal.querySelector('#history-list');
+        const totalSpan = modal.querySelector('#history-total-hours');
+
+        listContainer.innerHTML = `
+            <div class="text-center py-8 text-slate-400">
+                <div class="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                <p class="text-xs">Chargement...</p>
+            </div>
+        `;
+
+        const { data, totalHours, error } = await DirectoryService.getUserHistory(uid, start, end);
+
+        if (error) {
+            listContainer.innerHTML = `<div class="text-center text-red-500 text-sm py-4">Erreur chargement historique</div>`;
+            return;
+        }
+
+        totalSpan.textContent = `${totalHours}h sur la période`;
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+                    <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                    <p class="text-sm font-semibold">Aucune activité trouvée</p>
+                    <p class="text-xs mt-1">Essayez d'élargir la période</p>
+                </div>
+            `;
+            createIcons({ icons, root: listContainer });
+            return;
+        }
+
+        // Group by event name and date
+        const groupedByEvent = {};
+
+        data.forEach(item => {
+            const key = `${item.eventName}|${item.date}`;
+            if (!groupedByEvent[key]) {
+                groupedByEvent[key] = {
+                    eventName: item.eventName,
+                    date: item.date,
+                    location: item.location,
+                    shifts: []
+                };
+            }
+            groupedByEvent[key].shifts.push(item);
+        });
+
+        const eventGroups = Object.values(groupedByEvent).sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        listContainer.innerHTML = eventGroups.map(event => {
+            const date = new Date(event.date);
+
+            return `
+                <div class="rounded-xl border border-slate-100 overflow-hidden bg-white mb-3 hover:shadow-sm transition">
+                    <div class="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${escapeHtml(event.eventName)}</h4>
+                            <p class="text-xs text-slate-500">
+                                ${event.location ? escapeHtml(event.location) + ' • ' : ''}
+                                ${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="divide-y divide-slate-100">
+                        ${event.shifts.map(shift => `
+                            <div class="flex items-center gap-3 p-3 hover:bg-slate-50 transition">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-slate-700">${shift.startTime} - ${shift.endTime}</p>
+                                    <p class="text-[10px] text-slate-400">Créneau</p>
+                                </div>
+                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${shift.hours}h</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        createIcons({ icons, root: listContainer });
+    };
+
+    modal.querySelector('#btn-filter-history').addEventListener('click', loadHistory);
+
+    // Existing Note Logic
     modal.querySelector('#btn-save-note')?.addEventListener('click', async () => {
         const note = modal.querySelector('#admin-note-input').value;
         toggleLoader(true);

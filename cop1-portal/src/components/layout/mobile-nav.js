@@ -14,7 +14,7 @@ import { store } from '../../core/store.js';
 import { router } from '../../core/router.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
-import { showConfirm, showToast } from '../../services/utils.js';
+import { showConfirm, showToast, escapeHtml } from '../../services/utils.js';
 
 const MOBILE_NAV_ITEMS = {
     admin: [
@@ -210,8 +210,8 @@ function openMobileMenu() {
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="font-bold text-slate-900 text-lg truncate">${firstName} ${lastName}</div>
-                        <div class="text-sm text-slate-400 truncate">${email}</div>
+                        <div class="font-bold text-slate-900 text-lg truncate">${escapeHtml(firstName)} ${escapeHtml(lastName)}</div>
+                        <div class="text-sm text-slate-400 truncate">${escapeHtml(email)}</div>
                     </div>
                     ${profile?.is_admin ? `
                         <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">

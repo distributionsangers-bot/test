@@ -43,7 +43,7 @@ export function renderChat(container, params = {}) {
             <!-- 1. LEFT PANEL: LIST (Glassmorphism) -->
             <div id="chat-list-panel" class="
                 absolute inset-0 z-20 bg-slate-50 flex flex-col transition-transform duration-300
-                md:relative md:w-1/3 md:max-w-sm md:bg-white/80 md:backdrop-blur-xl md:rounded-3xl md:shadow-lg md:border md:border-white/50
+                md:relative md:w-80 lg:w-96 md:bg-white/80 md:backdrop-blur-xl md:rounded-3xl md:shadow-lg md:border md:border-white/50
                 ${params.id ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}
             ">
                 <!-- Header & Search -->
@@ -761,75 +761,281 @@ function injectCreateModal() {
     const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
     const modal = document.createElement('div');
     modal.id = 'create-ticket-modal';
-    modal.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm";
+    modal.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md";
+
+    let userList = [];
+    let selectedUser = null;
+
+    // CSS Fix: max-h-[85vh] and flex-col for responsiveness
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 relative animate-scale-in">
-            <button id="close-modal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <h3 class="font-bold text-lg mb-4">Nouveau Message</h3>
-            <form id="create-form" class="space-y-4">
-                ${isAdmin ? `
+        <div class="bg-gradient-to-br from-white to-slate-50 w-full max-w-2xl rounded-3xl shadow-2xl relative animate-scale-in flex flex-col max-h-[85vh]">
+            <!-- Decorative Gradient -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+                <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-brand-500/5 rounded-full blur-3xl"></div>
+            </div>
+
+            <!-- Header (Fixed) -->
+            <div class="relative z-10 border-b border-slate-100/50 bg-gradient-to-r from-white to-slate-50/50 p-6 flex-shrink-0 rounded-t-3xl">
+                <div class="flex items-center justify-between">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Type</label>
-                        <select name="type" id="create-type" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                            <option value="support">Support (Demande d'aide)</option>
-                            <option value="announcement">Annonce (À tous les bénévoles)</option>
-                            <option value="direct">Message Direct (À un bénévole)</option>
-                        </select>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                            ✨ Nouveau Message
+                        </h2>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Créer et envoyer un message</p>
                     </div>
-                    <div id="target-user-container" class="hidden">
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Destinataire</label>
-                        <select name="targetUserId" id="target-user-select" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                            <option value="">Chargement...</option>
-                        </select>
+                    <button id="close-modal" class="w-10 h-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-all duration-200 active:scale-95">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content (Scrollable) -->
+            <form id="create-form" class="relative z-10 p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                
+                <!-- Message Type Selector -->
+                <div>
+                    <label class="text-sm font-bold text-slate-700 mb-3 block uppercase tracking-wide">Type de message</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="type-option relative cursor-pointer group">
+                            <input type="radio" name="type" value="support" class="sr-only peer" checked>
+                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg peer-checked:shadow-blue-500/20 group-hover:border-slate-300">
+                                <i data-lucide="headset" class="w-6 h-6 text-slate-600 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800">Support</p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    ${isAdmin ? 'Demande d\'aide' : 'Message aux Admins'}
+                                </p>
+                            </div>
+                        </label>
+                        ${isAdmin ? `
+                        <label class="type-option relative cursor-pointer group">
+                            <input type="radio" name="type" value="announcement" class="sr-only peer">
+                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:shadow-lg peer-checked:shadow-amber-500/20 group-hover:border-slate-300">
+                                <i data-lucide="megaphone" class="w-6 h-6 text-slate-600 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800">Annonce</p>
+                                <p class="text-xs text-slate-500 mt-1">À tous</p>
+                            </div>
+                        </label>
+                        ` : ''}
+                        <label class="type-option relative cursor-pointer group">
+                            <input type="radio" name="type" value="direct" class="sr-only peer">
+                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-lg peer-checked:shadow-brand-500/20 group-hover:border-slate-300">
+                                <i data-lucide="send" class="w-6 h-6 text-slate-600 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800">Direct</p>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    ${isAdmin ? 'Personnel' : 'À un administrateur'}
+                                </p>
+                            </div>
+                        </label>
                     </div>
-                ` : '<input type="hidden" name="type" value="support">'}
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Sujet</label>
-                    <input name="subject" placeholder="Sujet du message" class="w-full p-2.5 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Message</label>
-                    <textarea name="content" placeholder="Votre message..." class="w-full p-2.5 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none" rows="4" required></textarea>
+
+                <!-- Search User (for Direct Messages) -->
+                <div id="target-user-container" class="hidden animate-slide-down">
+                    <label class="text-sm font-bold text-slate-700 mb-3 block uppercase tracking-wide">
+                        ${isAdmin ? 'Destinataire (Bénévole)' : 'Destinataire (Administrateur)'}
+                    </label>
+                    
+                    <!-- Search Bar -->
+                    <div class="relative group mb-3">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-brand-500"></i>
+                        <input id="search-user" type="text" placeholder="${isAdmin ? 'Rechercher un bénévole...' : 'Rechercher un administrateur...'}" class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border-2 border-slate-200 rounded-xl text-sm focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400">
+                    </div>
+
+                    <!-- User List -->
+                    <div id="user-list" class="bg-slate-50/30 border-2 border-slate-100 rounded-2xl max-h-48 overflow-y-auto space-y-1 p-2">
+                        <div class="text-center py-8 text-slate-400">
+                            <i data-lucide="users-2" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                            <p class="text-sm">Chargement...</p>
+                        </div>
+                    </div>
+
+                    <!-- Selected User Badge -->
+                    <div id="selected-user-badge" class="hidden mt-3 p-3 bg-gradient-to-r from-brand-50 to-blue-50 border-2 border-brand-200 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div id="selected-user-avatar" class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-sm flex items-center justify-center"></div>
+                            <div>
+                                <p id="selected-user-name" class="font-semibold text-sm text-slate-800"></p>
+                                <p id="selected-user-email" class="text-xs text-slate-500"></p>
+                            </div>
+                        </div>
+                        <button type="button" id="clear-user" class="w-6 h-6 rounded-full hover:bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="targetUserId" id="target-user-id">
                 </div>
-                <div class="flex gap-2 justify-end pt-2">
-                    <button type="button" id="cancel-modal" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition">Envoyer</button>
+
+                <!-- Subject -->
+                <div>
+                    <label class="text-sm font-bold text-slate-700 mb-2 block uppercase tracking-wide">Sujet</label>
+                    <input name="subject" placeholder="Ex: Besoin d'info, Problème technique..." class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 focus:bg-white" required>
+                </div>
+
+                <!-- Message -->
+                <div>
+                    <label class="text-sm font-bold text-slate-700 mb-2 block uppercase tracking-wide">Message</label>
+                    <textarea name="content" placeholder="Écrivez votre message ici... (Markdown supporté)" class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 resize-none" rows="5" required></textarea>
+                    <p class="text-xs text-slate-500 mt-2">💡 Conseil: Utilisez **gras** ou *italique* pour mettre en évidence</p>
                 </div>
             </form>
+
+            <!-- Footer / Actions (Fixed) -->
+            <div class="relative z-10 p-6 pt-4 border-t border-slate-100 flex-shrink-0 bg-white rounded-b-3xl">
+                <div class="flex gap-3 justify-end">
+                    <button type="button" id="cancel-modal" class="px-6 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-all duration-200 active:scale-95">
+                        Annuler
+                    </button>
+                    <button type="submit" form="create-form" class="px-6 py-2.5 bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 active:scale-95 flex items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Envoyer
+                    </button>
+                </div>
+            </div>
         </div>
     `;
+
     document.body.appendChild(modal);
     createIcons({ icons, root: modal });
 
+    // Close buttons
     const closeBtn = modal.querySelector('#close-modal');
     const cancelBtn = modal.querySelector('#cancel-modal');
-    closeBtn.onclick = () => modal.remove();
-    cancelBtn.onclick = () => modal.remove();
 
-    // Handle type change for direct messages
-    if (isAdmin) {
-        const typeSelect = modal.querySelector('#create-type');
-        const targetContainer = modal.querySelector('#target-user-container');
-        const targetSelect = modal.querySelector('#target-user-select');
+    const closeModal = () => {
+        modal.querySelector('.animate-scale-in').classList.remove('animate-scale-in');
+        modal.querySelector('.animate-scale-in')?.classList.add('animate-scale-out');
+        setTimeout(() => modal.remove(), 300);
+    };
 
-        typeSelect.addEventListener('change', async (e) => {
-            if (e.target.value === 'direct') {
-                // Load volunteers
-                const { data: volunteers } = await ChatService.getAllVolunteers();
-                if (volunteers && volunteers.length) {
-                    targetSelect.innerHTML = volunteers
-                        .map(v => `<option value="${v.id}">${v.first_name} ${v.last_name}</option>`)
-                        .join('');
-                }
-                targetContainer.classList.remove('hidden');
+    closeBtn.onclick = closeModal;
+    cancelBtn.onclick = closeModal;
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Handle Type Logic
+    const typeRadios = modal.querySelectorAll('input[name="type"]');
+    const targetContainer = modal.querySelector('#target-user-container');
+    const searchInput = modal.querySelector('#search-user');
+    const userListNode = modal.querySelector('#user-list'); // Renamed to avoid confusion
+    const selectedBadge = modal.querySelector('#selected-user-badge');
+    const clearBtn = modal.querySelector('#clear-user');
+
+    // Function to load users (Admins or Volunteers)
+    const loadUsers = async () => {
+        let result;
+        if (isAdmin) {
+            // Admin sees Volunteers
+            result = await ChatService.getAllVolunteers();
+        } else {
+            // Volunteer sees Admins
+            result = await ChatService.getAllAdmins();
+        }
+
+        userList = result.data || [];
+        renderUserList('');
+    };
+
+    const renderUserList = (query) => {
+        const filtered = userList.filter(u => {
+            const fullName = `${u.first_name} ${u.last_name}`.toLowerCase();
+            const email = (u.email || '').toLowerCase();
+            const q = query.toLowerCase();
+            // Only search by email if I am an admin (searching volunteers)
+            // If I am a volunteer (searching admins), don't search their hidden email
+            if (isAdmin) {
+                return fullName.includes(q) || email.includes(q);
             } else {
-                targetContainer.classList.add('hidden');
+                return fullName.includes(q);
             }
         });
-    }
 
+        if (filtered.length === 0) {
+            userListNode.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                    <p class="text-sm">Aucun utilisateur trouvé</p>
+                </div>
+            `;
+            createIcons({ icons, root: userListNode });
+            return;
+        }
+
+        userListNode.innerHTML = filtered.map(u => `
+            <button type="button" class="user-option w-full text-left p-2.5 rounded-lg hover:bg-white transition-all duration-200 flex items-center gap-3 group" data-user-id="${u.id}" data-user-name="${u.first_name} ${u.last_name}" data-user-email="${u.email}">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white font-bold flex items-center justify-center flex-shrink-0 group-hover:shadow-md transition border border-slate-200">
+                    ${u.first_name[0]}${u.last_name[0]}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-800 text-sm">${u.first_name} ${u.last_name}</p>
+                    <p class="text-xs text-slate-500 truncate">
+                        ${isAdmin ? u.email : 'Administrateur'}
+                    </p>
+                </div>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500 transition"></i>
+            </button>
+        `).join('');
+
+        createIcons({ icons, root: userListNode });
+
+        // Attach user selection
+        userListNode.querySelectorAll('.user-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedUser = {
+                    id: btn.dataset.userId,
+                    name: btn.dataset.userName,
+                    email: btn.dataset.userEmail
+                };
+                modal.querySelector('#target-user-id').value = selectedUser.id;
+
+                // Update badge
+                selectedBadge.querySelector('#selected-user-avatar').textContent =
+                    selectedUser.name.split(' ').map(n => n[0]).join('');
+                selectedBadge.querySelector('#selected-user-name').textContent = selectedUser.name;
+                selectedBadge.querySelector('#selected-user-email').textContent = isAdmin ? selectedUser.email : 'Administrateur';
+                selectedBadge.classList.remove('hidden');
+
+                searchInput.value = '';
+                renderUserList('');
+            });
+        });
+    };
+
+    // Type change handler
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'direct') {
+                targetContainer.classList.remove('hidden');
+                if (userList.length === 0) loadUsers(); // Load only on demand
+            } else {
+                targetContainer.classList.add('hidden');
+                selectedUser = null;
+                selectedBadge.classList.add('hidden');
+                // Also clear hidden input
+                modal.querySelector('#target-user-id').value = '';
+            }
+        });
+    });
+
+    // Search input handler
+    searchInput?.addEventListener('input', (e) => {
+        renderUserList(e.target.value);
+    });
+
+    // Clear selection
+    clearBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedUser = null;
+        modal.querySelector('#target-user-id').value = '';
+        selectedBadge.classList.add('hidden');
+        searchInput.value = '';
+        renderUserList('');
+    });
+
+    // Form submission
     modal.querySelector('#create-form').onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
@@ -849,10 +1055,13 @@ function injectCreateModal() {
             }
         }
 
+        toggleLoader(true);
         const { success, error } = await ChatService.createTicket(payload);
+        toggleLoader(false);
+
         if (success) {
-            showToast("Message envoyé", "success");
-            modal.remove();
+            showToast("Message envoyé avec succès ✨", "success");
+            closeModal();
             await loadTickets();
         } else {
             showToast("Erreur : " + (error?.message || "Impossible d'envoyer"), "error");

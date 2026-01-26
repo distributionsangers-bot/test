@@ -2,6 +2,7 @@ import { PolesService } from './poles.service.js';
 import { store } from '../../core/store.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
+import { ChatService } from '../chat/chat.service.js';
 
 export async function renderPoles(container) {
     if (!container) return;
@@ -18,7 +19,17 @@ export async function renderPoles(container) {
     // 2. Render Template
     const renderTeams = () => {
         if (!teams || teams.length === 0) {
-            return `<div class="col-span-2 text-center py-20 text-slate-400">Aucun pôle actif.</div>`;
+            return `
+                <div class="col-span-full">
+                    <div class="rounded-3xl border border-slate-100 bg-white p-16 text-center">
+                        <div class="w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                            <i data-lucide="users-round" class="w-10 h-10 text-slate-300"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-700">Aucun pôle actif</h3>
+                        <p class="text-slate-400 text-sm mt-2">Les pôles apparaîtront ici une fois créés.</p>
+                    </div>
+                </div>
+            `;
         }
 
         return teams.map(t => {
@@ -26,164 +37,203 @@ export async function renderPoles(container) {
             const teamLeaders = leaders ? leaders.filter(l => l.pole_id === t.id) : [];
 
             const adminActions = isViewAdmin ? `
-                <div class="absolute top-4 right-4 flex gap-2 z-10 bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-sm border border-slate-100">
-                    <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition relative group" title="Voir les intéressés">
-                        <i data-lucide="list-filter" class="w-4 h-4 pointer-events-none"></i>
+                <div class="absolute top-4 right-4 flex gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="p-2 rounded-xl bg-white/80 backdrop-blur-sm text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-100 transition shadow-sm" title="Voir les intéressés">
+                        <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
                     </button>
-                    <div class="w-px h-6 bg-slate-200 mx-1"></div>
-                    <button data-action="edit-pole" data-id="${t.id}" class="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition" title="Modifier">
+                    <button data-action="edit-pole" data-id="${t.id}" class="p-2 rounded-xl bg-white/80 backdrop-blur-sm text-slate-500 hover:text-amber-600 hover:bg-amber-50 border border-slate-100 transition shadow-sm" title="Modifier">
                         <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
                     </button>
-                    <button data-action="delete-pole" data-id="${t.id}" class="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition" title="Supprimer">
+                    <button data-action="delete-pole" data-id="${t.id}" class="p-2 rounded-xl bg-white/80 backdrop-blur-sm text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-100 transition shadow-sm" title="Supprimer">
                         <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 </div>
             ` : '';
 
-            // Leaders HTML
+            // Leaders HTML (Premium Style)
             const leadersHtml = teamLeaders.length > 0 ? `
-                <div class="space-y-2 mb-5">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Responsables</p>
-                    <div class="flex flex-wrap gap-2">
+                <div class="mt-auto pt-5 border-t border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3 px-0.5">👥 Responsables</p>
+                    <div class="space-y-2">
                         ${teamLeaders.map(l => `
-                            <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
-                                <div class="w-5 h-5 bg-gradient-to-br from-brand-400 to-brand-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold">
-                                    ${l.first_name[0]}
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/50 hover:bg-slate-100 transition">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 border-2 border-white shadow-md overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-xs font-black relative">
+                                    ${l.photo_url
+                    ? `<img src="${l.photo_url}" class="w-full h-full object-cover" alt="${l.first_name}">`
+                    : `<span class="absolute inset-0 flex items-center justify-center font-black drop-shadow-md">${l.first_name[0].toUpperCase()}</span>`
+                }
                                 </div>
-                                <div class="text-xs">
-                                    <span class="font-bold text-slate-800">${escapeHtml(l.first_name)}</span>
-                                    <span class="text-slate-500 hidden sm:inline">• ${escapeHtml(l.role_title || '')}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-slate-800 leading-tight truncate">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</p>
+                                    <p class="text-[10px] text-slate-500 leading-tight">${escapeHtml(l.role_title || 'Responsable')}</p>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-            ` : '<div class="mb-5 text-xs text-slate-300 italic flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> Aucun responsable assigné.</div>';
+            ` : `
+                <div class="mt-auto pt-5 border-t border-slate-100">
+                    <p class="text-[10px] font-black text-slate-300 uppercase tracking-wider mb-2 px-0.5">👥 Responsables</p>
+                    <p class="text-xs text-slate-400 italic px-0.5">À confirmer</p>
+                </div>
+            `;
 
             return `
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-4 animate-fade-in relative overflow-hidden group hover:shadow-md transition-all">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group relative" data-pole-id="${t.id}">
                     ${adminActions}
-                    <div class="flex justify-between items-start mb-4 pr-24"> 
-                        <div class="flex items-center gap-3">
-                            <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shadow-inner">
-                                <i data-lucide="${t.icon || 'users'}" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-lg text-slate-900 leading-tight">${escapeHtml(t.name)}</h3>
-                                <p class="text-xs text-slate-400 font-medium">${teamLeaders.length} responsable(s)</p>
-                            </div>
+                    
+                    <!-- Header Icon -->
+                    <div class="p-5 bg-gradient-to-br from-brand-50 to-indigo-50 border-b border-slate-100">
+                        <div class="w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center text-brand-600 shadow-md">
+                            <i data-lucide="${t.icon || 'users'}" class="w-6 h-6"></i>
                         </div>
                     </div>
-                    <p class="text-sm text-slate-600 mb-5 bg-slate-50 p-4 rounded-xl leading-relaxed">
-                        ${escapeHtml(t.description || 'Aucune description.')}
-                    </p>
-                    ${leadersHtml}
-                    <button data-action="toggle-interest" data-id="${t.id}" data-interested="${intr}" class="w-full py-3.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${intr ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-slate-900 text-white shadow-lg hover:bg-slate-800 active:scale-95'}">
-                        ${intr ? '<i data-lucide="check" class="w-4 h-4"></i> Intéressé(e)' : 'Rejoindre ce pôle'}
-                    </button>
+
+                    <!-- Content -->
+                    <div class="p-5 flex flex-col flex-1">
+                        <div class="mb-3">
+                            <h3 class="font-black text-lg text-slate-900 mb-1">${escapeHtml(t.name)}</h3>
+                            <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                                ${escapeHtml(t.description || 'Découvrez cette équipe et ses missions.')}
+                            </p>
+                        </div>
+
+                        <!-- Contact Link -->
+                        ${t.email ? `
+                            <div class="mb-4">
+                                <a href="mailto:${t.email}" class="inline-flex items-center gap-2 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50/50 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                                    ${t.email}
+                                </a>
+                            </div>
+                        ` : ''}
+
+                        ${leadersHtml}
+                    </div>
+
+                    <!-- Footer Button (Hidden for admins) -->
+                    ${!isViewAdmin ? `
+                        <div class="p-5 border-t border-slate-100 bg-slate-50/30">
+                            <button data-action="toggle-interest" data-id="${t.id}" data-interested="${intr}" class="w-full py-3 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 group/btn ${intr
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 active:scale-[0.98]'
+                    }">
+                                ${intr
+                        ? `<i data-lucide="check-circle-2" class="w-4 h-4"></i> Intéressé(e)`
+                        : `<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>`
+                    }
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }).join('');
     };
 
-    const createBtn = isViewAdmin
-        ? `<button id="btn-create-pole" class="bg-brand-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-brand-200 hover:scale-110 transition"><i data-lucide="plus" class="w-5 h-5"></i></button>`
-        : '';
+    const header = `
+        <div class="mb-12 animate-slide-up">
+            <div class="flex flex-col gap-3 mb-4">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider w-fit border border-brand-200/50">
+                    <i data-lucide="users-round" class="w-4 h-4"></i> Pôles & Équipes
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">Les Pôles</h1>
+                    <p class="text-slate-500 mt-3 text-lg max-w-2xl leading-relaxed">Rejoignez les équipes qui font bouger les choses. Découvrez les responsables et signifiez votre intérêt.</p>
+                </div>
+                ${isViewAdmin ? `
+                    <button id="btn-create-pole" class="flex-shrink-0 h-fit bg-brand-600 text-white px-7 py-3.5 rounded-xl font-bold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:shadow-xl active:scale-95 transition flex items-center gap-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        Nouveau Pôle
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `;
 
     container.innerHTML = `
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-2xl font-extrabold text-slate-900">Pôles & Équipes</h2>
-                <p class="text-slate-500 text-sm">Découvrez les différents rôles.</p>
-            </div>
-            ${createBtn}
-        </div>
-        <div id="poles-grid" class="pb-24 grid md:grid-cols-2 gap-4">
-            ${renderTeams()}
-        </div>
-    `;
-
-
-    // --- MODALE CREATION POLE (Embedded) ---
-    const createModalHtml = `
-        <div id="create-pole-modal" class="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in hidden">
-            <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-extrabold text-xl text-slate-900">Nouveau Pôle</h3>
-                    <button class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-600 transition btn-close">
-                        <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
-                    </button>
-                </div>
-                <form id="form-create-pole" class="space-y-4">
-                    <input name="name" placeholder="Nom (Ex: Logistique)" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500" required>
-                    <textarea name="desc" rows="2" placeholder="Description..." class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500"></textarea>
-                    <div>
-                         <label class="text-xs font-bold text-slate-400 uppercase ml-1 block mb-1">Icône (Lucide)</label>
-                         <input name="icon" value="users" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-                    <button type="submit" class="w-full py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-700 transition mt-2">Créer le pôle</button>
-                </form>
+        <div class="max-w-7xl mx-auto pb-24">
+            ${header}
+            <div id="poles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                ${renderTeams()}
             </div>
         </div>
     `;
 
-    // Ajout à la fin du container
-    container.innerHTML += createModalHtml;
     createIcons({ icons, root: container });
 
-    // 3. Event Handling
-    // Listener fermeture modale création
-    const createModal = container.querySelector('#create-pole-modal');
-    if (createModal) {
-        createModal.addEventListener('click', (e) => {
-            if (e.target === createModal || e.target.closest('.btn-close')) {
-                createModal.classList.add('hidden');
-            }
-        });
-
-        container.querySelector('#form-create-pole').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fd = new FormData(e.target);
-            toggleLoader(true);
-            try {
-                await PolesService.createTeam({
-                    name: fd.get('name'),
-                    description: fd.get('desc'),
-                    icon: fd.get('icon')
-                });
-                showToast('Pôle créé !');
-                createModal.classList.add('hidden');
-                e.target.reset();
-                await renderPoles(container);
-            } catch (err) {
-                showToast(err.message || "Erreur création", "error");
-            } finally {
-                toggleLoader(false);
-            }
-        });
+    // 3. Init Modals (Admin Only Listeners mostly)
+    if (isViewAdmin) {
+        initAdminListeners(container, teams, leaders);
     }
 
+    // Common Listeners
     container.addEventListener('click', async (e) => {
         const btn = e.target.closest('button');
         if (!btn) return;
-
         const action = btn.dataset.action;
         const id = btn.dataset.id;
 
         if (action === 'toggle-interest') {
             const isInterested = btn.dataset.interested === 'true';
-            toggleLoader(true);
-            try {
-                await PolesService.toggleInterest(store.state.user.id, id, isInterested);
-                showToast(isInterested ? 'Intérêt retiré' : 'Intérêt signalé aux admins !');
-                await renderPoles(container);
-            } catch (err) {
-                console.error(err);
-                showToast("Erreur connexion", "error");
-                toggleLoader(false);
+
+            if (!store.state.user?.id) {
+                showToast('Connectez-vous pour rejoindre un pôle', 'error');
+                return;
             }
-        } else if (action === 'delete-pole') {
-            showConfirm("Supprimer ce pôle ?", async () => {
+
+            // Optimistic UI Update - NO full re-render (prevents infinite loop!)
+            const newInterestState = !isInterested;
+            btn.setAttribute('data-interested', newInterestState ? 'true' : 'false');
+
+            // Update button appearance immediately
+            if (newInterestState) {
+                btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
+                btn.classList.add('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
+                btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> Intéressé(e)';
+            } else {
+                btn.classList.remove('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
+                btn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
+                btn.innerHTML = '<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>';
+            }
+            createIcons({ icons, root: btn.parentElement });
+
+            // Show immediate feedback
+            showToast(newInterestState ? '🎯 Intérêt signalé aux responsables !' : 'Intérêt retiré');
+
+            // Call API in background (fire and forget)
+            PolesService.toggleInterest(store.state.user.id, id, isInterested)
+                .catch(err => {
+                    console.error('Toggle interest error:', err);
+                    // Revert UI on error
+                    const revertState = !newInterestState;
+                    btn.setAttribute('data-interested', revertState ? 'true' : 'false');
+                    if (revertState) {
+                        btn.classList.remove('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
+                        btn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
+                        btn.innerHTML = '<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>';
+                    } else {
+                        btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
+                        btn.classList.add('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
+                        btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> Intéressé(e)';
+                    }
+                    createIcons({ icons, root: btn.parentElement });
+                    showToast('Erreur lors de la mise à jour', 'error');
+                });
+        }
+    });
+}
+
+function initAdminListeners(container, teams) {
+    container.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+
+        if (action === 'delete-pole') {
+            showConfirm("⚠️ Supprimer ce pôle ?\nCela supprimera aussi l'historique des intérêts.", async () => {
                 toggleLoader(true);
                 try {
                     await PolesService.deleteTeam(id);
@@ -193,113 +243,507 @@ export async function renderPoles(container) {
                     showToast("Erreur suppression", "error");
                     toggleLoader(false);
                 }
-            }, { type: 'danger', confirmText: 'Supprimer' });
+            }, { type: 'danger', confirmText: 'Supprimer définitivement' });
+
         } else if (action === 'view-candidates') {
             const name = btn.dataset.name;
-            await viewPoleCandidates(id, name);
+            await openCandidatesModal(id, name);
+
         } else if (action === 'edit-pole') {
             const team = teams.find(t => t.id == id);
-            if (team) openEditPoleModal(team, async () => await renderPoles(container));
+            if (team) openUpsertPoleModal(team);
+
         } else if (btn.id === 'btn-create-pole') {
-            const m = document.getElementById('create-pole-modal');
-            if (m) m.classList.remove('hidden');
+            openUpsertPoleModal();
         }
     });
-
 }
 
-// --- Modals ---
+// =============================================================================
+// 🏰 MODALE CRÉATION / MODIFICATION (Premium)
+// =============================================================================
 
-async function viewPoleCandidates(teamId, teamName) {
-    toggleLoader(true);
-    const candidates = await PolesService.getCandidates(teamId);
-    toggleLoader(false);
+async function openUpsertPoleModal(team = null) {
+    const isEdit = !!team;
+
+    // Fetch current leaders if edit
+    let currentLeaders = [];
+    if (isEdit) {
+        const allLeaders = await PolesService.getLeaders();
+        currentLeaders = allLeaders.filter(l => l.pole_id === team.id);
+    }
 
     const m = document.createElement('div');
-    m.className = 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+    m.className = 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in';
 
-    const listHtml = candidates.length > 0 ? candidates.map(c => {
-        const p = c.profiles;
-        const date = new Date(c.created_at).toLocaleDateString('fr-FR');
-        return `
-            <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between mb-3 shadow-sm">
-                 <div>
-                    <div class="flex items-center gap-2">
-                        <div class="font-bold text-slate-900">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</div>
-                        ${p.status === 'pending' ? '<span class="w-2 h-2 bg-orange-400 rounded-full" title="En attente validation"></span>' : ''}
-                    </div>
-                    <div class="text-xs text-slate-500 flex gap-3 mt-1">
-                        <span><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${date}</span>
-                        <span><i data-lucide="phone" class="w-3 h-3 inline"></i> ${escapeHtml(p.phone || '-')}</span>
-                    </div>
+    m.innerHTML = `
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl animate-scale-in overflow-hidden flex flex-col max-h-[90vh]" data-modal="upsert-pole">
+            <!-- Header (Premium) -->
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-br from-brand-50/80 to-indigo-50/50">
+                <div>
+                    <h3 class="font-black text-2xl text-slate-900 tracking-tight">${isEdit ? '🏰 Modifier le Pôle' : '✨ Nouveau Pôle'}</h3>
+                    <p class="text-sm text-slate-500 font-medium mt-0.5">Configuration et équipe</p>
                 </div>
-            </div>`;
-    }).join('') : `<div class="text-center py-10 text-slate-400 italic">Aucun candidat pour le moment.</div>`;
-
-    m.innerHTML = `
-        <div class="bg-slate-50 w-full max-w-md rounded-[2rem] p-6 h-[70vh] flex flex-col shadow-2xl animate-slide-up relative">
-            <button class="absolute top-5 right-5 bg-white p-2 rounded-full shadow-sm hover:bg-slate-100 transition text-slate-500 btn-close">
-                <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
-            </button>
-            <div class="mb-6">
-                <div class="text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">Recrutement</div>
-                <h3 class="text-xl font-extrabold text-slate-900">Intéressés par : ${teamName}</h3>
-            </div>
-            <div class="flex-1 overflow-y-auto no-scrollbar space-y-1 pr-1">
-                ${listHtml}
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(m);
-    createIcons({ icons, root: m });
-
-    m.querySelector('.btn-close').onclick = () => m.remove();
-}
-
-function openEditPoleModal(team, onSuccess) {
-    const m = document.createElement('div');
-    m.className = 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
-    m.innerHTML = `
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-extrabold text-xl text-slate-900">Modifier le Pôle</h3>
-                <button class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-600 transition btn-close">
+                <button class="w-11 h-11 bg-white rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-sm border border-slate-100 flex items-center justify-center transition duration-300 btn-close">
                     <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
                 </button>
             </div>
-            <form id="form-edit-pole" class="space-y-4">
-                <input name="name" value="${escapeHtml(team.name)}" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500" required>
-                <textarea name="desc" rows="3" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500">${escapeHtml(team.description || '')}</textarea>
-                <div>
-                     <label class="text-xs font-bold text-slate-400 uppercase ml-1 block mb-1">Icône</label>
-                     <input name="icon" value="${escapeHtml(team.icon || 'users')}" class="w-full p-3 bg-slate-50 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-                <button type="submit" class="w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl shadow-lg hover:bg-slate-800 transition mt-2">Enregistrer</button>
-            </form>
+
+            <!-- Form Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <form id="form-upsert-pole" class="space-y-5">
+                    
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nom du Pôle</label>
+                             <input name="name" value="${isEdit ? escapeHtml(team.name) : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:font-medium" placeholder="Ex: Logistique" required>
+                        </div>
+                        <div>
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Icône (Lucide)</label>
+                             <div class="relative">
+                                <i data-lucide="box" class="absolute left-3.5 top-3.5 w-5 h-5 text-slate-400"></i>
+                                <input name="icon" value="${isEdit ? escapeHtml(team.icon || 'users') : 'users'}" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-bold text-slate-600 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100">
+                             </div>
+                        </div>
+                        <div>
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Couleur (Optionnel)</label>
+                             <select name="color" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-600 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100">
+                                <option value="brand" ${team?.color === 'brand' ? 'selected' : ''}>Bleu (Brand)</option>
+                                <option value="emerald" ${team?.color === 'emerald' ? 'selected' : ''}>Émeraude</option>
+                                <option value="purple" ${team?.color === 'purple' ? 'selected' : ''}>Violet</option>
+                                <option value="orange" ${team?.color === 'orange' ? 'selected' : ''}>Orange</option>
+                             </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
+                        <textarea name="desc" rows="3" class="w-full p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:text-slate-400" placeholder="Décrivez la mission de ce pôle...">${isEdit ? escapeHtml(team.description || '') : ''}</textarea>
+                    </div>
+
+                    <div>
+                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Email de contact</label>
+                         <div class="relative">
+                            <i data-lucide="mail" class="absolute left-3.5 top-3.5 w-5 h-5 text-slate-400"></i>
+                            <input name="email" type="email" value="${isEdit ? escapeHtml(team.email || '') : ''}" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100" placeholder="pole@asso.fr">
+                         </div>
+                    </div>
+
+                    <!-- Responsables Section (Only Edit Mode) -->
+                    ${isEdit ? `
+                        <div class="pt-4 border-t border-slate-100">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Responsables actuels</label>
+                            
+                            <div id="leaders-list" class="space-y-3 mb-4">
+                                ${currentLeaders.map(l => `
+                                    <div class="bg-white border border-slate-200 p-3 rounded-xl" data-leader-card="${l.id}">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-white">
+                                                    ${l.photo_url ? `<img src="${l.photo_url}" class="w-full h-full object-cover">` : `<span>${l.first_name[0].toUpperCase()}</span>`}
+                                                </div>
+                                                <span class="font-bold text-sm text-slate-800">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                            </div>
+                                            <button type="button" data-remove-leader="${l.id}" class="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition">
+                                                <i data-lucide="minus-circle" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                        <div class="relative">
+                                            <i data-lucide="briefcase" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                                            <input type="text" data-leader-title="${l.id}" value="${escapeHtml(l.role_title || 'Responsable')}" placeholder="Ex: Responsable Logistique" class="w-full pl-10 pr-3 py-2 text-xs bg-slate-50 rounded-lg border border-slate-100 focus:ring-2 focus:ring-brand-500 outline-none" data-original-value="${escapeHtml(l.role_title || 'Responsable')}">
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                ${currentLeaders.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun responsable.</p>' : ''}
+                            </div>
+
+                            <!-- Search to Add (Premium Visible) -->
+                            <div class="relative">
+                                <label class="block text-xs font-black text-brand-700 uppercase tracking-wider mb-3">✨ Ajouter un responsable</label>
+                                <div class="relative">
+                                    <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-500 pointer-events-none"></i>
+                                    <input id="leader-search" placeholder="Tapez un nom ou email..." class="w-full pl-11 p-3.5 bg-brand-100/30 border-2 border-brand-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none transition placeholder:text-brand-600">
+                                </div>
+                                <div id="search-results" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 shadow-2xl rounded-xl mt-2 z-50 max-h-64 overflow-y-auto"></div>
+                            </div>
+                        </div>
+                    ` : '<div class="bg-blue-50 p-3 rounded-xl text-xs text-blue-700 flex gap-2"><i data-lucide="info" class="w-4 h-4"></i> Vous pourrez ajouter des responsables une fois le pôle créé.</div>'}
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                 <button class="btn-close px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition">Annuler</button>
+                 <button form="form-upsert-pole" type="submit" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-95 transition">Enregistrer</button>
+            </div>
         </div>
     `;
+
     document.body.appendChild(m);
     createIcons({ icons, root: m });
 
-    m.querySelector('.btn-close').onclick = () => m.remove();
-    m.querySelector('#form-edit-pole').onsubmit = async (e) => {
+    // Events
+    const closeModal = () => m.remove();
+    m.querySelectorAll('.btn-close').forEach(b => b.onclick = closeModal);
+    // Initialize leader changes tracker (before form submit)
+    const leaderChanges = {
+        toAdd: [],      // { userId, poleId, roleTitle }
+        toRemove: [],   // { userId }
+        toUpdate: {}    // { userId: newRoleTitle }
+    };
+
+    // Form Submit
+    const form = m.querySelector('#form-upsert-pole');
+    form.onsubmit = async (e) => {
         e.preventDefault();
-        const fd = new FormData(e.target);
+        const fd = new FormData(form);
+        const data = {
+            name: fd.get('name'),
+            description: fd.get('desc'),
+            icon: fd.get('icon'),
+            email: fd.get('email'),
+            color: fd.get('color')
+        };
+
         toggleLoader(true);
         try {
-            await PolesService.updateTeam(team.id, {
-                name: fd.get('name'),
-                description: fd.get('desc'),
-                icon: fd.get('icon')
-            });
-            showToast('Pôle mis à jour !');
-            m.remove();
-            if (onSuccess) onSuccess();
+            // 1. Update pole info
+            if (isEdit) {
+                await PolesService.updateTeam(team.id, data);
+            } else {
+                await PolesService.createTeam(data);
+            }
+
+            // 2. Apply leader changes (if edit mode)
+            if (isEdit) {
+                // Remove leaders
+                for (const removal of leaderChanges.toRemove) {
+                    await PolesService.removeLeader(removal.userId);
+                }
+
+                // Add new leaders
+                for (const addition of leaderChanges.toAdd) {
+                    await PolesService.assignLeader(addition.userId, addition.poleId, addition.roleTitle);
+                }
+
+                // Update existing leader titles
+                for (const [userId, newTitle] of Object.entries(leaderChanges.toUpdate)) {
+                    await PolesService.updateLeaderTitle(userId, newTitle);
+                }
+            }
+
+            showToast(isEdit ? "Pôle mis à jour" : "Pôle créé");
+            closeModal();
+            const container = document.getElementById('view-container'); // Hacky but works if standard layout
+            if (container) renderPoles(container);
+            else window.location.reload();
         } catch (err) {
-            showToast(err.message, "error");
+            showToast("Erreur sauvegarde", "error");
+            console.error(err);
         } finally {
             toggleLoader(false);
         }
     };
+
+    // Leader Management (Only in Edit Mode) - Local State Management
+    if (isEdit) {
+        // Update Leader Role Title (LOCAL ONLY - no immediate API call)
+        m.querySelectorAll('[data-leader-title]').forEach(input => {
+            input.oninput = () => {
+                const uid = input.dataset.leaderTitle;
+                const newTitle = input.value.trim() || 'Responsable';
+                // Store in local state
+                leaderChanges.toUpdate[uid] = newTitle;
+                // Visual feedback - change input style
+                input.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50');
+            };
+        });
+
+        // Remove Leader (LOCAL ONLY - mark for removal, don't delete immediately)
+        m.querySelectorAll('[data-remove-leader]').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                const uid = btn.dataset.removeLeader;
+                
+                if (!confirm("Retirer ce responsable ?")) return;
+
+                // Add to removal list
+                leaderChanges.toRemove.push({ userId: uid });
+                
+                // Remove from DOM immediately for UX
+                const leaderCard = btn.closest('[data-leader-card]');
+                if (leaderCard) {
+                    leaderCard.style.opacity = '0.5';
+                    leaderCard.style.textDecoration = 'line-through';
+                }
+                showToast("Responsable marqué pour suppression");
+            };
+        });
+
+        // Search Leader
+        const searchInput = m.querySelector('#leader-search');
+        const resultsBox = m.querySelector('#search-results');
+        let searchTimeout;
+
+        searchInput.oninput = (e) => {
+            clearTimeout(searchTimeout);
+            const q = e.target.value.trim();
+            if (q.length < 2) {
+                resultsBox.classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                const results = await PolesService.searchVolunteers(q);
+                resultsBox.innerHTML = results.map(u => `
+                    <div class="flex items-center justify-between p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 transition" data-add-leader="${u.id}">
+                        <div class="flex items-center gap-2">
+                             <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold overflow-hidden">
+                                ${u.photo_url ? `<img src="${u.photo_url}" class="w-full h-full object-cover">` : u.first_name[0]}
+                             </div>
+                             <div class="flex flex-col">
+                                <span class="text-sm font-bold text-slate-800">${escapeHtml(u.first_name)} ${escapeHtml(u.last_name)}</span>
+                                <span class="text-[10px] text-slate-400">${escapeHtml(u.email)}</span>
+                             </div>
+                        </div>
+                        <i data-lucide="plus" class="w-4 h-4 text-brand-600"></i>
+                    </div>
+                `).join('');
+                createIcons({ icons, root: resultsBox });
+
+                if (results.length > 0) resultsBox.classList.remove('hidden');
+                else resultsBox.classList.add('hidden');
+
+                // Add Click Event
+                resultsBox.querySelectorAll('[data-add-leader]').forEach(row => {
+                    row.onclick = () => {
+                        const uid = row.dataset.addLeader;
+                        const user = {
+                            id: uid,
+                            first_name: row.querySelector('.text-sm.font-bold').textContent.split(' ')[0],
+                            last_name: row.querySelector('.text-sm.font-bold').textContent.split(' ').slice(1).join(' ')
+                        };
+
+                        // Open modal with callback for role title
+                        openLeaderRoleModal(user, (roleTitle) => {
+                            // Add to local changes
+                            leaderChanges.toAdd.push({
+                                userId: uid,
+                                poleId: team.id,
+                                roleTitle: roleTitle
+                            });
+                            showToast(`${user.first_name} sera ajouté(e) au poste "${roleTitle}"`);
+                            searchInput.value = ''; // Clear search
+                            resultsBox.classList.add('hidden');
+                        });
+                    };
+                });
+            }, 300);
+        };
+    }
+}
+
+// =============================================================================
+// 🎖️ MODALE TITRE DU POSTE (Responsable)
+// =============================================================================
+
+function openLeaderRoleModal(user, onConfirm) {
+    const m = document.createElement('div');
+    m.className = 'fixed inset-0 bg-black/60 z-[90] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in';
+
+    // Handle user object structure variability (db vs search result)
+    const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
+    m.innerHTML = `
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in p-6 border border-slate-100">
+            <!-- Header -->
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-100 text-brand-600 mb-3">
+                    <i data-lucide="briefcase" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Titre du poste</h3>
+                <p class="text-sm text-slate-500 mt-2">Définissez le rôle de <strong class="text-slate-700">${escapeHtml(userName)}</strong></p>
+            </div>
+
+            <!-- Form -->
+            <form id="form-role-title" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Intitulé du poste</label>
+                    <div class="relative">
+                        <i data-lucide="briefcase" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                        <input type="text" name="role_title" placeholder="Ex: Responsable Logistique" value="Responsable" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white border border-slate-100 transition" required>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">Suggestions : Responsable • Coordinateur • Animateur • Référent • Animateur Senior</p>
+                </div>
+            </form>
+
+            <!-- Actions -->
+            <div class="flex gap-3 mt-7">
+                <button id="btn-cancel-role" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition duration-300">Annuler</button>
+                <button form="form-role-title" type="submit" class="flex-1 px-4 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition duration-300 active:scale-95">Ajouter</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(m);
+    createIcons({ icons, root: m });
+
+    const closeModal = () => m.remove();
+    m.querySelector('#btn-cancel-role').onclick = closeModal;
+
+    const form = m.querySelector('#form-role-title');
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        const roleTitle = form.querySelector('[name="role_title"]').value.trim() || 'Responsable';
+
+        // Calback instead of API call
+        if (onConfirm) onConfirm(roleTitle);
+
+        closeModal();
+    };
+}
+
+// =============================================================================
+// 👥 MODALE CANDIDATS (Premium)
+// =============================================================================
+
+async function openCandidatesModal(teamId, teamName) {
+    toggleLoader(true);
+    const candidates = await PolesService.getCandidates(teamId); // Returns { user_id, created_at, profiles: {...} }
+    toggleLoader(false);
+
+    const m = document.createElement('div');
+    m.className = 'fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+
+    const listHtml = candidates.length > 0 ? candidates.map(c => {
+        const p = c.profiles;
+        const date = new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+        return `
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between mb-3 shadow-sm hover:shadow-md transition group">
+                 <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-brand-600 font-bold text-lg overflow-hidden">
+                        ${p.photo_url
+                ? `<img src="${p.photo_url}" class="w-full h-full object-cover">`
+                : p.first_name[0]
+            }
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-slate-900">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">${date}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
+                            <span><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.phone || '-')}</span>
+                            <span><i data-lucide="mail" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.email || '-')}</span>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button data-action="contact-candidate" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="Contacter">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    </button>
+                    <button data-action="remove-interest" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition" title="Retirer de la liste">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                 </div>
+            </div>`;
+    }).join('') : `
+        <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <i data-lucide="inbox" class="w-12 h-12 mb-3 text-slate-200"></i>
+            <p>Aucun bénévole intéressé pour le moment.</p>
+        </div>
+    `;
+
+    m.innerHTML = `
+        <div class="bg-white w-full max-w-2xl rounded-3xl p-0 h-[75vh] flex flex-col shadow-2xl animate-scale-in relative overflow-hidden">
+            <!-- Header (Premium) -->
+            <div class="bg-gradient-to-br from-brand-50/80 to-indigo-50/50 p-6 border-b border-slate-100 flex justify-between items-start">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider border border-brand-200/30 mb-2">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i> Recrutement
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Intéressés par: ${escapeHtml(teamName)}</h3>
+                    <p class="text-slate-500 text-sm mt-1 font-medium">${candidates.length} bénévole${candidates.length > 1 ? 's' : ''} en attente</p>
+                </div>
+                <button class="bg-white/80 backdrop-blur-sm p-2.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-white transition duration-300 btn-close shadow-sm border border-slate-100/50">
+                    <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                ${listHtml}
+            </div>
+            
+            <div class="bg-slate-50 p-4 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
+                <i data-lucide="lightbulb" class="w-4 h-4 inline mr-1 text-amber-500"></i> Cliquez sur l'icône message pour contacter directement.
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(m);
+    createIcons({ icons, root: m });
+
+    m.querySelector('.btn-close').onclick = () => m.remove();
+
+    // Actions
+    m.querySelectorAll('[data-action]').forEach(btn => {
+        btn.onclick = async () => {
+            const uid = btn.dataset.userId;
+            const action = btn.dataset.action;
+
+            if (action === 'remove-interest') {
+                if (!confirm("Retirer ce bénévole de la liste ?\n(Cela décochera son intérêt)")) return;
+                toggleLoader(true);
+                await PolesService.removeCandidateInterest(uid, teamId);
+                toggleLoader(false);
+                showToast("Intérêt retiré");
+                m.remove();
+                await openCandidatesModal(teamId, teamName); // Refresh
+            }
+
+            if (action === 'contact-candidate') {
+                toggleLoader(true);
+                try {
+                    const profileData = candidates.find(c => c.user_id === uid)?.profiles;
+                    const fullName = `${profileData?.first_name} ${profileData?.last_name}`;
+                    const messageContent = `Bonjour ${profileData?.first_name},\n\nJe te contacte suite à ton intérêt pour le pôle ${teamName}.`;
+
+                    // Create or get existing conversation
+                    const res = await ChatService.createTicketByUser(uid, `Candidature Pôle: ${teamName}`, messageContent);
+
+                    // Close modal and navigate to messages
+                    m.remove();
+                    toggleLoader(false);
+
+                    // Force navigation to messages
+                    if (res && (res.ticketId || res.id)) {
+                        // Update store to indicate we should open this ticket
+                        if (store.state) {
+                            store.state.selectedTicketId = res.ticketId || res.id;
+                        }
+                    }
+
+                    // Navigate to messages page
+                    window.history.pushState({}, '', '/messages');
+                    const { router } = await import('../../core/router.js');
+                    if (router && router.handleLocation) {
+                        router.handleLocation();
+                    } else {
+                        // Fallback: reload page
+                        setTimeout(() => location.reload(), 100);
+                    }
+
+                    showToast('💬 Conversation ouverte!');
+                } catch (err) {
+                    console.error('Contact candidate error:', err);
+                    toggleLoader(false);
+                    showToast("Erreur lors de l'ouverture du tchat", "error");
+                }
+            }
+        };
+    });
 }

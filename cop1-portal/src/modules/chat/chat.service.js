@@ -19,25 +19,44 @@ export const ChatService = {
         if (!store.state.user) return { success: false, error: "Non connecté" };
 
         const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+        const myId = store.state.user?.id;
 
         // 1. Base Query
-        // On récupère aussi les timestamps de lecture pour calculer les "non lus"
         let query = supabase
             .from('tickets')
             .select(`
                 *,
                 last_message:messages(content, created_at, user_id, deleted_at),
-                profiles:user_id(first_name, last_name, email)
+                profiles:user_id(first_name, last_name, email),
+                assigned_admin:assigned_admin_id(first_name, last_name)
             `)
             .neq('status', 'deleted')
             .order('last_message_at', { ascending: false });
 
         // 2. Security & Visibility Filters
         if (isAdmin) {
-            query = query.not('hidden_for_admin', 'is', true);
+            // Admin sees:
+            // - Tickets assigned to them (assigned_admin_id = myId)
+            // - OR Global support tickets (assigned_admin_id IS NULL AND category != 'direct') 
+            //   (Actually 'direct' w/o assigned_admin shouldn't exist, but 'support' is global)
+            // - AND not hidden
+
+            // Logic:
+            // (assigned_admin_id == ME) OR (assigned_admin_id IS NULL)
+
+            query = query.not('hidden_for_admin', 'is', true)
+                .or(`assigned_admin_id.eq.${myId},assigned_admin_id.is.null`);
         } else {
+            // Volunteer sees:
+            // - Tickets they created (user_id = me)
+            // - OR Announcements (category = announcement)
+            // - AND not hidden
+
+            // Note: assigned_admin_id doesn't affect visibility for volunteers, 
+            // they just see their threads.
+
             query = query.not('hidden_for_volunteer', 'is', true)
-                .or(`user_id.eq.${store.state.user.id},category.eq.announcement`);
+                .or(`user_id.eq.${myId},category.eq.announcement`);
         }
 
         const { data, error } = await query;
@@ -124,6 +143,19 @@ export const ChatService = {
         return { success: true, data };
     },
 
+    async getAllAdmins() {
+        if (!store.state.user) return { success: false, error: "Non connecté" };
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, email')
+            .eq('is_admin', true)
+            .order('first_name');
+
+        if (error) return { success: false, error };
+        return { success: true, data };
+    },
+
     // =========================================================================
     // ⚡ ACTIONS
     // =========================================================================
@@ -179,7 +211,7 @@ export const ChatService = {
 
     async editMessage(messageId, newContent) {
         if (!newContent?.trim()) return { success: false, error: "Contenu vide" };
-        
+
         const { error } = await supabase
             .from('messages')
             .update({
@@ -216,15 +248,27 @@ export const ChatService = {
             if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
         }
         else if (type === 'direct') {
-            // Direct messages : admin envoie un ticket directement à un bénévole
-            if (!store.state.profile?.is_admin) return { success: false, error: "Non autorisé" };
+            // Direct messages
             if (!targetUserId) return { success: false, error: "Destinataire requis" };
-            payload.user_id = targetUserId; // Le ticket appartient au destinataire
-            payload.category = 'support'; // Les messages directs sont des supports
+
+            // Scenario A: Admin -> Volunteer
+            if (store.state.profile?.is_admin) {
+                payload.user_id = targetUserId; // The ticket belongs to the volunteer
+                payload.assigned_admin_id = user.id; // Assign to me (Admin) automatically
+                payload.category = 'support'; // It's a support thread, just private
+            }
+            // Scenario B: Volunteer -> Admin
+            else {
+                // Volunteer creates ticket for themselves
+                payload.user_id = user.id;
+                payload.assigned_admin_id = targetUserId; // Assign to the target Admin
+                payload.category = 'support';
+            }
         }
         else if (type === 'support') {
-            // Support normal : bénévole envoie un ticket d'aide
+            // Global Support (No assigned admin)
             payload.category = 'support';
+            payload.assigned_admin_id = null;
         }
         else {
             return { success: false, error: "Type de ticket invalide" };
@@ -244,6 +288,20 @@ export const ChatService = {
         }
 
         return { success: true, data: ticket };
+    },
+
+    /**
+     * Helper pour créer un ticket direct vers un utilisateur
+     */
+    async createTicketByUser(targetUserId, subject, content) {
+        // 1. Check if existing ticket? (Optional optimization, avoiding duplicates)
+        // For now, simple creation
+        return this.createTicket({
+            type: 'direct',
+            targetUserId,
+            subject,
+            content
+        });
     },
 
     async hideTicket(ticketId) {

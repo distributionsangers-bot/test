@@ -407,5 +407,94 @@ export const DirectoryService = {
             console.error('❌ Erreur export CSV:', error);
             return { csv: null, error };
         }
+    },
+
+    /**
+     * Récupère l'historique des participations d'un bénévole
+     * @param {string} userId
+     * @param {string|null} startDate - Format YYYY-MM-DD
+     * @param {string|null} endDate - Format YYYY-MM-DD
+     */
+    async getUserHistory(userId, startDate = null, endDate = null) {
+        try {
+            // 1. Fetch registrations with shift & event details
+            // We need to join: registrations -> shifts -> events
+            let query = supabase
+                .from('registrations')
+                .select(`
+                    id, 
+                    created_at,
+                    attended,
+                    counts_for_hours,
+                    hours_counted,
+                    shift:shifts (
+                        id, 
+                        start_time, 
+                        end_time,
+                        event:events (
+                            id, 
+                            title, 
+                            date, 
+                            location
+                        )
+                    )
+                `)
+                .eq('user_id', userId);
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            // 2. Process & Filter - Only count attended/validated presences
+            let history = data.map(reg => {
+                const shift = reg.shift;
+                const event = shift?.event;
+
+                if (!shift || !event) return null;
+
+                // Only include if attended OR counts_for_hours is true (to show history of what happened)
+                // But for the total, we will strictly use hours_counted
+                const isValidPresence = reg.attended || reg.counts_for_hours;
+
+                if (!isValidPresence) return null;
+
+                // Use the DB calculated hours (source of truth)
+                const hoursVal = reg.hours_counted !== null ? Number(reg.hours_counted) : 0;
+
+                return {
+                    id: reg.id,
+                    eventName: event.title,
+                    date: event.date,
+                    location: event.location,
+                    startTime: shift.start_time.slice(0, 5), // HH:MM
+                    endTime: shift.end_time.slice(0, 5),   // HH:MM
+                    hours: parseFloat(hoursVal.toFixed(2)),
+                    attended: reg.attended,
+                    validated: reg.counts_for_hours
+                };
+            }).filter(item => item !== null);
+
+            // Filter by Date Range
+            if (startDate) {
+                history = history.filter(h => h.date >= startDate);
+            }
+            if (endDate) {
+                history = history.filter(h => h.date <= endDate);
+            }
+
+            // Sort by Date Descending
+            history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Sum Total Hours (using the DB value)
+            const totalHours = history.reduce((sum, h) => sum + h.hours, 0);
+
+            return {
+                data: history,
+                totalHours: parseFloat(totalHours.toFixed(2)),
+                error: null
+            };
+        } catch (error) {
+            console.error('❌ Erreur historique bénévole:', error);
+            return { data: [], totalHours: 0, error };
+        }
     }
 };

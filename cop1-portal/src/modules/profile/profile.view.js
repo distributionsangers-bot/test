@@ -306,47 +306,109 @@ function renderHistoryList(history) {
         `;
     }
 
-    return `<div class="space-y-3">${history.map(item => {
-        const shift = item.shifts;
-        const event = shift?.events;
-        if (!shift || !event) return '';
+    // Group by event name and date
+    const groupedByEvent = {};
 
-        const date = new Date(event.date);
-        const isPast = new Date() > new Date(`${event.date}T${shift.end_time}`);
-        const isPresent = item.attended === true || item.status === 'present' || (item.hours_added && item.hours_added > 0);
-        const isAbsent = item.status === 'absent';
-
-        let config = { border: 'border-slate-100', bg: 'bg-white', icon: 'calendar', iconColor: 'text-slate-400', badge: '', badgeBg: '' };
-
-        if (isPresent) {
-            config = { border: 'border-emerald-200', bg: 'bg-emerald-50/50', icon: 'check-circle', iconColor: 'text-emerald-600', badge: 'Présent', badgeBg: 'bg-emerald-100 text-emerald-700' };
-        } else if (isAbsent) {
-            config = { border: 'border-red-200', bg: 'bg-red-50/50', icon: 'x-circle', iconColor: 'text-red-500', badge: 'Absent', badgeBg: 'bg-red-100 text-red-700' };
-        } else if (isPast) {
-            // Past but neither present nor explicitly absent => Non pointé (or Absent implicitly?)
-            // User complaint suggests default fallback was 'Non pointé'
-            config = { border: 'border-amber-200', bg: 'bg-amber-50/50', icon: 'help-circle', iconColor: 'text-amber-500', badge: 'Non pointé', badgeBg: 'bg-amber-100 text-amber-700' };
-        } else {
-            // Future
-            config = { border: 'border-blue-200', bg: 'bg-blue-50/50', icon: 'clock', iconColor: 'text-blue-500', badge: 'À venir', badgeBg: 'bg-blue-100 text-blue-700' };
+    history.forEach(item => {
+        const key = `${item.eventName}|${item.date}`;
+        if (!groupedByEvent[key]) {
+            groupedByEvent[key] = {
+                eventName: item.eventName,
+                date: item.date,
+                location: item.location,
+                shifts: []
+            };
         }
+        groupedByEvent[key].shifts.push(item);
+    });
+
+    const eventGroups = Object.values(groupedByEvent).sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    const items = eventGroups.map(event => {
+        const date = new Date(event.date);
 
         return `
-            <div class="flex items-center gap-4 p-4 rounded-2xl border-2 ${config.border} ${config.bg} transition-all hover:shadow-md">
-                <div class="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="${config.icon}" class="w-6 h-6 ${config.iconColor}"></i>
+            <div class="rounded-2xl border-2 border-slate-100 overflow-hidden hover:shadow-md transition-all">
+                <!-- Event Header -->
+                <div class="bg-gradient-to-r from-slate-50 to-slate-100 px-5 py-4 border-b border-slate-200">
+                    <h4 class="font-bold text-slate-900 text-base mb-1">${escapeHtml(event.eventName)}</h4>
+                    <p class="text-xs text-slate-500">
+                        ${event.location ? escapeHtml(event.location) + ' • ' : ''}
+                        ${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(event.title)}</h4>
-                    <p class="text-xs text-slate-500 truncate">${escapeHtml(shift.title)} • ${date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
-                </div>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    ${item.hours_added ? `<span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-lg">+${item.hours_added}h</span>` : ''}
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${config.badgeBg}">${config.badge}</span>
+                
+                <!-- Shifts List -->
+                <div class="divide-y divide-slate-100">
+                    ${event.shifts.map(shift => {
+            const eventEndTime = new Date(`${shift.date}T${shift.endTime}`);
+            const isPast = new Date() > eventEndTime;
+            const isAttended = shift.attended === true;
+            const isValidated = shift.validated === true;
+            // New Condition: Attended BUT 0 hours (likely quota overflow)
+            const isQuotaOverflow = isAttended && shift.hours === 0;
+
+            let config = {
+                icon: 'calendar-x',
+                iconColor: 'text-slate-400',
+                badge: '❌ Non pointé',
+                badgeBg: 'bg-slate-100 text-slate-700'
+            };
+
+            if (isQuotaOverflow) {
+                config = {
+                    icon: 'alert-circle',
+                    iconColor: 'text-amber-500',
+                    badge: '⚠️ Hors Quota (0h)',
+                    badgeBg: 'bg-amber-50 text-amber-600 border border-amber-200'
+                };
+            } else if (isAttended) {
+                config = {
+                    icon: 'check-circle',
+                    iconColor: 'text-emerald-600',
+                    badge: '✓ Présent',
+                    badgeBg: 'bg-emerald-100 text-emerald-700'
+                };
+            } else if (isValidated) {
+                config = {
+                    icon: 'clipboard-list',
+                    iconColor: 'text-orange-600',
+                    badge: '📋 Inscrit',
+                    badgeBg: 'bg-orange-100 text-orange-700'
+                };
+            } else if (!isPast) {
+                config = {
+                    icon: 'clock',
+                    iconColor: 'text-blue-500',
+                    badge: '⏳ À venir',
+                    badgeBg: 'bg-blue-100 text-blue-700'
+                };
+            }
+
+            return `
+                            <div class="flex items-center gap-4 p-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="${config.icon}" class="w-5 h-5 ${config.iconColor}"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900">${shift.startTime} - ${shift.endTime}</p>
+                                    <p class="text-xs text-slate-500">${shift.hours}h</p>
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg whitespace-nowrap ${config.badgeBg}">${config.badge}</span>
+                                    ${isQuotaOverflow ? `<span class="text-[9px] text-amber-600 mt-1 font-medium">Bénévole École (Quota atteint)</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+        }).join('')}
                 </div>
             </div>
         `;
-    }).join('')}</div>`;
+    }).join('');
+
+    return `<div class="space-y-4">${items}</div>`;
 }
 
 function setupTabs(c) {
@@ -420,24 +482,28 @@ function setupDelete(c, uid) {
         showConfirm(
             "Supprimer définitivement votre compte ? Cette action est irréversible.",
             async () => {
-                // Prompt for email confirmation
-                const email = prompt("Pour confirmer, entrez votre email :");
-                if (email !== store.state.user?.email) {
-                    showToast("Email incorrect", "error");
-                    return;
-                }
+                showPrompt(
+                    "Pour confirmer, veuillez saisir votre email :",
+                    async (email) => {
+                        if (email !== store.state.user?.email) {
+                            showToast("Email incorrect", "error");
+                            return;
+                        }
 
-                toggleLoader(true);
-                const res = await ProfileService.deleteAccount(uid);
-                if (res.error) {
-                    toggleLoader(false);
-                    showToast("Erreur: " + res.error.message, "error");
-                } else {
-                    await supabase.auth.signOut();
-                    window.location.reload();
-                }
+                        toggleLoader(true);
+                        const res = await ProfileService.deleteAccount(uid);
+                        if (res.error) {
+                            toggleLoader(false);
+                            showToast("Erreur: " + res.error.message, "error");
+                        } else {
+                            await supabase.auth.signOut();
+                            window.location.reload();
+                        }
+                    },
+                    { title: "Confirmation de sécurité", confirmText: "Supprimer définitivement", cancelText: "Annuler", placeholder: store.state.user?.email }
+                );
             },
-            { type: 'danger', confirmText: 'Supprimer' }
+            { type: 'danger', confirmText: 'Continuer' }
         );
     });
 }
@@ -490,16 +556,20 @@ async function refreshProfile(userId) {
         else if (profile.status === 'approved') statusConfig = { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Validé', icon: 'check-circle' };
         else if (profile.status === 'rejected') statusConfig = { bg: 'bg-red-100', text: 'text-red-700', label: 'Refusé', icon: 'x-circle' };
 
-        elTags.innerHTML = `
-            <span class="px-3 py-1.5 rounded-xl text-xs font-bold ${statusConfig.bg} ${statusConfig.text} flex items-center gap-1.5">
-                <i data-lucide="${statusConfig.icon}" class="w-3.5 h-3.5"></i>
-                ${statusConfig.label}
-            </span>
-            <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">
-                ${profile.mandatory_hours ? '🎓 Scolaire' : '💚 Bénévole'}
-            </span>
-            ${profile.has_permit ? `<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>` : ''}
-        `;
+        const mandatoryLabel = profile.mandatory_hours ? '🎓 Scolaire' : '💚 Bénévole';
+        let tagsHtml = '<span class="px-3 py-1.5 rounded-xl text-xs font-bold ' + statusConfig.bg + ' ' + statusConfig.text + ' flex items-center gap-1.5">' +
+            '<i data-lucide="' + statusConfig.icon + '" class="w-3.5 h-3.5"></i>' +
+            statusConfig.label +
+            '</span>' +
+            '<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">' +
+            mandatoryLabel +
+            '</span>';
+
+        if (profile.has_permit) {
+            tagsHtml += '<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>';
+        }
+
+        elTags.innerHTML = tagsHtml;
         createIcons({ icons, root: elTags });
     }
 
@@ -512,9 +582,10 @@ async function refreshProfile(userId) {
 
     const elPresence = document.getElementById('stat-presence');
     if (elPresence) {
-        elPresence.innerHTML = `${stats.presenceRate}<span class="text-lg opacity-60">%</span>`;
+        elPresence.innerHTML = stats.presenceRate + '<span class="text-lg opacity-60">%</span>';
         // Update color
-        elPresence.className = `text-3xl font-black ${stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500'}`;
+        let presenceColor = stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500';
+        elPresence.className = 'text-3xl font-black ' + presenceColor;
     }
 
     const elUpcoming = document.getElementById('stat-upcoming');

@@ -136,14 +136,15 @@ export const ParticipantsService = {
 
     /**
      * Inscrit manuellement un participant à un créneau (admin)
-     * NOUVEAU - Fonctionnalité manquante dans l'original
+     * Si 'force' est true, augmente la capacité du créneau si nécessaire.
      * @param {number} shiftId - ID du créneau
      * @param {string} userId - ID de l'utilisateur
-     * @returns {Promise<{data, error}>}
+     * @param {boolean} force - Forcer l'ajout même si complet
+     * @returns {Promise<{data, error, needsConfirmation}>}
      */
-    async addParticipant(shiftId, userId) {
+    async addParticipant(shiftId, userId, force = false) {
         try {
-            // Vérifie si déjà inscrit
+            // 1. Vérifie si déjà inscrit
             const { data: existing } = await supabase
                 .from('registrations')
                 .select('id')
@@ -152,13 +153,34 @@ export const ParticipantsService = {
                 .single();
 
             if (existing) {
-                return {
-                    data: null,
-                    error: { message: 'Participant déjà inscrit à ce créneau' }
-                };
+                return { data: null, error: { message: 'Participant déjà inscrit à ce créneau' } };
             }
 
-            // Inscrit le participant
+            // 2. Vérifie la capacité
+            const { data: shift } = await supabase
+                .from('shifts')
+                .select('max_slots')
+                .eq('id', shiftId)
+                .single();
+
+            const { count } = await supabase
+                .from('registrations')
+                .select('*', { count: 'exact', head: true })
+                .eq('shift_id', shiftId);
+
+            if (shift && count >= shift.max_slots) {
+                if (!force) {
+                    return { data: null, error: null, needsConfirmation: true };
+                } else {
+                    // Augmente la capacité pour permettre l'ajout
+                    await supabase
+                        .from('shifts')
+                        .update({ max_slots: count + 1 })
+                        .eq('id', shiftId);
+                }
+            }
+
+            // 3. Inscrit le participant
             const { data, error } = await supabase
                 .from('registrations')
                 .insert({
@@ -283,6 +305,67 @@ export const ParticipantsService = {
         } catch (error) {
             console.error('❌ Erreur vérification capacité:', error);
             return { isFull: false, current: 0, max: 0 };
+        }
+    },
+
+    /**
+     * Force la validation des heures pour une inscription (Admin Override)
+     * Utile pour les bénévoles "Hors Quota"
+     * @param {number} regId - ID de l'inscription
+     * @param {boolean} shouldCount - Force à TRUE ou FALSE
+     */
+    async forceHoursValidation(regId, shouldCount) {
+        try {
+            // 1. Update counts_for_hours
+            const { data: reg, error } = await supabase
+                .from('registrations')
+                .update({ counts_for_hours: shouldCount })
+                .eq('id', regId)
+                .select('*, shifts(*)')
+                .single();
+
+            if (error) throw error;
+
+            // 2. If attended, recalculate hours immediately
+            if (reg.attended) {
+                // Trigger logic similar to the DB trigger but manual to be sure
+                const shift = reg.shifts;
+                let newHoursCounted = 0;
+
+                if (shouldCount) {
+                    const start = new Date(`${'1970-01-01'}T${shift.start_time}`); // Date part doesn't matter for duration
+                    const end = new Date(`${'1970-01-01'}T${shift.end_time}`);
+                    newHoursCounted = (end - start) / (1000 * 60 * 60);
+                    newHoursCounted = Math.max(0, newHoursCounted);
+                }
+
+                // Update hours_counted
+                await supabase
+                    .from('registrations')
+                    .update({ hours_counted: newHoursCounted })
+                    .eq('id', regId);
+
+                // 3. Trigger Profile Total Update (recalc all for this user to be safe)
+                // We can use the simple ADD/SUBTRACT logic DB side or re-sum.
+                // Re-sum is safer.
+                const { data: allRegs } = await supabase
+                    .from('registrations')
+                    .select('hours_counted')
+                    .eq('user_id', reg.user_id)
+                    .not('hours_counted', 'is', null);
+
+                const total = (allRegs || []).reduce((acc, r) => acc + (Number(r.hours_counted) || 0), 0);
+
+                await supabase
+                    .from('profiles')
+                    .update({ total_hours: total })
+                    .eq('id', reg.user_id);
+            }
+
+            return { success: true, error: null };
+        } catch (error) {
+            console.error('❌ Erreur forçage validation:', error);
+            return { success: false, error };
         }
     }
 };

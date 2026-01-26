@@ -254,11 +254,11 @@ function renderShiftCard(shift, userId, countsMap) {
     // Status badge
     let statusBadge = '';
     if (isFull) {
-        statusBadge = '<span class="text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg">Complet</span>';
+        statusBadge = '<span class="text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg" data-status-badge>🔴 Complet</span>';
     } else if (isAlmostFull) {
-        statusBadge = `<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">${remaining} place${remaining > 1 ? 's' : ''}</span>`;
+        statusBadge = `<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg" data-status-badge>🟠 <span data-available-slots>${remaining}</span> place${remaining > 1 ? 's' : ''}</span>`;
     } else {
-        statusBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg">${remaining} places</span>`;
+        statusBadge = `<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg" data-status-badge>🟢 <span data-available-slots>${remaining}</span> places</span>`;
     }
 
     // Reserved Badge
@@ -272,7 +272,7 @@ function renderShiftCard(shift, userId, countsMap) {
     }
 
     return `
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3 ${isRegistered ? 'bg-emerald-50 border-emerald-200' : ''} hover:shadow-sm transition">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3 ${isRegistered ? 'bg-emerald-50 border-emerald-200' : ''} hover:shadow-sm transition" data-shift-id="${shift.id}">
             <!-- Time -->
             <div class="text-center flex-shrink-0 w-16">
                 <div class="text-sm font-bold ${isRegistered ? 'text-emerald-700' : 'text-slate-700'}">${(shift.start_time || '').slice(0, 5)}</div>
@@ -282,7 +282,7 @@ function renderShiftCard(shift, userId, countsMap) {
             <!-- Info -->
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-semibold text-sm ${isRegistered ? 'text-emerald-800' : 'text-slate-700'} truncate">${escapeHtml(shift.title)}</span>
+                    <span class="font-semibold text-sm ${isRegistered ? 'text-emerald-800' : 'text-slate-700'} truncate" data-shift-title>${escapeHtml(shift.title)}</span>
                     ${statusBadge}
                     ${reservedBadge}
                 </div>
@@ -309,7 +309,7 @@ function renderShiftCard(shift, userId, countsMap) {
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
         }"
             >
-                ${isRegistered ? 'Désister' : isFull ? 'Complet' : "S'inscrire"}
+                ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
             </button>
         </div>
     `;
@@ -383,7 +383,8 @@ export function cleanup() {
 
 /**
  * Configure l'écoute en temps réel des changements d'inscriptions
- * Quand quelqu'un s'inscrit/désinscrit à une mission, on met à jour les places visibles immédiatement
+ * Quand quelqu'un s'inscrit/désinscrit à une mission, on met à jour SEULEMENT les affichages des places
+ * SANS re-rendre la page complète
  */
 function setupRegistrationSubscription() {
     // Arrête la subscription précédente s'il y en a une
@@ -392,18 +393,125 @@ function setupRegistrationSubscription() {
     }
 
     registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
-        // payload.event === 'INSERT' | 'UPDATE' | 'DELETE'
-        // On va re-rendre avec un délai court
-        // pour laisser le temps aux compteurs de se mettre à jour
+        // payload.new contient les données de la registration
+        const shiftId = payload.new?.shift_id;
+        
+        if (!shiftId) return;
+
+        // Au lieu de re-rendre la page, on met à jour juste les affichages des places
         if (registrationRefreshTimeout) {
             clearTimeout(registrationRefreshTimeout);
         }
 
         registrationRefreshTimeout = setTimeout(() => {
-            // Re-render la page des missions
-            import('../../core/router.js').then(({ router }) => router.handleLocation());
-        }, 300); // Attendez 300ms avant de rafraîchir (même logique que chat.view.js)
+            updateShiftDisplayOnly(shiftId);
+        }, 300); // Attendez 300ms avant de rafraîchir
     });
+}
+
+/**
+ * Met à jour UNIQUEMENT l'affichage des places pour un créneau spécifique
+ * Pas de re-render complet, juste une mise à jour du DOM ciblée
+ * Cela permet aux utilisateurs de continuer à remplir des formulaires sans interruption
+ */
+async function updateShiftDisplayOnly(shiftId) {
+    try {
+        // 1. Récupère juste le nombre actuel d'inscriptions pour ce créneau
+        const { count } = await supabase
+            .from('registrations')
+            .select('*', { count: 'exact', head: true })
+            .eq('shift_id', shiftId);
+
+        // 2. Récupère max_slots du créneau
+        const { data: shift } = await supabase
+            .from('shifts')
+            .select('id, max_slots, reserved_slots')
+            .eq('id', shiftId)
+            .single();
+
+        if (!shift) return;
+
+        const max = shift.max_slots || 0;
+        const taken = count || 0;
+        const available = Math.max(0, max - taken);
+        const reservedFull = shift.reserved_slots > 0 && taken >= max;
+
+        // 3. Trouve l'élément HTML du créneau
+        const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
+        if (!shiftEl) return;
+
+        // 4. Met à jour le texte des places disponibles
+        const availEl = shiftEl.querySelector('[data-available-slots]');
+        if (availEl) {
+            availEl.textContent = available;
+        }
+
+        // 5. Met à jour l'état du bouton d'inscription
+        const registerBtn = shiftEl.querySelector('[data-action="toggle-reg"]');
+        if (registerBtn) {
+            const isCurrentlyFull = available === 0;
+            registerBtn.dataset.reservedFull = reservedFull;
+            
+            if (isCurrentlyFull && !registerBtn.dataset.registered) {
+                // Désactiver le bouton et changer le texte
+                registerBtn.disabled = true;
+                registerBtn.className = registerBtn.className.replace('bg-emerald-500', 'bg-slate-300');
+                registerBtn.className = registerBtn.className.replace('hover:bg-emerald-600', '');
+                registerBtn.textContent = '🔴 Complet';
+            } else if (!isCurrentlyFull && registerBtn.disabled && !registerBtn.dataset.registered) {
+                // Réactiver le bouton
+                registerBtn.disabled = false;
+                registerBtn.className = registerBtn.className.replace('bg-slate-300', 'bg-emerald-500');
+                registerBtn.className += ' hover:bg-emerald-600';
+                registerBtn.textContent = 'S\'inscrire';
+            }
+        }
+
+        // 6. Met à jour les informations de statut visuel
+        updateMissionVisualStatus(shiftEl, taken, max, available);
+
+    } catch (error) {
+        console.error('Erreur mise à jour affichage créneau:', error);
+    }
+}
+
+/**
+ * Met à jour les visuels de statut d'une mission (couleurs, badges)
+ */
+function updateMissionVisualStatus(shiftEl, taken, max, available) {
+    // Supprimer les anciens badges de statut
+    const oldBadges = shiftEl.querySelectorAll('[data-status-badge]');
+    oldBadges.forEach(b => b.remove());
+
+    // Déterminer le nouveau badge
+    let badge = '';
+    let statusClass = '';
+
+    if (available === 0) {
+        badge = '🔴 Complet';
+        statusClass = 'bg-red-50 border-red-200 text-red-700';
+    } else if (available <= 2) {
+        badge = '🟠 Presque complet';
+        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+    } else {
+        badge = '🟢 Disponible';
+        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
+    }
+
+    if (badge) {
+        const badgeEl = document.createElement('span');
+        badgeEl.setAttribute('data-status-badge', 'true');
+        badgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}`;
+        badgeEl.textContent = badge;
+        
+        // Ajouter après le titre du créneau
+        const titleEl = shiftEl.querySelector('[data-shift-title]');
+        if (titleEl) {
+            titleEl.parentNode.insertBefore(badgeEl, titleEl.nextSibling);
+        } else {
+            shiftEl.prepend(badgeEl);
+        }
+    }
 }
 
 async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false) {

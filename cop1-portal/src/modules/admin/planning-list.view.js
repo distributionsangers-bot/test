@@ -1,5 +1,6 @@
 import { PlanningService } from './planning.service.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
+import { supabase } from '../../services/supabase.js';
 import { createIcons, icons } from 'lucide';
 import { openEventModal } from './planning-form.view.js';
 import { openParticipantsModal } from './participants.view.js';
@@ -175,19 +176,146 @@ function setupRegistrationSubscription() {
     }
 
     registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
-        // payload.event === 'INSERT' | 'UPDATE' | 'DELETE'
-        // payload.new et payload.old contiennent les données
+        // payload.new contient les données de la registration
+        const shiftId = payload.new?.shift_id;
         
-        // On va recharger les événements avec un délai court
-        // pour laisser le temps aux compteurs de se mettre à jour
+        if (!shiftId) return;
+
+        // Au lieu de re-rendre tout, on met à jour juste les compteurs
         if (registrationRefreshTimeout) {
             clearTimeout(registrationRefreshTimeout);
         }
 
         registrationRefreshTimeout = setTimeout(() => {
-            loadEvents();
-        }, 300); // Attendez 300ms avant de rafraîchir (même logique que chat.view.js)
+            updateShiftCounterOnly(shiftId);
+        }, 300); // Attendez 300ms avant de rafraîchir
     });
+}
+
+/**
+ * Met à jour UNIQUEMENT le compteur de places pour un créneau spécifique
+ * Pas de re-render complet, juste une mise à jour du DOM ciblée
+ * Cela permet aux utilisateurs de continuer à remplir des formulaires sans interruption
+ */
+async function updateShiftCounterOnly(shiftId) {
+    try {
+        // 1. Récupère juste le nombre actuel d'inscriptions pour ce créneau
+        const { count } = await supabase
+            .from('registrations')
+            .select('*', { count: 'exact', head: true })
+            .eq('shift_id', shiftId);
+
+        // 2. Récupère max_slots du créneau
+        const { data: shift } = await supabase
+            .from('shifts')
+            .select('id, max_slots')
+            .eq('id', shiftId)
+            .single();
+
+        if (!shift) return;
+
+        const max = shift.max_slots || 0;
+        const taken = count || 0;
+        const available = Math.max(0, max - taken);
+
+        // 3. Trouve l'élément HTML du créneau
+        const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
+        if (!shiftEl) return;
+
+        // 4. Met à jour les affichages de compteurs dans cet élément
+        const takenEl = shiftEl.querySelector('[data-counter="taken"]');
+        const availEl = shiftEl.querySelector('[data-counter="available"]');
+        const maxEl = shiftEl.querySelector('[data-counter="max"]');
+
+        if (takenEl) takenEl.textContent = taken;
+        if (availEl) availEl.textContent = available;
+        if (maxEl) maxEl.textContent = max;
+
+        // 5. Mets à jour les badges visuels (Full, Available, etc.)
+        updateShiftVisualStatus(shiftEl, taken, max, available);
+
+        // 6. Met à jour les stats globales (discrètement)
+        updateStatsFromCurrentDOM();
+
+    } catch (error) {
+        console.error('Erreur mise à jour compteur:', error);
+    }
+}
+
+/**
+ * Met à jour les visuels de statut d'un créneau (couleurs, badges)
+ */
+function updateShiftVisualStatus(shiftEl, taken, max, available) {
+    // Supprimer les anciens badges de statut
+    const oldBadges = shiftEl.querySelectorAll('[data-status-badge]');
+    oldBadges.forEach(b => b.remove());
+
+    // Déterminer le nouveau badge
+    let badge = '';
+    let statusClass = '';
+
+    if (available === 0) {
+        badge = '🔴 Complet';
+        statusClass = 'bg-red-50 border-red-200 text-red-700';
+    } else if (available <= 2) {
+        badge = '🟠 Presque complet';
+        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+    } else {
+        badge = '🟢 Disponible';
+        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
+    }
+
+    if (badge) {
+        const badgeEl = document.createElement('span');
+        badgeEl.setAttribute('data-status-badge', 'true');
+        badgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}`;
+        badgeEl.textContent = badge;
+        
+        // Ajouter après le titre du créneau
+        const titleEl = shiftEl.querySelector('[data-shift-title]');
+        if (titleEl) {
+            titleEl.parentNode.insertBefore(badgeEl, titleEl.nextSibling);
+        } else {
+            shiftEl.prepend(badgeEl);
+        }
+    }
+}
+
+/**
+ * Met à jour les statistiques globales en basant sur les valeurs actuelles du DOM
+ * (pour ne pas faire une requête DB complète)
+ */
+function updateStatsFromCurrentDOM() {
+    if (currentTab !== 'upcoming') return;
+
+    let totalShifts = 0;
+    let urgentShifts = 0;
+    let totalSlots = 0;
+    let filledSlots = 0;
+
+    // Parcourir tous les créneaux visibles
+    document.querySelectorAll('[data-shift-id]').forEach(shiftEl => {
+        const maxEl = shiftEl.querySelector('[data-counter="max"]');
+        const takenEl = shiftEl.querySelector('[data-counter="taken"]');
+
+        if (maxEl && takenEl) {
+            totalShifts++;
+            const max = parseInt(maxEl.textContent) || 0;
+            const taken = parseInt(takenEl.textContent) || 0;
+            totalSlots += max;
+            filledSlots += taken;
+            if (taken < max) urgentShifts++;
+        }
+    });
+
+    const fillRate = totalSlots > 0 ? Math.round((filledSlots / totalSlots) * 100) : 0;
+
+    // Mettre à jour les stats
+    const statUrgent = document.getElementById('stat-urgent');
+    const statFill = document.getElementById('stat-fill');
+
+    if (statUrgent) statUrgent.textContent = urgentShifts;
+    if (statFill) statFill.textContent = `${fillRate}%`;
 }
 
 async function loadEvents() {
@@ -391,13 +519,28 @@ function renderEventCard(e) {
 function renderShiftItem(s, eventId) {
     const total = s.max_slots || 0;
     const taken = s.registrations?.[0]?.count || 0;
+    const available = Math.max(0, total - taken);
     const percent = total > 0 ? (taken / total) * 100 : 0;
     const isFull = taken >= total;
     const barColor = isFull ? 'bg-emerald-500' : percent >= 50 ? 'bg-amber-500' : 'bg-red-500';
     const reservedBadge = s.reserved_slots > 0 ? `<span class="text-[8px] font-bold text-orange-600 bg-orange-100 px-1 py-0.5 rounded">+${s.reserved_slots}</span>` : '';
 
+    // Déterminer le badge de statut initial
+    let statusBadge = '';
+    let statusClass = '';
+    if (available === 0) {
+        statusBadge = '🔴 Complet';
+        statusClass = 'bg-red-50 border-red-200 text-red-700';
+    } else if (available <= 2) {
+        statusBadge = '🟠 Presque complet';
+        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+    } else {
+        statusBadge = '🟢 Disponible';
+        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
+    }
+
     return `
-        <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-100 flex items-center gap-2 sm:gap-3 hover:shadow-sm transition">
+        <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-100 flex items-center gap-2 sm:gap-3 hover:shadow-sm transition" data-shift-id="${s.id}">
             <!-- Time -->
             <div class="w-12 sm:w-14 text-center flex-shrink-0">
                 <div class="text-xs sm:text-sm font-bold text-slate-700">${(s.start_time || '').slice(0, 5)}</div>
@@ -406,8 +549,9 @@ function renderShiftItem(s, eventId) {
 
             <!-- Info -->
             <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5">
-                    <span class="font-semibold text-xs sm:text-sm text-slate-800 truncate">${escapeHtml(s.title)}</span>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-semibold text-xs sm:text-sm text-slate-800 truncate" data-shift-title>${escapeHtml(s.title)}</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}" data-status-badge>${statusBadge}</span>
                     ${reservedBadge}
                 </div>
                 <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">Réf: ${escapeHtml(s.referent_name || '-')}</div>
@@ -416,7 +560,8 @@ function renderShiftItem(s, eventId) {
             <!-- Progress -->
             <div class="w-16 sm:w-20 flex-shrink-0">
                 <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold mb-0.5">
-                    <span class="${isFull ? 'text-emerald-600' : 'text-slate-500'}">${taken}/${total}</span>
+                    <span class="${isFull ? 'text-emerald-600' : 'text-slate-500'}"><span data-counter="taken">${taken}</span>/<span data-counter="max">${total}</span></span>
+                    <span class="text-slate-400">(<span data-counter="available">${available}</span>)</span>
                 </div>
                 <div class="h-1 sm:h-1.5 bg-slate-200 rounded-full overflow-hidden">
                     <div class="${barColor} h-full transition-all" style="width: ${percent}%"></div>

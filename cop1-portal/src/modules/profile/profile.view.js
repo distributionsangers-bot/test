@@ -257,10 +257,11 @@ function computeStats(history, profile) {
 
         const eventEnd = new Date(`${event.date}T${shift.end_time}`);
         const isPast = now > eventEnd;
+        const isPresent = item.attended === true || item.status === 'present' || (item.hours_added && item.hours_added > 0);
 
         if (isPast) {
             pastCount++;
-            if (item.status === 'present') presentCount++;
+            if (isPresent) presentCount++;
         } else {
             upcoming++;
         }

@@ -1,7 +1,7 @@
 import { EventsService } from './events.service.js';
 import { supabase } from '../../services/supabase.js';
 import { store } from '../../core/store.js';
-import { showToast, toggleLoader, escapeHtml } from '../../services/utils.js';
+import { showToast, toggleLoader, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 
 let abortController = null;

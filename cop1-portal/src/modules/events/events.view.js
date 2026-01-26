@@ -265,9 +265,9 @@ function renderShiftCard(shift, userId, countsMap) {
     let reservedBadge = '';
     if (reservedTotal > 0 && !isFull) {
         if (reservedRemaining > 0) {
-            reservedBadge = `<span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1" title="${reservedRemaining} places réservées restantes">🎓 ${reservedRemaining} réservées</span>`;
+            reservedBadge = `<span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1" title="${reservedRemaining} places réservées restantes"><span data-reserved-badge-text>🎓 ${reservedRemaining} réservées</span></span>`;
         } else {
-            reservedBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1" title="Places réservées complètes">🎓 Complet</span>`;
+            reservedBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1" title="Places réservées complètes"><span data-reserved-badge-text>🎓 Complet</span></span>`;
         }
     }
 
@@ -382,135 +382,129 @@ export function cleanup() {
 }
 
 /**
- * Configure l'écoute en temps réel des changements d'inscriptions
- * Quand quelqu'un s'inscrit/désinscrit à une mission, on met à jour SEULEMENT les affichages des places
- * SANS re-rendre la page complète
+ * Configure l'écoute en temps réel des changements sur les CRÉNEAUX (shifts)
+ * Grâce au trigger en base de données, la table 'shifts' est mise à jour automatiquement
+ * à chaque inscription/désinscription with les nouveaux compteurs.
  */
 function setupRegistrationSubscription() {
     // Arrête la subscription précédente s'il y en a une
     if (registrationSubscription) {
-        registrationSubscription.unsubscribe();
+        supabase.removeChannel(registrationSubscription);
     }
 
-    registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
-        // payload.new contient les données de la registration
-        const shiftId = payload.new?.shift_id;
-        
-        if (!shiftId) return;
-
-        // Au lieu de re-rendre la page, on met à jour juste les affichages des places
-        if (registrationRefreshTimeout) {
-            clearTimeout(registrationRefreshTimeout);
-        }
-
-        registrationRefreshTimeout = setTimeout(() => {
-            updateShiftDisplayOnly(shiftId);
-        }, 300); // Attendez 300ms avant de rafraîchir
-    });
+    // On écoute les changements PUBLICS sur la table 'shifts'
+    // UPDATE : Quand les compteurs changent
+    registrationSubscription = supabase
+        .channel('public:shifts')
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'shifts' },
+            (payload) => {
+                // payload.new contient la nouvelle ligne 'shifts' avec total_registrations et reserved_taken à jour
+                handleShiftUpdate(payload.new);
+            }
+        )
+        .subscribe();
 }
 
 /**
  * Met à jour UNIQUEMENT l'affichage des places pour un créneau spécifique
- * Pas de re-render complet, juste une mise à jour du DOM ciblée
- * Cela permet aux utilisateurs de continuer à remplir des formulaires sans interruption
+ * Utilise les données reçues en temps réel sans refaire de requête
  */
-async function updateShiftDisplayOnly(shiftId) {
-    try {
-        // 1. Récupère juste le nombre actuel d'inscriptions pour ce créneau
-        const { count } = await supabase
-            .from('registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('shift_id', shiftId);
+function handleShiftUpdate(shiftData) {
+    if (!shiftData || !shiftData.id) return;
 
-        // 2. Récupère max_slots du créneau
-        const { data: shift } = await supabase
-            .from('shifts')
-            .select('id, max_slots, reserved_slots')
-            .eq('id', shiftId)
-            .single();
+    const shiftId = shiftData.id;
+    const max = shiftData.max_slots || 0;
+    // Utiliser les nouvelles colonnes calculées par le trigger
+    const taken = shiftData.total_registrations || 0;
+    const reservedTaken = shiftData.reserved_taken || 0;
+    const reservedTotal = shiftData.reserved_slots || 0;
 
-        if (!shift) return;
+    const available = Math.max(0, max - taken);
+    const reservedRemaining = Math.max(0, reservedTotal - reservedTaken);
+    // Si reservedTotal est 0, c'est considéré comme "plein" pour les places réservées
+    const reservedFull = reservedRemaining <= 0;
 
-        const max = shift.max_slots || 0;
-        const taken = count || 0;
-        const available = Math.max(0, max - taken);
-        const reservedFull = shift.reserved_slots > 0 && taken >= max;
+    // 1. Trouve l'élément HTML du créneau
+    const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
+    if (!shiftEl) return;
 
-        // 3. Trouve l'élément HTML du créneau
-        const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
-        if (!shiftEl) return;
+    // 2. Met à jour le texte des places disponibles (Standard)
+    // Cherche le span dans le badge de statut ou ailleurs
+    const availableSpan = shiftEl.querySelector('[data-available-slots]');
+    if (availableSpan) {
+        availableSpan.textContent = available;
+    }
 
-        // 4. Met à jour le texte des places disponibles
-        const availEl = shiftEl.querySelector('[data-available-slots]');
-        if (availEl) {
-            availEl.textContent = available;
+    // 3. Met à jour le texte des places réservées (Badge spécifique)
+    const reservedBadgeSpan = shiftEl.querySelector('[data-reserved-badge-text]');
+    if (reservedBadgeSpan) {
+        if (reservedRemaining > 0) {
+            reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} réservées`;
+            // Assure le style correct
+            reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1";
+            reservedBadgeSpan.parentElement.title = `${reservedRemaining} places réservées restantes`;
+        } else {
+            reservedBadgeSpan.textContent = `🎓 Complet`;
+            // Style gris
+            reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1";
+            reservedBadgeSpan.parentElement.title = "Places réservées complètes";
         }
+    }
 
-        // 5. Met à jour l'état du bouton d'inscription
-        const registerBtn = shiftEl.querySelector('[data-action="toggle-reg"]');
-        if (registerBtn) {
-            const isCurrentlyFull = available === 0;
-            registerBtn.dataset.reservedFull = reservedFull;
-            
-            if (isCurrentlyFull && !registerBtn.dataset.registered) {
-                // Désactiver le bouton et changer le texte
+    // 4. Met à jour l'état du bouton d'inscription
+    const registerBtn = shiftEl.querySelector('[data-action="toggle-reg"]');
+    if (registerBtn) {
+        const isCurrentlyFull = available === 0;
+
+        // Mise à jour dataset pour la logique du warning
+        registerBtn.dataset.reservedFull = reservedFull;
+
+        // Si l'utilisateur est DÉJÀ inscrit, on ne touche pas au bouton (il doit pouvoir se désister)
+        const isRegistered = registerBtn.dataset.registered === 'true';
+
+        if (!isRegistered) {
+            if (isCurrentlyFull) {
+                // Désactiver le bouton
                 registerBtn.disabled = true;
-                registerBtn.className = registerBtn.className.replace('bg-emerald-500', 'bg-slate-300');
-                registerBtn.className = registerBtn.className.replace('hover:bg-emerald-600', '');
+                registerBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 bg-slate-300 text-white cursor-not-allowed";
                 registerBtn.textContent = '🔴 Complet';
-            } else if (!isCurrentlyFull && registerBtn.disabled && !registerBtn.dataset.registered) {
+            } else {
                 // Réactiver le bouton
                 registerBtn.disabled = false;
-                registerBtn.className = registerBtn.className.replace('bg-slate-300', 'bg-emerald-500');
-                registerBtn.className += ' hover:bg-emerald-600';
-                registerBtn.textContent = 'S\'inscrire';
+                registerBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95";
+                registerBtn.textContent = "S'inscrire";
             }
         }
-
-        // 6. Met à jour les informations de statut visuel
-        updateMissionVisualStatus(shiftEl, taken, max, available);
-
-    } catch (error) {
-        console.error('Erreur mise à jour affichage créneau:', error);
     }
+
+    // 5. Met à jour les informations de statut visuel (couleurs du badge)
+    updateMissionVisualStatus(shiftEl, available);
 }
 
 /**
- * Met à jour les visuels de statut d'une mission (couleurs, badges)
+ * Met à jour les visuels de statut (Badge Vert/Orange/Rouge)
  */
-function updateMissionVisualStatus(shiftEl, taken, max, available) {
-    // Supprimer les anciens badges de statut
-    const oldBadges = shiftEl.querySelectorAll('[data-status-badge]');
-    oldBadges.forEach(b => b.remove());
-
-    // Déterminer le nouveau badge
-    let badge = '';
-    let statusClass = '';
+function updateMissionVisualStatus(shiftEl, available) {
+    // Le badge est mis à jour en modifiant son contenu HTML complet pour la simplicité
+    // On cherche l'élément qui a l'attribut data-status-badge
+    const badgeEl = shiftEl.querySelector('[data-status-badge]');
+    if (!badgeEl) return;
 
     if (available === 0) {
-        badge = '🔴 Complet';
-        statusClass = 'bg-red-50 border-red-200 text-red-700';
+        badgeEl.className = 'text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg';
+        badgeEl.innerHTML = '🔴 Complet';
     } else if (available <= 2) {
-        badge = '🟠 Presque complet';
-        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+        badgeEl.className = 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg';
+        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${available > 1 ? 's' : ''}`;
     } else {
-        badge = '🟢 Disponible';
-        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
-    }
-
-    if (badge) {
-        const badgeEl = document.createElement('span');
-        badgeEl.setAttribute('data-status-badge', 'true');
-        badgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}`;
-        badgeEl.textContent = badge;
-        
-        // Ajouter après le titre du créneau
-        const titleEl = shiftEl.querySelector('[data-shift-title]');
-        if (titleEl) {
-            titleEl.parentNode.insertBefore(badgeEl, titleEl.nextSibling);
-        } else {
-            shiftEl.prepend(badgeEl);
-        }
+        badgeEl.className = 'text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg'; // Ou vert si on veut
+        // Remet le style par défaut (slate-400 dans le code original) ou emerald ?
+        // Le code original utilisait slate-400. Le vôtre utilise emerald. Gardons une cohérence.
+        // Si vous préférez Emerald :
+        // badgeEl.className = 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg';
+        badgeEl.innerHTML = `<span data-available-slots>${available}</span> places`;
     }
 }
 

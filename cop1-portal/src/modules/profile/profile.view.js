@@ -312,7 +312,7 @@ function renderHistoryList(history) {
 
         const date = new Date(event.date);
         const isPast = new Date() > new Date(`${event.date}T${shift.end_time}`);
-        const isPresent = item.status === 'present';
+        const isPresent = item.attended === true || item.status === 'present' || (item.hours_added && item.hours_added > 0);
         const isAbsent = item.status === 'absent';
 
         let config = { border: 'border-slate-100', bg: 'bg-white', icon: 'calendar', iconColor: 'text-slate-400', badge: '', badgeBg: '' };
@@ -321,10 +321,13 @@ function renderHistoryList(history) {
             config = { border: 'border-emerald-200', bg: 'bg-emerald-50/50', icon: 'check-circle', iconColor: 'text-emerald-600', badge: 'Présent', badgeBg: 'bg-emerald-100 text-emerald-700' };
         } else if (isAbsent) {
             config = { border: 'border-red-200', bg: 'bg-red-50/50', icon: 'x-circle', iconColor: 'text-red-500', badge: 'Absent', badgeBg: 'bg-red-100 text-red-700' };
-        } else if (!isPast) {
-            config = { border: 'border-blue-200', bg: 'bg-blue-50/50', icon: 'clock', iconColor: 'text-blue-500', badge: 'À venir', badgeBg: 'bg-blue-100 text-blue-700' };
-        } else {
+        } else if (isPast) {
+            // Past but neither present nor explicitly absent => Non pointé (or Absent implicitly?)
+            // User complaint suggests default fallback was 'Non pointé'
             config = { border: 'border-amber-200', bg: 'bg-amber-50/50', icon: 'help-circle', iconColor: 'text-amber-500', badge: 'Non pointé', badgeBg: 'bg-amber-100 text-amber-700' };
+        } else {
+            // Future
+            config = { border: 'border-blue-200', bg: 'bg-blue-50/50', icon: 'clock', iconColor: 'text-blue-500', badge: 'À venir', badgeBg: 'bg-blue-100 text-blue-700' };
         }
 
         return `

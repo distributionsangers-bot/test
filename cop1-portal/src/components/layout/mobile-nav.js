@@ -206,7 +206,7 @@ function openMobileMenu() {
             <!-- User Card -->
             <div class="px-5 py-4">
                 <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-50 via-white to-slate-50 border border-slate-100">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-900 to-brand-700 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-800/30">
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">

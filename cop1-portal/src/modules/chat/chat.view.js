@@ -307,9 +307,20 @@ async function openTicket(id) {
     document.getElementById('chat-active').classList.remove('hidden', 'opacity-0');
 
     // 2. Update Header Info
+    // 2. Update Header Info
     const info = document.getElementById('active-chat-info');
+    const form = document.getElementById('chat-form');
+
     if (ticket) {
         const isAnnouncement = ticket.category === 'announcement';
+
+        // Hide input for announcements
+        if (isAnnouncement) {
+            form?.classList.add('hidden');
+        } else {
+            form?.classList.remove('hidden');
+        }
+
         const otherName = isAnnouncement ? 'Annonce Système' : `${ticket.profiles?.first_name || 'Bénévole'} ${ticket.profiles?.last_name || ''}`;
         const initial = otherName[0].toUpperCase();
 
@@ -469,6 +480,34 @@ function createMessageHtml(msg) {
     const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const isDeleted = !!msg.deleted_at;
     const isEdited = !!msg.edited_at && !isDeleted;
+
+    // Check if Announcement
+    const currentTicket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
+    const isAnnouncement = currentTicket?.category === 'announcement';
+
+    // SPECIAL RENDER: ANNOUNCEMENT
+    if (isAnnouncement) {
+        return `
+            <div class="w-full flex flex-col items-center my-6 animate-scale-in px-4">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-slate-700 p-6 rounded-2xl shadow-sm max-w-lg w-full text-center relative overflow-hidden">
+                    <!-- Decorative Icon Background -->
+                    <i data-lucide="megaphone" class="absolute -right-4 -top-4 w-24 h-24 text-amber-500/10 rotate-12"></i>
+                    
+                    <div class="relative z-10 flex flex-col items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-1 ring-4 ring-white shadow-sm">
+                            <i data-lucide="megaphone" class="w-5 h-5"></i>
+                        </div>
+                        <p class="text-base text-slate-800 leading-relaxed font-medium">
+                            ${escapeHtml(msg.content)}
+                        </p>
+                        <span class="text-[11px] font-semibold text-amber-600/70 tracking-wide uppercase mt-2">
+                            Annonce Système • ${time}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     let content = isDeleted ? '<span class="italic text-slate-400 text-xs flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Message supprimé</span>' : escapeHtml(msg.content);
 

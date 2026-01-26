@@ -48,7 +48,7 @@ export function renderHeader(profile) {
                     data-link="/profile" 
                     aria-label="Mon profil" 
                     title="Mon Profil"
-                    class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-brand-500/25 hover:shadow-xl hover:scale-105 transition-all active:scale-95"
+                    class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-brand-500/25 hover:shadow-xl hover:scale-105 transition-all active:scale-95"
                 >
                     ${initial}
                 </button>

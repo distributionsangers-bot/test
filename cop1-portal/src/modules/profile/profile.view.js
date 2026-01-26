@@ -109,7 +109,7 @@ export async function renderProfile(container, params) {
                         <i data-lucide="clock" class="w-20 h-20"></i>
                     </div>
                     <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-wider mb-1">Heures</p>
-                    <p class="text-3xl font-black">${hours}<span class="text-lg opacity-60">h</span></p>
+                    <p class="text-3xl font-black"><span id="stat-hours">${hours}</span><span class="text-lg opacity-60">h</span></p>
                 </div>
 
                 <!-- Missions -->
@@ -118,7 +118,7 @@ export async function renderProfile(container, params) {
                         <i data-lucide="calendar-check" class="w-20 h-20 text-brand-600"></i>
                     </div>
                     <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Missions</p>
-                    <p class="text-3xl font-black text-slate-900">${stats.totalMissions}</p>
+                    <p id="stat-missions" class="text-3xl font-black text-slate-900">${stats.totalMissions}</p>
                 </div>
 
                 <!-- Presence Rate -->
@@ -127,7 +127,7 @@ export async function renderProfile(container, params) {
                         <i data-lucide="trending-up" class="w-20 h-20 text-blue-600"></i>
                     </div>
                     <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Présence</p>
-                    <p class="text-3xl font-black ${stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500'}">${stats.presenceRate}<span class="text-lg opacity-60">%</span></p>
+                    <p id="stat-presence" class="text-3xl font-black ${stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500'}">${stats.presenceRate}<span class="text-lg opacity-60">%</span></p>
                 </div>
 
                 <!-- Upcoming -->
@@ -136,7 +136,7 @@ export async function renderProfile(container, params) {
                         <i data-lucide="rocket" class="w-20 h-20 text-purple-600"></i>
                     </div>
                     <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">À venir</p>
-                    <p class="text-3xl font-black text-purple-600">${stats.upcoming}</p>
+                    <p id="stat-upcoming" class="text-3xl font-black text-purple-600">${stats.upcoming}</p>
                 </div>
             </div>
 
@@ -435,4 +435,57 @@ function setupDelete(c, uid) {
     });
 }
 
-export function initProfile() { }
+
+export async function initProfile(params) {
+    const currentUserId = store.state.user?.id;
+    const targetUserId = params?.id || currentUserId;
+
+    // Realtime Subscription
+    const channel = supabase.channel(`profile-${targetUserId}`)
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'registrations', filter: `user_id=eq.${targetUserId}` },
+            () => refreshProfile(targetUserId)
+        )
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${targetUserId}` },
+            () => refreshProfile(targetUserId)
+        )
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(channel);
+    };
+}
+
+async function refreshProfile(userId) {
+    const { profile, history } = await ProfileService.getProfileAndHistory(userId);
+    if (!profile) return;
+
+    const stats = computeStats(history, profile);
+
+    // Update Stats
+    const elHours = document.getElementById('stat-hours');
+    if (elHours) elHours.textContent = profile.total_hours || 0;
+
+    const elMissions = document.getElementById('stat-missions');
+    if (elMissions) elMissions.textContent = stats.totalMissions;
+
+    const elPresence = document.getElementById('stat-presence');
+    if (elPresence) {
+        elPresence.innerHTML = `${stats.presenceRate}<span class="text-lg opacity-60">%</span>`;
+        // Update color
+        elPresence.className = `text-3xl font-black ${stats.presenceRate >= 80 ? 'text-emerald-600' : stats.presenceRate >= 50 ? 'text-amber-600' : 'text-red-500'}`;
+    }
+
+    const elUpcoming = document.getElementById('stat-upcoming');
+    if (elUpcoming) elUpcoming.textContent = stats.upcoming;
+
+    // Update History List
+    const elHistory = document.getElementById('content-history');
+    if (elHistory) {
+        elHistory.innerHTML = renderHistoryList(history);
+        createIcons({ icons, root: elHistory });
+    }
+}

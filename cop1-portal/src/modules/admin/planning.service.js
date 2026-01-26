@@ -353,5 +353,33 @@ export const PlanningService = {
             console.error('❌ Erreur récupération statistiques planning:', error);
             return { data: null, error };
         }
+    },
+
+    // =========================================================================
+    // 📡 REALTIME SUBSCRIPTIONS
+    // =========================================================================
+
+    /**
+     * S'abonne aux changements des inscriptions (registrations) en temps réel
+     * Permet de mettre à jour dynamiquement le nombre de places disponibles
+     * @param {Function} callback - Fonction appelée quand il y a un changement
+     * @returns {Object} - { unsubscribe } pour arrêter l'écoute
+     */
+    subscribeToRegistrations(callback) {
+        const channel = supabase.channel('global-registrations-listener')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'registrations' },
+                (payload) => {
+                    // On appelle la callback avec le payload complet
+                    // event sera 'INSERT', 'UPDATE' ou 'DELETE'
+                    callback(payload);
+                }
+            )
+            .subscribe();
+
+        return {
+            unsubscribe: () => supabase.removeChannel(channel)
+        };
     }
 };

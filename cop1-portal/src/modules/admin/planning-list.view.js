@@ -9,6 +9,9 @@ let currentTab = 'upcoming';
 let searchQuery = '';
 let collapsedEvents = new Set();
 let abortController = null;
+let registrationSubscription = null;
+let registrationRefreshTimeout = null;
+let currentEventsData = []; // Stocke les données d'événements actuels
 
 export function renderPlanningList() {
     return `
@@ -105,6 +108,9 @@ export async function initPlanningList() {
     abortController = new AbortController();
     const signal = abortController.signal;
 
+    // Setup Realtime subscription pour les inscriptions
+    setupRegistrationSubscription();
+
     // Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -145,6 +151,43 @@ export function cleanup() {
         abortController.abort();
         abortController = null;
     }
+    // Cleanup realtime subscription
+    if (registrationSubscription) {
+        registrationSubscription.unsubscribe();
+        registrationSubscription = null;
+    }
+    // Cleanup timeout
+    if (registrationRefreshTimeout) {
+        clearTimeout(registrationRefreshTimeout);
+        registrationRefreshTimeout = null;
+    }
+    currentEventsData = [];
+}
+
+/**
+ * Configure l'écoute en temps réel des changements d'inscriptions
+ * Quand quelqu'un s'inscrit/désinscrit, on met à jour les places visibles immédiatement
+ */
+function setupRegistrationSubscription() {
+    // Arrête la subscription précédente s'il y en a une
+    if (registrationSubscription) {
+        registrationSubscription.unsubscribe();
+    }
+
+    registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
+        // payload.event === 'INSERT' | 'UPDATE' | 'DELETE'
+        // payload.new et payload.old contiennent les données
+        
+        // On va recharger les événements avec un délai court
+        // pour laisser le temps aux compteurs de se mettre à jour
+        if (registrationRefreshTimeout) {
+            clearTimeout(registrationRefreshTimeout);
+        }
+
+        registrationRefreshTimeout = setTimeout(() => {
+            loadEvents();
+        }, 300); // Attendez 300ms avant de rafraîchir (même logique que chat.view.js)
+    });
 }
 
 async function loadEvents() {
@@ -167,6 +210,11 @@ async function loadEvents() {
         }
 
         if (error) throw error;
+
+        // Sauvegarder les données pour la subscription realtime
+        if (!currentTab.includes('template') && data) {
+            currentEventsData = data;
+        }
 
         // Filter by search
         if (searchQuery && data) {

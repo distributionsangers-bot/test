@@ -3,9 +3,12 @@ import { supabase } from '../../services/supabase.js';
 import { store } from '../../core/store.js';
 import { showToast, toggleLoader, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
+import { PlanningService } from '../admin/planning.service.js';
 
 let abortController = null;
 let currentFilter = 'all'; // 'all' or 'mine'
+let registrationSubscription = null;
+let registrationRefreshTimeout = null;
 
 export async function renderEvents() {
     toggleLoader(true);
@@ -331,6 +334,9 @@ export function initEvents() {
     abortController = new AbortController();
     const signal = abortController.signal;
 
+    // Setup Realtime subscription pour les inscriptions
+    setupRegistrationSubscription();
+
     // Scanner Button
     document.getElementById('btn-scan-qr')?.addEventListener('click', () => {
         import('../scanner/scanner.view.js').then(m => m.ScannerView.openScanner());
@@ -363,6 +369,41 @@ export function cleanup() {
         abortController.abort();
         abortController = null;
     }
+    // Cleanup realtime subscription
+    if (registrationSubscription) {
+        registrationSubscription.unsubscribe();
+        registrationSubscription = null;
+    }
+    // Cleanup timeout
+    if (registrationRefreshTimeout) {
+        clearTimeout(registrationRefreshTimeout);
+        registrationRefreshTimeout = null;
+    }
+}
+
+/**
+ * Configure l'écoute en temps réel des changements d'inscriptions
+ * Quand quelqu'un s'inscrit/désinscrit à une mission, on met à jour les places visibles immédiatement
+ */
+function setupRegistrationSubscription() {
+    // Arrête la subscription précédente s'il y en a une
+    if (registrationSubscription) {
+        registrationSubscription.unsubscribe();
+    }
+
+    registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
+        // payload.event === 'INSERT' | 'UPDATE' | 'DELETE'
+        // On va re-rendre avec un délai court
+        // pour laisser le temps aux compteurs de se mettre à jour
+        if (registrationRefreshTimeout) {
+            clearTimeout(registrationRefreshTimeout);
+        }
+
+        registrationRefreshTimeout = setTimeout(() => {
+            // Re-render la page des missions
+            import('../../core/router.js').then(({ router }) => router.handleLocation());
+        }, 300); // Attendez 300ms avant de rafraîchir (même logique que chat.view.js)
+    });
 }
 
 async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false) {

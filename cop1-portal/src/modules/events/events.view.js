@@ -388,7 +388,11 @@ async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isRese
                     { type: 'warning', confirmText: "M'inscrire sans valider mes heures", cancelText: "Annuler", onCancel: () => resolve(false) }
                 );
             });
+
+            // If user cancels, stop here
             if (!confirmed) return;
+
+            // If user confirms, we proceed to the API call below
         }
     }
 

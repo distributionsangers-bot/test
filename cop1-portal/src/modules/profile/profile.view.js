@@ -71,7 +71,7 @@ export async function renderProfile(container, params) {
                         <!-- Avatar -->
                         <div class="relative">
                             <div id="avatar-container" class="w-28 h-28 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-4xl font-black shadow-xl border-4 border-white/30 overflow-hidden">
-                                ${initial}
+                                <span id="profile-initial">${initial}</span>
                             </div>
                             ${profile.is_admin ? `
                             <div class="absolute -top-1 -right-1 w-8 h-8 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
@@ -82,9 +82,9 @@ export async function renderProfile(container, params) {
                         
                         <!-- Info -->
                         <div class="flex-1 text-center md:text-left text-white">
-                            <h1 class="text-3xl font-black tracking-tight mb-1">${fullName}</h1>
-                            <p class="text-brand-200 font-medium mb-3">${email}</p>
-                            <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                            <h1 id="profile-fullname" class="text-3xl font-black tracking-tight mb-1">${fullName}</h1>
+                            <p id="profile-email" class="text-brand-200 font-medium mb-3">${email}</p>
+                            <div id="profile-tags" class="flex flex-wrap justify-center md:justify-start gap-2">
                                 <span class="px-3 py-1.5 rounded-xl text-xs font-bold ${statusConfig.bg} ${statusConfig.text} flex items-center gap-1.5">
                                     <i data-lucide="${statusConfig.icon}" class="w-3.5 h-3.5"></i>
                                     ${statusConfig.label}
@@ -402,6 +402,9 @@ function setupEditForm(c, uid) {
                 store.state.profile.has_permit = data.has_permit;
                 store.state.profile.mandatory_hours = data.mandatory_hours;
             }
+            // Trigger UI Refresh
+            refreshProfile(uid);
+
             if (data.password) form.querySelector('[name=password]').value = '';
         }
     });
@@ -468,6 +471,37 @@ async function refreshProfile(userId) {
     if (!profile) return;
 
     const stats = computeStats(history, profile);
+
+    // 3. Update Profile Header Elements
+    const elFullname = document.getElementById('profile-fullname');
+    if (elFullname) elFullname.textContent = `${profile.first_name || ''} ${profile.last_name || ''}`;
+
+    const elEmail = document.getElementById('profile-email');
+    if (elEmail) elEmail.textContent = profile.email || '';
+
+    const elInitial = document.getElementById('profile-initial');
+    if (elInitial) elInitial.textContent = (profile.first_name || '?')[0].toUpperCase();
+
+    // Re-render Tags
+    const elTags = document.getElementById('profile-tags');
+    if (elTags) {
+        let statusConfig = { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Inconnu', icon: 'help-circle' };
+        if (profile.status === 'pending') statusConfig = { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente', icon: 'clock' };
+        else if (profile.status === 'approved') statusConfig = { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Validé', icon: 'check-circle' };
+        else if (profile.status === 'rejected') statusConfig = { bg: 'bg-red-100', text: 'text-red-700', label: 'Refusé', icon: 'x-circle' };
+
+        elTags.innerHTML = `
+            <span class="px-3 py-1.5 rounded-xl text-xs font-bold ${statusConfig.bg} ${statusConfig.text} flex items-center gap-1.5">
+                <i data-lucide="${statusConfig.icon}" class="w-3.5 h-3.5"></i>
+                ${statusConfig.label}
+            </span>
+            <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">
+                ${profile.mandatory_hours ? '🎓 Scolaire' : '💚 Bénévole'}
+            </span>
+            ${profile.has_permit ? `<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>` : ''}
+        `;
+        createIcons({ icons, root: elTags });
+    }
 
     // Update Stats
     const elHours = document.getElementById('stat-hours');

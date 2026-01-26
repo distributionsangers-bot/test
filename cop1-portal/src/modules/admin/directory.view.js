@@ -491,6 +491,13 @@ async function viewUserDetails(uid) {
                     <span class="text-sm text-slate-400">Inscription</span>
                     <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
                 </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span class="text-sm text-slate-400">Type de profil</span>
+                    <button id="btn-toggle-type" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${isMandatory ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-brand-50 text-brand-600 hover:bg-brand-100'}" title="Cliquez pour changer">
+                        ${isMandatory ? '🎓 Scolaire (Heures obligatoires)' : '💚 Bénévole Simple'}
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    </button>
+                </div>
 
                 ${u.status === 'pending' ? `
                 <button id="btn-view-proof" class="w-full py-3 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2">
@@ -530,6 +537,23 @@ async function viewUserDetails(uid) {
     });
 
     modal.querySelector('#btn-view-proof')?.addEventListener('click', () => openProof(uid));
+
+    modal.querySelector('#btn-toggle-type')?.addEventListener('click', () => {
+        const newStatus = !isMandatory;
+        showConfirm(`Passer ce bénévole en ${newStatus ? 'Scolaire (heures obligatoires)' : 'Bénévole Simple'} ?`, async () => {
+            toggleLoader(true);
+            const res = await DirectoryService.updateUserProfile(uid, { mandatory_hours: newStatus });
+            toggleLoader(false);
+            if (res.error) showToast("Erreur modification", "error");
+            else {
+                showToast("Type de profil mis à jour ✓");
+                // Refresh modal
+                modal.remove();
+                viewUserDetails(uid); // Re-open with new data
+                loadUsers(); // Refresh background list
+            }
+        });
+    });
 }
 
 // ==========================================

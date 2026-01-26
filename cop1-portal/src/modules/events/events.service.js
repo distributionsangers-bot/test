@@ -31,15 +31,18 @@ export const EventsService = {
         try {
             const { data, error } = await supabase.rpc('get_future_shift_counts');
             if (error) throw error;
-            // Convert array to map for O(1) lookup: { shiftId: count }
+            // Convert array to map: { shiftId: { total: number, reservedTaken: number } }
             const map = {};
             (data || []).forEach(item => {
-                map[item.shift_id] = item.count;
+                map[item.shift_id] = {
+                    total: item.total_count,
+                    reservedTaken: item.reserved_taken
+                };
             });
             return { data: map, error: null };
         } catch (error) {
             console.error("EventsService.getShiftCounts error:", error);
-            // Fallback: return empty object, UI will fallback to length based count
+            // Fallback
             return { data: {}, error };
         }
     },

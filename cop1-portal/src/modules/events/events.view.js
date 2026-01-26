@@ -28,7 +28,7 @@ export async function renderEvents() {
         ]);
 
         const { data: shifts, error } = eventsRes;
-        const realCounts = countsRes.data || {}; // { shift_id: count }
+        const realCounts = countsRes.data || {}; // { shift_id: { total, reservedTaken } }
 
         if (error) throw error;
 
@@ -231,15 +231,21 @@ function renderEventGroup(group, userId, countsMap) {
 function renderShiftCard(shift, userId, countsMap) {
     const isRegistered = shift.registrations.some(r => r.user_id === userId);
     const total = shift.max_slots || 0;
+    const reservedTotal = shift.reserved_slots || 0;
 
-    // Use Real Count (Global) or fallback to local registrations (if user registered and RPC failed)
-    // countsMap[shift.id] provides the true count from DB ignoring RLS
-    const globalCount = countsMap ? countsMap[shift.id] : undefined;
-    const taken = globalCount !== undefined ? globalCount : shift.registrations.length;
+    // Counts
+    const counts = countsMap ? countsMap[shift.id] : null;
+    const globalCount = counts ? counts.total : shift.registrations.length;
+    const reservedTaken = counts ? counts.reservedTaken : 0; // fallback if simplified
 
+    const taken = globalCount;
     const remaining = total - taken;
     const isFull = remaining <= 0;
     const isAlmostFull = remaining <= 2 && remaining > 0;
+
+    // Check Reserved Availability
+    const reservedRemaining = Math.max(0, reservedTotal - reservedTaken);
+    const isReserveFull = reservedTotal > 0 && reservedRemaining <= 0;
 
     // Status badge
     let statusBadge = '';
@@ -249,6 +255,16 @@ function renderShiftCard(shift, userId, countsMap) {
         statusBadge = `<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">${remaining} place${remaining > 1 ? 's' : ''}</span>`;
     } else {
         statusBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg">${remaining} places</span>`;
+    }
+
+    // Reserved Badge
+    let reservedBadge = '';
+    if (reservedTotal > 0 && !isFull) {
+        if (reservedRemaining > 0) {
+            reservedBadge = `<span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1" title="${reservedRemaining} places réservées restantes">🎓 ${reservedRemaining} réservées</span>`;
+        } else {
+            reservedBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1" title="Places réservées complètes">🎓 Complet</span>`;
+        }
     }
 
     return `
@@ -264,6 +280,7 @@ function renderShiftCard(shift, userId, countsMap) {
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="font-semibold text-sm ${isRegistered ? 'text-emerald-800' : 'text-slate-700'} truncate">${escapeHtml(shift.title)}</span>
                     ${statusBadge}
+                    ${reservedBadge}
                 </div>
                 ${shift.referent_name ? `
                     <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
@@ -277,6 +294,8 @@ function renderShiftCard(shift, userId, countsMap) {
             <button 
                 data-action="toggle-reg" 
                 data-shift-id="${shift.id}" 
+                data-hours="${shift.hours_value || 0}"
+                data-reserved-full="${isReserveFull}"
                 data-registered="${isRegistered}"
                 ${isFull && !isRegistered ? 'disabled' : ''}
                 class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
@@ -330,8 +349,10 @@ export function initEvents() {
         const btn = e.target.closest('[data-action="toggle-reg"]');
         if (btn && !btn.disabled) {
             const shiftId = btn.dataset.shiftId;
+            const hours = parseFloat(btn.dataset.hours || 0);
+            const isReserveFull = btn.dataset.reservedFull === 'true';
             const isRegistered = btn.dataset.registered === 'true';
-            await handleToggleRegistration(shiftId, isRegistered);
+            await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull);
         }
     }, { signal });
 }
@@ -343,7 +364,33 @@ export function cleanup() {
     }
 }
 
-async function handleToggleRegistration(shiftId, isRegistered) {
+async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false) {
+    // WARN: Student logic updated
+    if (!isRegistered && store.state.profile?.mandatory_hours) {
+        // Case 1: Shift credits 0 hours anyway
+        if (hours === 0) {
+            const confirmed = await new Promise(resolve => {
+                showConfirm(
+                    "Ce créneau ne permet pas de valider d'heures (0h). En tant qu'étudiant devant valider un quota, ces heures ne compteront pas. Voulez-vous continuer ?",
+                    () => resolve(true),
+                    { type: 'warning', confirmText: "M'inscrire quand même", cancelText: "Annuler", onCancel: () => resolve(false) }
+                );
+            });
+            if (!confirmed) return;
+        }
+        // Case 2: Shift has hours, but reserved slots are full
+        else if (isReserveFull) {
+            const confirmed = await new Promise(resolve => {
+                showConfirm(
+                    "Les places réservées aux étudiants sont complètes sur ce créneau. Vous pouvez vous inscrire sur une place standard, mais vos heures NE SERONT PAS COMPTABILISÉES pour votre quota. Voulez-vous continuer ?",
+                    () => resolve(true),
+                    { type: 'warning', confirmText: "M'inscrire sans valider mes heures", cancelText: "Annuler", onCancel: () => resolve(false) }
+                );
+            });
+            if (!confirmed) return;
+        }
+    }
+
     toggleLoader(true);
     try {
         const userId = store.state.user.id;

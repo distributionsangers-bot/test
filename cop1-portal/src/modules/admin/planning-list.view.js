@@ -166,80 +166,74 @@ export function cleanup() {
 }
 
 /**
- * Configure l'écoute en temps réel des changements d'inscriptions
- * Quand quelqu'un s'inscrit/désinscrit, on met à jour les places visibles immédiatement
+ * Configure l'écoute en temps réel des changements sur les CRÉNEAUX (shifts)
+ * Identique à events.view.js : on écoute la table 'shifts' qui est mise à jour par trigger
  */
 function setupRegistrationSubscription() {
     // Arrête la subscription précédente s'il y en a une
     if (registrationSubscription) {
-        registrationSubscription.unsubscribe();
+        supabase.removeChannel(registrationSubscription);
     }
 
-    registrationSubscription = PlanningService.subscribeToRegistrations((payload) => {
-        // payload.new contient les données de la registration
-        const shiftId = payload.new?.shift_id;
-        
-        if (!shiftId) return;
+    console.log("🔌 [Admin Realtime] Initialisation de l'écoute sur public:shifts...");
 
-        // Au lieu de re-rendre tout, on met à jour juste les compteurs
-        if (registrationRefreshTimeout) {
-            clearTimeout(registrationRefreshTimeout);
-        }
+    const channel = supabase.channel('admin-planning-realtime');
 
-        registrationRefreshTimeout = setTimeout(() => {
-            updateShiftCounterOnly(shiftId);
-        }, 300); // Attendez 300ms avant de rafraîchir
-    });
+    registrationSubscription = channel
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'shifts' },
+            (payload) => {
+                console.log("📨 [Admin Realtime] Update sur shift:", payload);
+                if (payload.new) {
+                    handleShiftUpdate(payload.new);
+                }
+            }
+        )
+        .subscribe((status) => {
+            console.log(`🔌 [Admin Realtime] Statut: ${status}`);
+        });
 }
 
 /**
  * Met à jour UNIQUEMENT le compteur de places pour un créneau spécifique
- * Pas de re-render complet, juste une mise à jour du DOM ciblée
- * Cela permet aux utilisateurs de continuer à remplir des formulaires sans interruption
+ * Utilise les données du payload Realtime (total_registrations, etc.)
  */
-async function updateShiftCounterOnly(shiftId) {
-    try {
-        // 1. Récupère juste le nombre actuel d'inscriptions pour ce créneau
-        const { count } = await supabase
-            .from('registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('shift_id', shiftId);
+function handleShiftUpdate(shiftData) {
+    if (!shiftData || !shiftData.id) return;
 
-        // 2. Récupère max_slots du créneau
-        const { data: shift } = await supabase
-            .from('shifts')
-            .select('id, max_slots')
-            .eq('id', shiftId)
-            .single();
+    const shiftId = shiftData.id;
+    const max = shiftData.max_slots || 0;
+    // Utiliser les nouvelles colonnes calculées par le trigger
+    const taken = shiftData.total_registrations || 0;
+    const reservedTaken = shiftData.reserved_taken || 0;
+    // const reservedTotal = shiftData.reserved_slots || 0;
 
-        if (!shift) return;
+    const available = Math.max(0, max - taken);
 
-        const max = shift.max_slots || 0;
-        const taken = count || 0;
-        const available = Math.max(0, max - taken);
+    // 1. Trouve l'élément HTML du créneau
+    const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
+    if (!shiftEl) return;
 
-        // 3. Trouve l'élément HTML du créneau
-        const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
-        if (!shiftEl) return;
+    // 2. Met à jour les affichages de compteurs dans cet élément
+    const takenEl = shiftEl.querySelector('[data-counter="taken"]');
+    const availEl = shiftEl.querySelector('[data-counter="available"]');
+    const maxEl = shiftEl.querySelector('[data-counter="max"]');
 
-        // 4. Met à jour les affichages de compteurs dans cet élément
-        const takenEl = shiftEl.querySelector('[data-counter="taken"]');
-        const availEl = shiftEl.querySelector('[data-counter="available"]');
-        const maxEl = shiftEl.querySelector('[data-counter="max"]');
-
-        if (takenEl) takenEl.textContent = taken;
-        if (availEl) availEl.textContent = available;
-        if (maxEl) maxEl.textContent = max;
-
-        // 5. Mets à jour les badges visuels (Full, Available, etc.)
-        updateShiftVisualStatus(shiftEl, taken, max, available);
-
-        // 6. Met à jour les stats globales (discrètement)
-        updateStatsFromCurrentDOM();
-
-    } catch (error) {
-        console.error('Erreur mise à jour compteur:', error);
+    // Petite animation visuelle pour montrer le changement
+    if (takenEl) {
+        takenEl.textContent = taken;
+        takenEl.classList.add('text-brand-600', 'font-black');
+        setTimeout(() => takenEl.classList.remove('text-brand-600', 'font-black'), 1000);
     }
+    if (availEl) availEl.textContent = available;
+    if (maxEl) maxEl.textContent = max;
+
+    // 3. Mets à jour les badges visuels (Full, Available, etc.)
+    updateShiftVisualStatus(shiftEl, taken, max, available);
+
+    // 4. Met à jour les stats globales
+    requestAnimationFrame(() => updateStatsFromCurrentDOM());
 }
 
 /**
@@ -270,7 +264,7 @@ function updateShiftVisualStatus(shiftEl, taken, max, available) {
         badgeEl.setAttribute('data-status-badge', 'true');
         badgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}`;
         badgeEl.textContent = badge;
-        
+
         // Ajouter après le titre du créneau
         const titleEl = shiftEl.querySelector('[data-shift-title]');
         if (titleEl) {

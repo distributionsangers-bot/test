@@ -394,17 +394,23 @@ function setupRegistrationSubscription() {
 
     // On écoute les changements PUBLICS sur la table 'shifts'
     // UPDATE : Quand les compteurs changent
-    registrationSubscription = supabase
-        .channel('public:shifts')
+    console.log("🔌 [Realtime] Initialisation de l'écoute sur public:shifts...");
+
+    const channel = supabase.channel('public:shifts');
+
+    registrationSubscription = channel
         .on(
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'shifts' },
             (payload) => {
+                console.log("📨 [Realtime] Reçu update sur shifts:", payload);
                 // payload.new contient la nouvelle ligne 'shifts' avec total_registrations et reserved_taken à jour
                 handleShiftUpdate(payload.new);
             }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+            console.log(`🔌 [Realtime] Statut de connection: ${status}`, err ? err : '');
+        });
 }
 
 /**

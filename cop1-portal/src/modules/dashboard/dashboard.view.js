@@ -130,17 +130,16 @@ async function renderUserDashboard(container) {
         }
     }
 
-    // Recent activity (last 3 attended)
+    // Recent activity (last 5 registrations with all statuses)
     const { data: recentActivity } = await supabase
         .from('registrations')
         .select(`
-            id, created_at, attended, hours_counted,
+            id, created_at, attended, hours_counted, validated,
             shifts (title, start_time, end_time, events (title, date))
         `)
         .eq('user_id', user.id)
-        .eq('attended', true)
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(5);
 
     // Status badge
     const statusBadge = getStatusBadge(profile.status);
@@ -226,6 +225,50 @@ async function renderUserDashboard(container) {
         </div>
     ` : '';
 
+    // Helper function to get activity status
+    const getActivityStatus = (r) => {
+        const eventDate = new Date(r.shifts?.events?.date);
+        const isPast = eventDate < today;
+
+        if (!r.attended && !isPast) {
+            // Future mission, just registered
+            return {
+                icon: 'calendar-check',
+                bgColor: 'bg-blue-50',
+                textColor: 'text-blue-600',
+                label: 'Inscrit',
+                badgeClass: 'text-blue-600 bg-blue-50'
+            };
+        } else if (!r.attended && isPast) {
+            // Past mission, not attended (absent)
+            return {
+                icon: 'x-circle',
+                bgColor: 'bg-red-50',
+                textColor: 'text-red-500',
+                label: 'Absent',
+                badgeClass: 'text-red-500 bg-red-50'
+            };
+        } else if (r.attended && (r.hours_counted === 0 || !r.validated)) {
+            // Attended but no hours (hors quota)
+            return {
+                icon: 'alert-triangle',
+                bgColor: 'bg-orange-50',
+                textColor: 'text-orange-500',
+                label: 'Hors Quota',
+                badgeClass: 'text-orange-500 bg-orange-50'
+            };
+        } else {
+            // Attended and validated with hours
+            return {
+                icon: 'check-circle',
+                bgColor: 'bg-emerald-50',
+                textColor: 'text-emerald-600',
+                label: `+${r.hours_counted || 0}h`,
+                badgeClass: 'text-emerald-600 bg-emerald-50'
+            };
+        }
+    };
+
     // Activity panel HTML
     const activityHtml = recentActivity && recentActivity.length > 0 ? `
         <div class="mb-6">
@@ -240,18 +283,20 @@ async function renderUserDashboard(container) {
                 </button>
             </div>
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-100 overflow-hidden">
-                ${recentActivity.map(r => `
+                ${recentActivity.map(r => {
+        const status = getActivityStatus(r);
+        return `
                     <div class="p-3 flex items-center gap-3 hover:bg-slate-50 transition">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        <div class="w-10 h-10 rounded-xl ${status.bgColor} ${status.textColor} flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="${status.icon}" class="w-5 h-5"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-bold text-slate-700 truncate">${escapeHtml(r.shifts?.events?.title || '')}</p>
                             <p class="text-[10px] text-slate-400">${new Date(r.shifts?.events?.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} • ${escapeHtml(r.shifts?.title || '')}</p>
                         </div>
-                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${r.hours_counted || 0}h</span>
+                        <span class="text-xs font-bold ${status.badgeClass} px-2 py-0.5 rounded-lg">${status.label}</span>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         </div>
     ` : '';

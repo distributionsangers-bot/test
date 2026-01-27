@@ -690,18 +690,29 @@ async function viewUserDetails(uid) {
                     </div>
                     
                     <div class="divide-y divide-slate-100">
-                        ${event.shifts.map(shift => `
+                        ${event.shifts.map(shift => {
+                // Determine if this is "Hors Quota" (attended but hours don't count)
+                const isHorsQuota = shift.attended && (shift.hours === 0 || !shift.validated);
+
+                return `
                             <div class="flex items-center gap-3 p-3 hover:bg-slate-50 transition">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                <div class="w-8 h-8 rounded-lg ${isHorsQuota ? 'bg-amber-50 text-amber-500' : 'bg-indigo-50 text-indigo-600'} flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="${isHorsQuota ? 'alert-circle' : 'clock'}" class="w-4 h-4"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-bold text-slate-700">${shift.startTime} - ${shift.endTime}</p>
-                                    <p class="text-[10px] text-slate-400">Créneau</p>
+                                    <p class="text-[10px] text-slate-400">${isHorsQuota ? 'Bénévole École (Quota atteint)' : 'Créneau'}</p>
                                 </div>
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${shift.hours}h</span>
+                                ${isHorsQuota ? `
+                                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
+                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                        Hors Quota (${shift.hours}h)
+                                    </span>
+                                ` : `
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${shift.hours}h</span>
+                                `}
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                 </div>
             `;

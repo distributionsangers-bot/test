@@ -52,6 +52,7 @@ async function renderUserDashboard(container) {
     const profile = store.state.profile;
     const greeting = getGreeting();
     const totalHours = profile.total_hours || 0;
+    const isMandatory = profile.mandatory_hours;
 
     // Fetch announcements
     const { data: announcements } = await supabase
@@ -61,7 +62,7 @@ async function renderUserDashboard(container) {
         .order('created_at', { ascending: false })
         .limit(3);
 
-    // Fetch next mission
+    // Fetch user's registrations
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -69,16 +70,21 @@ async function renderUserDashboard(container) {
         .from('registrations')
         .select(`
             shift_id, 
+            attended,
             shifts!inner (
+                id,
                 title, 
                 start_time, 
                 end_time,
-                events!inner (title, date, location)
+                events!inner (id, title, date, location)
             )
         `)
-        .eq('user_id', user.id)
-        .gte('shifts.events.date', today.toISOString());
+        .eq('user_id', user.id);
 
+    // Count total missions completed
+    const completedMissions = myRegs?.filter(r => r.attended).length || 0;
+
+    // Next scheduled mission
     let nextMission = null;
     if (myRegs && myRegs.length > 0) {
         const candidates = myRegs
@@ -87,6 +93,51 @@ async function renderUserDashboard(container) {
             .sort((a, b) => new Date(a.event.date) - new Date(b.event.date));
         if (candidates.length > 0) nextMission = candidates[0];
     }
+
+    // My shift IDs for filtering available missions
+    const myShiftIds = new Set(myRegs?.map(r => r.shift_id) || []);
+
+    // Fetch available mission (not registered)
+    const { data: availableEvents } = await supabase
+        .from('events')
+        .select(`
+            id, title, date, location,
+            shifts (id, title, start_time, max_slots, total_registrations)
+        `)
+        .gte('date', today.toISOString())
+        .eq('is_visible', true)
+        .order('date')
+        .limit(10);
+
+    let availableMission = null;
+    if (availableEvents) {
+        for (const event of availableEvents) {
+            const availableShift = event.shifts?.find(s =>
+                !myShiftIds.has(s.id) &&
+                (s.max_slots - (s.total_registrations || 0)) > 0
+            );
+            if (availableShift) {
+                availableMission = {
+                    event,
+                    shift: availableShift,
+                    available: availableShift.max_slots - (availableShift.total_registrations || 0)
+                };
+                break;
+            }
+        }
+    }
+
+    // Recent activity (last 3 attended)
+    const { data: recentActivity } = await supabase
+        .from('registrations')
+        .select(`
+            id, created_at, attended, hours_counted,
+            shifts (title, start_time, end_time, events (title, date))
+        `)
+        .eq('user_id', user.id)
+        .eq('attended', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
 
     // Status badge
     const statusBadge = getStatusBadge(profile.status);
@@ -115,8 +166,92 @@ async function renderUserDashboard(container) {
         `;
     }
 
-    // Next mission with countdown
+    // Calculate countdown for next mission
+    let nextMissionDays = null;
+    if (nextMission) {
+        const eventDate = new Date(nextMission.event.date);
+        nextMissionDays = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24));
+    }
+
+    // Quota progress for mandatory users
+    const quotaHtml = isMandatory ? `
+        <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-indigo-400/20 transition-colors"></div>
+            <div class="relative z-10">
+                <div class="text-3xl font-black text-indigo-600 mb-1">🎓</div>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scolaire</div>
+            </div>
+        </div>
+    ` : '';
+
+    // Next mission card
     const missionHtml = renderNextMissionCard(nextMission);
+
+    // Available mission HTML
+    const availableMissionHtml = availableMission ? `
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                Mission Disponible
+            </h2>
+            <button data-link="/events" class="w-full bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-200 hover:shadow-lg hover:shadow-amber-500/10 transition-all text-left group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-orange-500"></div>
+                
+                <div class="pl-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-lg uppercase flex items-center gap-1">
+                            🟢 ${availableMission.available} places
+                        </span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                    
+                    <h3 class="font-bold text-lg text-slate-900 leading-tight mb-1">${escapeHtml(availableMission.event.title)}</h3>
+                    <p class="text-sm text-slate-500 font-medium mb-3">${escapeHtml(availableMission.shift.title)}</p>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/80 px-3 py-1.5 rounded-lg">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-500"></i>
+                            ${new Date(availableMission.event.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/80 px-3 py-1.5 rounded-lg">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+                            ${(availableMission.shift.start_time || '').slice(0, 5)}
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </div>
+    ` : '';
+
+    // Activity panel HTML
+    const activityHtml = recentActivity && recentActivity.length > 0 ? `
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+                    Mon Activité
+                </h2>
+                <button data-link="/profile?tab=history" class="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                    Voir tout
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-100 overflow-hidden">
+                ${recentActivity.map(r => `
+                    <div class="p-3 flex items-center gap-3 hover:bg-slate-50 transition">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-slate-700 truncate">${escapeHtml(r.shifts?.events?.title || '')}</p>
+                            <p class="text-[10px] text-slate-400">${new Date(r.shifts?.events?.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} • ${escapeHtml(r.shifts?.title || '')}</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${r.hours_counted || 0}h</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
 
     container.innerHTML = `
         <div class="animate-fade-in max-w-lg mx-auto pb-24 pt-2">
@@ -139,14 +274,33 @@ async function renderUserDashboard(container) {
                         <i data-lucide="user" class="w-6 h-6"></i>
                     </button>
                 </div>
+            </div>
 
-                <!-- Hours Counter -->
-                <div class="mt-6 flex items-center gap-4">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/20">
-                        <div class="text-3xl font-black text-white">${totalHours}<span class="text-lg opacity-60">h</span></div>
-                        <div class="text-[10px] font-bold text-white/60 uppercase">Heures</div>
+            <!-- STATS BENTO GRID -->
+            <div class="grid grid-cols-2 ${isMandatory ? 'md:grid-cols-3' : ''} gap-3 mb-6">
+                <!-- Hours (Gradient Card) -->
+                <div class="relative group bg-gradient-to-br from-brand-500 to-indigo-600 p-5 rounded-3xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute -bottom-4 -right-4 text-white/10 group-hover:text-white/20 transition-colors transform group-hover:rotate-12 duration-500">
+                        <i data-lucide="clock" class="w-16 h-16"></i>
+                    </div>
+                    <div class="relative z-10 text-white">
+                        <div class="text-3xl font-black mb-1">${totalHours}h</div>
+                        <div class="text-[10px] font-bold text-brand-100 uppercase tracking-wider">Heures cumulées</div>
                     </div>
                 </div>
+
+                <!-- Missions Count -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
+                        <i data-lucide="calendar-check-2" class="w-12 h-12 text-emerald-600"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-emerald-600 mb-1">${completedMissions}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Missions</div>
+                    </div>
+                </div>
+
+                ${quotaHtml}
             </div>
 
             <!-- ANNOUNCEMENTS -->
@@ -161,29 +315,35 @@ async function renderUserDashboard(container) {
                 ${missionHtml}
             </div>
 
+            <!-- AVAILABLE MISSION -->
+            ${availableMissionHtml}
+
+            <!-- ACTIVITY -->
+            ${activityHtml}
+
             <!-- QUICK ACTIONS -->
             <div class="grid grid-cols-3 gap-3">
-                <button data-link="/events" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition">
-                        <i data-lucide="calendar-plus" class="w-6 h-6 text-white"></i>
+                <button data-link="/events" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="calendar-plus" class="w-6 h-6"></i>
                     </div>
-                    <div class="font-bold text-slate-800 text-sm">Missions</div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-emerald-600 transition-colors">Missions</div>
                     <div class="text-[10px] text-slate-400">S'inscrire</div>
                 </button>
                 
-                <button id="btn-scanner" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-slate-500/20 group-hover:scale-110 transition">
-                        <i data-lucide="scan-line" class="w-6 h-6 text-white"></i>
+                <button id="btn-scanner" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-slate-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
+                    <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="scan-line" class="w-6 h-6"></i>
                     </div>
-                    <div class="font-bold text-slate-800 text-sm">Scanner</div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-slate-900 transition-colors">Scanner</div>
                     <div class="text-[10px] text-slate-400">Pointer</div>
                 </button>
 
-                <button data-link="/messages" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-purple-500/20 group-hover:scale-110 transition">
-                        <i data-lucide="message-circle" class="w-6 h-6 text-white"></i>
+                <button data-link="/messages" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="message-circle" class="w-6 h-6"></i>
                     </div>
-                    <div class="font-bold text-slate-800 text-sm">Messages</div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-purple-600 transition-colors">Messages</div>
                     <div class="text-[10px] text-slate-400">Contacter</div>
                 </button>
             </div>

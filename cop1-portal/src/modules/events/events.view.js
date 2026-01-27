@@ -21,7 +21,7 @@ export async function renderEvents() {
                 .from('shifts')
                 .select(`
                     *,
-                    events!inner ( id, title, date, location, is_visible, publish_at ),
+                    events!inner ( id, title, date, location, is_visible, publish_at, description ),
                     registrations ( user_id )
                 `)
                 .gte('events.date', new Date().toISOString().split('T')[0])
@@ -235,42 +235,92 @@ function renderEventGroup(group, userId, countsMap) {
 
 function renderShiftCard(shift, userId, countsMap, event) {
     const isRegistered = shift.registrations.some(r => r.user_id === userId);
-    // ... code ...
-    // Store event data in a safe way (JSON stringified) or just pass needed fields
-    // Simplest: store JSON in data-event
+
+    // Get real counts if available, otherwise fallback to shift data
+    const counts = countsMap[shift.id] || {};
+    const taken = counts.total !== undefined ? counts.total : (shift.registrations ? shift.registrations.length : 0);
+    const max = shift.max_slots || 0;
+    const available = Math.max(0, max - taken);
+
+    // Reserved slots logic
+    const reservedTotal = shift.reserved_slots || 0;
+    const reservedTaken = counts.reservedTaken !== undefined ? counts.reservedTaken : 0; // metrics often not available in simple view without rpc, but passed in countsMap
+    const reservedRemaining = Math.max(0, reservedTotal - reservedTaken);
+    const isReserveFull = reservedRemaining <= 0;
+
+    const isFull = available === 0;
+
+    // Encode event data for the modal
     const eventData = encodeURIComponent(JSON.stringify(event));
 
-    // ... inside return HTML button ...
-    <button
-        data-action="toggle-reg"
-        data-shift-id="${shift.id}"
-        data-event="${eventData}"
-        data-hours="${shift.hours_value || 0}"
-        data-reserved-full="${isReserveFull}"
-        data-registered="${isRegistered}"
-        ${isFull && !isRegistered ? 'disabled' : ''}
-        class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
+    return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-emerald-200 transition-colors group" data-shift-id="${shift.id}">
+            
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="font-bold text-slate-700 font-mono text-lg tracking-tight">
+                        ${(shift.start_time || '').slice(0, 5)} - ${(shift.end_time || '').slice(0, 5)}
+                    </div>
+                    
+                    <!-- Badge Places -->
+                    <div data-status-badge class="${isFull
+            ? 'text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg'
+            : available <= 2
+                ? 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg'
+                : 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg'
+        }">
+                        ${isFull
+            ? '🔴 Complet'
+            : available <= 2
+                ? `🟠 <span data-available-slots>${available}</span> places`
+                : `<span data-available-slots>${available}</span> places`
+        }
+                    </div>
+
+                    <!-- Badge Réservé -->
+                    ${reservedTotal > 0 ? `
+                        <div class="${reservedRemaining > 0
+                ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1'
+                : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1'
+            }" title="${reservedRemaining} places réservées restantes">
+                            <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} réservées` : '🎓 Complet'}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${shift.description ? `<p class="text-xs text-slate-500 line-clamp-1">${escapeHtml(shift.description)}</p>` : ''}
+            </div>
+
+            <button
+                data-action="toggle-reg"
+                data-shift-id="${shift.id}"
+                data-event="${eventData}"
+                data-hours="${shift.hours_value || 0}"
+                data-reserved-full="${isReserveFull}"
+                data-registered="${isRegistered}"
+                ${isFull && !isRegistered ? 'disabled' : ''}
+                class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
             ? 'bg-red-100 text-red-600 hover:bg-red-200 active:scale-95'
             : isFull
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
         } min-h-[44px] flex items-center justify-center"
-    >
-        ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
-    </button>
-        </div >
-        `;
+            >
+                ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
+            </button>
+        </div>
+    `;
 }
 
 function renderEmptyState() {
     return `
-        < div class="text-center py-16 bg-white rounded-2xl border border-slate-100" >
+        <div class="text-center py-16 bg-white rounded-2xl border border-slate-100">
             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
             </div>
             <p class="text-slate-400 font-semibold">${currentFilter === 'mine' ? 'Aucune inscription' : 'Aucune mission disponible'}</p>
             <p class="text-xs text-slate-300 mt-1">${currentFilter === 'mine' ? 'Inscrivez-vous à une mission' : 'Revenez bientôt'}</p>
-        </div >
+        </div>
         `;
 }
 
@@ -307,7 +357,7 @@ export function initEvents() {
             const isReserveFull = btn.dataset.reservedFull === 'true';
             const isRegistered = btn.dataset.registered === 'true';
             const eventData = btn.dataset.event ? JSON.parse(decodeURIComponent(btn.dataset.event)) : null;
-            
+
             // Pass event data correctly (it contains description etc.)
             // Merge shift into event/shifts for modal context if needed, but passing event object is enough
             if (eventData) {
@@ -365,7 +415,7 @@ function setupRegistrationSubscription() {
             }
         )
         .subscribe((status, err) => {
-            console.log(`🔌[Realtime] Statut de connection: ${ status } `, err ? err : '');
+            console.log(`🔌[Realtime] Statut de connection: ${status} `, err ? err : '');
         });
 }
 
@@ -389,7 +439,7 @@ function handleShiftUpdate(shiftData) {
     const reservedFull = reservedRemaining <= 0;
 
     // 1. Trouve l'élément HTML du créneau
-    const shiftEl = document.querySelector(`[data - shift - id= "${shiftId}"]`);
+    const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
     if (!shiftEl) return;
 
     // 2. Met à jour le texte des places disponibles (Standard)
@@ -403,10 +453,10 @@ function handleShiftUpdate(shiftData) {
     const reservedBadgeSpan = shiftEl.querySelector('[data-reserved-badge-text]');
     if (reservedBadgeSpan) {
         if (reservedRemaining > 0) {
-            reservedBadgeSpan.textContent = `🎓 ${ reservedRemaining } réservées`;
+            reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} réservées`;
             // Assure le style correct
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1";
-            reservedBadgeSpan.parentElement.title = `${ reservedRemaining } places réservées restantes`;
+            reservedBadgeSpan.parentElement.title = `${reservedRemaining} places réservées restantes`;
         } else {
             reservedBadgeSpan.textContent = `🎓 Complet`;
             // Style gris
@@ -459,14 +509,14 @@ function updateMissionVisualStatus(shiftEl, available) {
         badgeEl.innerHTML = '🔴 Complet';
     } else if (available <= 2) {
         badgeEl.className = 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${ available > 1 ? 's' : '' } `;
+        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${available > 1 ? 's' : ''} `;
     } else {
         badgeEl.className = 'text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg'; // Ou vert si on veut
         // Remet le style par défaut (slate-400 dans le code original) ou emerald ?
         // Le code original utilisait slate-400. Le vôtre utilise emerald. Gardons une cohérence.
         // Si vous préférez Emerald :
         // badgeEl.className = 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `< span data - available - slots > ${ available }</span > places`;
+        badgeEl.innerHTML = `<span data-available-slots>${available}</span> places`;
     }
 }
 

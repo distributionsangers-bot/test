@@ -101,6 +101,7 @@ export const ProfileService = {
             if (formData.phone !== undefined) updates.phone = formData.phone;
             if (formData.has_permit !== undefined) updates.has_permit = formData.has_permit;
             if (formData.mandatory_hours !== undefined) updates.mandatory_hours = formData.mandatory_hours;
+            if (formData.school !== undefined) updates.school = formData.school;
 
             // 1. Update Profile Data (only if there are updates)
             if (Object.keys(updates).length > 0) {

@@ -1,6 +1,7 @@
 import { ScannerService } from './scanner.service.js';
 import { showToast, showConfirm } from '../../services/utils.js';
 import { Html5Qrcode } from 'html5-qrcode'; // Import module from npm
+import { createIcons, icons } from 'lucide';
 
 let html5QrcodeScanner = null;
 
@@ -22,8 +23,11 @@ export const ScannerView = {
         document.head.appendChild(style);
 
         m.innerHTML = `
-            <button id="close-scanner-btn" class="absolute top-6 right-6 text-white bg-black/40 hover:bg-black/60 p-3 rounded-full backdrop-blur-md transition z-50 border border-white/10">
-                <i data-lucide="x" class="w-6 h-6"></i>
+            <button id="close-scanner-btn" class="absolute top-6 right-6 text-white bg-red-500 hover:bg-red-600 p-3 rounded-full backdrop-blur-md transition z-[210] border-2 border-white shadow-lg shadow-red-500/50" style="z-index: 9999 !important;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
             
             <h3 class="absolute top-16 text-white font-bold text-lg tracking-wide z-50 drop-shadow-md text-center w-full px-4">
@@ -48,8 +52,13 @@ export const ScannerView = {
 
         document.body.appendChild(m);
 
-        // Event Listener pour fermer le scanner
-        m.querySelector('#close-scanner-btn').addEventListener('click', ScannerView.closeScanner);
+        // Event Listener pour fermer le scanner (avec stopPropagation)
+        const closeBtn = m.querySelector('#close-scanner-btn');
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            ScannerView.closeScanner();
+        });
 
         // 2. Démarrage de la caméra
         html5QrcodeScanner = new Html5Qrcode("qr-reader");

@@ -250,8 +250,14 @@ function renderShiftCard(shift, userId, countsMap, event) {
 
     const isFull = available === 0;
 
-    // Encode event data for the modal
+    // Encode event and shift data for the modal
     const eventData = encodeURIComponent(JSON.stringify(event));
+    const shiftData = encodeURIComponent(JSON.stringify({
+        id: shift.id,
+        start_time: shift.start_time,
+        end_time: shift.end_time,
+        description: shift.description
+    }));
 
     return `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-emerald-200 transition-colors group" data-shift-id="${shift.id}">
@@ -295,6 +301,7 @@ function renderShiftCard(shift, userId, countsMap, event) {
                 data-action="toggle-reg"
                 data-shift-id="${shift.id}"
                 data-event="${eventData}"
+                data-shift="${shiftData}"
                 data-hours="${shift.hours_value || 0}"
                 data-reserved-full="${isReserveFull}"
                 data-registered="${isRegistered}"
@@ -357,15 +364,9 @@ export function initEvents() {
             const isReserveFull = btn.dataset.reservedFull === 'true';
             const isRegistered = btn.dataset.registered === 'true';
             const eventData = btn.dataset.event ? JSON.parse(decodeURIComponent(btn.dataset.event)) : null;
+            const shiftDataParsed = btn.dataset.shift ? JSON.parse(decodeURIComponent(btn.dataset.shift)) : { id: shiftId };
 
-            // Pass event data correctly (it contains description etc.)
-            // Merge shift into event/shifts for modal context if needed, but passing event object is enough
-            if (eventData) {
-                // Ensure shifts array exists in eventData if we need it
-                if (!eventData.shifts) eventData.shifts = [{ id: shiftId }]; // minimal fallback
-            }
-
-            await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull, eventData);
+            await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull, eventData, shiftDataParsed);
         }
     }, { signal });
 }
@@ -521,18 +522,17 @@ function updateMissionVisualStatus(shiftEl, available) {
 }
 
 // Updated handleToggleRegistration to use Modal
-async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false, event = null) {
+async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false, event = null, shiftData = null) {
 
     // Import Modal dynamically
     const { renderRegistrationModal } = await import('./registration-modal.view.js');
 
+    // Use the shiftData passed from the button (contains start_time, end_time, etc.)
+    const shiftInfo = shiftData || { id: shiftId };
+
     // Create Modal Element
     const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = renderRegistrationModal(event, {
-        id: shiftId,
-        start_time: event.shifts.find(s => s.id === shiftId)?.start_time,
-        end_time: event.shifts.find(s => s.id === shiftId)?.end_time
-    }, isRegistered); // Pass shift info correctly
+    modalContainer.innerHTML = renderRegistrationModal(event, shiftInfo, isRegistered);
 
     document.body.appendChild(modalContainer);
     createIcons({ icons, root: modalContainer });

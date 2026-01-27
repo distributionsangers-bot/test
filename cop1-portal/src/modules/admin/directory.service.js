@@ -48,7 +48,7 @@ export const DirectoryService = {
 
             // Recherche (prénom, nom, email)
             if (search) {
-                query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+                query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,school.ilike.%${search}%`);
             }
 
             // Tri et pagination

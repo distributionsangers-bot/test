@@ -236,10 +236,10 @@ function renderUserCard(u) {
                         ${statusBadge}
                     </div>
                     <div class="text-xs text-slate-400 font-medium truncate">${escapeHtml(u.email)}</div>
-                    <div class="flex items-center gap-3 mt-2">
-                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">${hours}h</span>
+                    <div class="flex items-center gap-2 flex-wrap mt-2">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg whitespace-nowrap">${hours}h</span>
                         ${badges.join('')}
-                        <span class="text-[10px] text-slate-300">Inscrit ${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                        <span class="text-[10px] text-slate-300 whitespace-nowrap ml-auto sm:ml-0">Inscrit ${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
                     </div>
                 </div>
                 

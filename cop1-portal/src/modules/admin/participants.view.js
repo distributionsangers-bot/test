@@ -178,9 +178,24 @@ function renderParticipantRow(r) {
                 Heures validées
             </div>
         `;
-    }
+        // Note Indicator
+        let noteHtml = '';
+        if (r.note) {
+            noteHtml = `
+            <div class="group/note relative">
+                <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center cursor-help border border-blue-100">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                </div>
+                <div class="absolute bottom-full right-0 mb-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover/note:opacity-100 transition pointer-events-none z-50">
+                    <div class="font-bold text-slate-300 mb-1">Remarque du bénévole :</div>
+                    "${escapeHtml(r.note)}"
+                    <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                </div>
+            </div>
+        `;
+        }
 
-    return `
+        return `
         <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3 hover:shadow-md transition-all group">
             ${avatarHtml}
             
@@ -198,6 +213,11 @@ function renderParticipantRow(r) {
                     ${badgeHtml}
                     ${warningHtml}
                 </div>
+            </div>
+            
+            <!-- Note Column -->
+            <div class="flex flex-col justify-center px-1">
+                ${noteHtml}
             </div>
 
             <!-- Actions Column -->
@@ -232,10 +252,10 @@ function renderParticipantRow(r) {
             </div>
         </div>
     `;
-}
+    }
 
-function renderAddTab() {
-    return `
+    function renderAddTab() {
+        return `
         <div class="flex flex-col h-full bg-slate-50">
             <!-- Search Header -->
             <div class="p-3 md:p-4 bg-white border-b border-slate-100 sticky top-0 z-10">
@@ -257,35 +277,35 @@ function renderAddTab() {
             </div>
         </div>
     `;
-}
+    }
 
 
-function renderSearchResults() {
-    const list = state.searchResults;
+    function renderSearchResults() {
+        const list = state.searchResults;
 
-    if (!state.searchQuery) {
-        return `
+        if (!state.searchQuery) {
+            return `
             <div class="text-center py-10 opacity-50">
                 <i data-lucide="search" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
                 <p class="text-xs md:text-sm font-semibold text-slate-400">Tapez un nom pour rechercher</p>
             </div>
         `;
-    }
+        }
 
-    if (list.length === 0) {
-        return `
+        if (list.length === 0) {
+            return `
             <div class="text-center py-10">
                 <p class="text-xs md:text-sm font-bold text-slate-400">Aucun bénévole trouvé</p>
             </div>
         `;
-    }
+        }
 
-    return list.map(u => {
-        const initial = (u.first_name || '?')[0].toUpperCase();
-        // Check if already registered
-        const isRegistered = state.registrations.some(r => r.user_id === u.id);
+        return list.map(u => {
+            const initial = (u.first_name || '?')[0].toUpperCase();
+            // Check if already registered
+            const isRegistered = state.registrations.some(r => r.user_id === u.id);
 
-        return `
+            return `
             <div class="bg-white p-2 md:p-3 rounded-xl border border-slate-100 flex items-center justify-between shadow-sm hover:border-brand-200 transition-colors gap-3">
                 <div class="flex items-center gap-2 md:gap-3 min-w-0">
                     <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 flex-shrink-0">
@@ -306,254 +326,254 @@ function renderSearchResults() {
                 `}
             </div>
         `;
-    }).join('');
-}
-
-
-// =============================================================================
-// 🧠 LOGIC & CONTROLLERS
-// =============================================================================
-
-async function loadRegistrations() {
-    const { data } = await ParticipantsService.getShiftRegistrations(state.shiftId);
-    state.registrations = data || [];
-}
-
-async function loadUsersForSearch() {
-    // Cache load if empty
-    if (state.approvedUsers.length === 0) {
-        toggleLoader(true);
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('id, first_name, last_name, email')
-            .eq('status', 'approved')
-            .order('last_name', { ascending: true })
-            .limit(500); // Limit for performance, search API better for large sets
-        toggleLoader(false);
-
-        if (data) state.approvedUsers = data;
+        }).join('');
     }
-}
 
-function filterUsers(query) {
-    if (!query) return [];
-    const q = query.toLowerCase();
-    return state.approvedUsers.filter(u =>
-        (u.first_name || '').toLowerCase().includes(q) ||
-        (u.last_name || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q)
-    );
-}
 
-function updateModalContent() {
-    const container = document.getElementById('modal-content');
-    const footer = document.getElementById('modal-footer');
-    const badge = document.getElementById('badge-count');
-    const btnList = document.querySelector('[data-tab="list"]');
-    const btnAdd = document.querySelector('[data-tab="add"]');
+    // =============================================================================
+    // 🧠 LOGIC & CONTROLLERS
+    // =============================================================================
 
-    // Update Tab Styles
-    if (state.currentTab === 'list') {
-        btnList.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg';
-        btnAdd.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white/10 text-slate-300 hover:bg-white/20';
-        container.innerHTML = renderListTab();
-        footer.classList.remove('hidden');
-    } else {
-        btnList.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white/10 text-slate-300 hover:bg-white/20';
-        btnAdd.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg';
-        container.innerHTML = renderAddTab();
-        footer.classList.add('hidden');
+    async function loadRegistrations() {
+        const { data } = await ParticipantsService.getShiftRegistrations(state.shiftId);
+        state.registrations = data || [];
+    }
 
-        // Setup Search Listener
-        const searchInput = document.getElementById('user-search-input');
-        if (searchInput) {
-            searchInput.focus();
-            searchInput.addEventListener('input', (e) => {
-                state.searchQuery = e.target.value;
-                state.searchResults = filterUsers(state.searchQuery);
-                document.getElementById('search-results-list').innerHTML = renderSearchResults();
-                createIcons({ icons, root: document.getElementById('search-results-list') });
+    async function loadUsersForSearch() {
+        // Cache load if empty
+        if (state.approvedUsers.length === 0) {
+            toggleLoader(true);
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, email')
+                .eq('status', 'approved')
+                .order('last_name', { ascending: true })
+                .limit(500); // Limit for performance, search API better for large sets
+            toggleLoader(false);
 
-                // Update count
-                const countEl = document.getElementById('search-count');
-                if (countEl && state.searchQuery) {
-                    countEl.textContent = `${state.searchResults.length} trouvés`;
-                    countEl.classList.remove('hidden');
-                } else if (countEl) {
-                    countEl.classList.add('hidden');
-                }
-            });
+            if (data) state.approvedUsers = data;
         }
     }
 
-    // Update Badge
-    if (badge) {
-        badge.textContent = state.registrations.length;
-        badge.classList.remove('hidden');
+    function filterUsers(query) {
+        if (!query) return [];
+        const q = query.toLowerCase();
+        return state.approvedUsers.filter(u =>
+            (u.first_name || '').toLowerCase().includes(q) ||
+            (u.last_name || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q)
+        );
     }
 
-    // Update Footer Stats
-    if (state.currentTab === 'list') {
-        const total = state.registrations.length;
-        const attended = state.registrations.filter(r => r.attended).length;
-        footer.innerHTML = `
+    function updateModalContent() {
+        const container = document.getElementById('modal-content');
+        const footer = document.getElementById('modal-footer');
+        const badge = document.getElementById('badge-count');
+        const btnList = document.querySelector('[data-tab="list"]');
+        const btnAdd = document.querySelector('[data-tab="add"]');
+
+        // Update Tab Styles
+        if (state.currentTab === 'list') {
+            btnList.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg';
+            btnAdd.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white/10 text-slate-300 hover:bg-white/20';
+            container.innerHTML = renderListTab();
+            footer.classList.remove('hidden');
+        } else {
+            btnList.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white/10 text-slate-300 hover:bg-white/20';
+            btnAdd.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg';
+            container.innerHTML = renderAddTab();
+            footer.classList.add('hidden');
+
+            // Setup Search Listener
+            const searchInput = document.getElementById('user-search-input');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.addEventListener('input', (e) => {
+                    state.searchQuery = e.target.value;
+                    state.searchResults = filterUsers(state.searchQuery);
+                    document.getElementById('search-results-list').innerHTML = renderSearchResults();
+                    createIcons({ icons, root: document.getElementById('search-results-list') });
+
+                    // Update count
+                    const countEl = document.getElementById('search-count');
+                    if (countEl && state.searchQuery) {
+                        countEl.textContent = `${state.searchResults.length} trouvés`;
+                        countEl.classList.remove('hidden');
+                    } else if (countEl) {
+                        countEl.classList.add('hidden');
+                    }
+                });
+            }
+        }
+
+        // Update Badge
+        if (badge) {
+            badge.textContent = state.registrations.length;
+            badge.classList.remove('hidden');
+        }
+
+        // Update Footer Stats
+        if (state.currentTab === 'list') {
+            const total = state.registrations.length;
+            const attended = state.registrations.filter(r => r.attended).length;
+            footer.innerHTML = `
             <div class="flex gap-4">
                 <span>Total: <span class="text-slate-800">${total}</span></span>
                 <span>Présents: <span class="text-emerald-600">${attended}</span></span>
             </div>
         `;
+        }
+
+        createIcons({ icons, root: container });
+        bindListEvents();
+        if (state.currentTab === 'add') bindAddButtons();
     }
 
-    createIcons({ icons, root: container });
-    bindListEvents();
-    if (state.currentTab === 'add') bindAddButtons();
-}
+    function bindListEvents() {
+        const list = document.getElementById('modal-content');
+        if (!list) return;
 
-function bindListEvents() {
-    const list = document.getElementById('modal-content');
-    if (!list) return;
+        // Toggle Presence
+        list.querySelectorAll('.action-toggle-presence').forEach(cb => {
+            cb.addEventListener('change', async (e) => {
+                const regId = e.target.dataset.regId;
+                const newVal = e.target.checked;
 
-    // Toggle Presence
-    list.querySelectorAll('.action-toggle-presence').forEach(cb => {
-        cb.addEventListener('change', async (e) => {
-            const regId = e.target.dataset.regId;
-            const newVal = e.target.checked;
-
-            toggleLoader(true);
-            await ParticipantsService.updateAttendance(regId, newVal);
-            await loadRegistrations(); // Refresh full data to catch side effects
-            toggleLoader(false);
-            updateModalContent();
-        });
-    });
-
-    // Delete
-    list.querySelectorAll('.action-delete').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const regId = btn.dataset.regId;
-            showConfirm("Désinscrire ce bénévole ?", async () => {
                 toggleLoader(true);
-                await ParticipantsService.deleteRegistration(regId);
-                await loadRegistrations();
+                await ParticipantsService.updateAttendance(regId, newVal);
+                await loadRegistrations(); // Refresh full data to catch side effects
                 toggleLoader(false);
                 updateModalContent();
-                showToast("Bénévole désinscrit");
-            }, { type: 'danger' });
+            });
         });
-    });
 
-    // Force Validation
-    list.querySelectorAll('.action-force').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const regId = btn.dataset.regId;
-            const currentVal = btn.dataset.currentVal === 'true';
-            const newVal = !currentVal;
-
-            let msg = newVal
-                ? "Forcer la validation des heures (comptera dans le total même si hors quota) ?"
-                : "Retirer la validation des heures ?";
-
-            showConfirm(msg, async () => {
-                toggleLoader(true);
-                const { success } = await ParticipantsService.forceHoursValidation(regId, newVal);
-                if (success) {
+        // Delete
+        list.querySelectorAll('.action-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const regId = btn.dataset.regId;
+                showConfirm("Désinscrire ce bénévole ?", async () => {
+                    toggleLoader(true);
+                    await ParticipantsService.deleteRegistration(regId);
                     await loadRegistrations();
+                    toggleLoader(false);
                     updateModalContent();
-                    showToast("Validation mise à jour");
-                } else {
-                    showToast("Erreur lors de la mise à jour", "error");
-                }
-                toggleLoader(false);
-            }, { type: 'warning', confirmText: 'Valider' });
+                    showToast("Bénévole désinscrit");
+                }, { type: 'danger' });
+            });
         });
-    });
-}
 
-function bindAddButtons() {
-    const modal = document.getElementById('modal-content');
-    if (!modal) return;
+        // Force Validation
+        list.querySelectorAll('.action-force').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const regId = btn.dataset.regId;
+                const currentVal = btn.dataset.currentVal === 'true';
+                const newVal = !currentVal;
 
-    modal.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.btn-add-user');
-        if (!btn) return;
+                let msg = newVal
+                    ? "Forcer la validation des heures (comptera dans le total même si hors quota) ?"
+                    : "Retirer la validation des heures ?";
 
-        const userId = btn.dataset.userId;
-
-        // First attempt (no force)
-        toggleLoader(true);
-        const res = await ParticipantsService.addParticipant(state.shiftId, userId, false);
-        toggleLoader(false);
-
-        if (res.needsConfirmation) {
-            showConfirm("Le créneau est complet. Voulez-vous augmenter la capacité et ajouter ce bénévole quand même ?", async () => {
-                toggleLoader(true);
-                const forceRes = await ParticipantsService.addParticipant(state.shiftId, userId, true);
-                toggleLoader(false);
-
-                if (forceRes.error) {
-                    showToast(forceRes.error.message || "Erreur ajout forcé", "error");
-                } else {
-                    showToast("Participant ajouté (capacité augmentée)");
-                    handleSuccessAdd();
-                }
-            }, { type: 'warning', confirmText: 'Forcer l\'ajout' });
-            return;
-        }
-
-        if (res.error) {
-            showToast(res.error.message || "Erreur ajout", "error");
-        } else {
-            showToast("Participant ajouté");
-            handleSuccessAdd();
-        }
-    });
-}
-
-async function handleSuccessAdd() {
-    state.registrations = []; // Force reload
-    await loadRegistrations();
-    state.currentTab = 'list';
-    updateModalContent();
-}
-
-// =============================================================================
-// ⚡ EVENT LISTENERS
-// =============================================================================
-
-document.addEventListener('click', (e) => {
-    // Close Modal
-    if (e.target.closest('#btn-close-participants')) {
-        document.getElementById('participants-modal')?.remove();
+                showConfirm(msg, async () => {
+                    toggleLoader(true);
+                    const { success } = await ParticipantsService.forceHoursValidation(regId, newVal);
+                    if (success) {
+                        await loadRegistrations();
+                        updateModalContent();
+                        showToast("Validation mise à jour");
+                    } else {
+                        showToast("Erreur lors de la mise à jour", "error");
+                    }
+                    toggleLoader(false);
+                }, { type: 'warning', confirmText: 'Valider' });
+            });
+        });
     }
 
-    // Tab Switching
-    const tabBtn = e.target.closest('.tab-btn');
-    if (tabBtn && document.getElementById('participants-modal')) {
-        const tab = tabBtn.dataset.tab;
-        if (tab !== state.currentTab) {
-            state.currentTab = tab;
-            if (tab === 'add') {
-                loadUsersForSearch().then(() => {
-                    updateModalContent();
-                });
+    function bindAddButtons() {
+        const modal = document.getElementById('modal-content');
+        if (!modal) return;
+
+        modal.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-add-user');
+            if (!btn) return;
+
+            const userId = btn.dataset.userId;
+
+            // First attempt (no force)
+            toggleLoader(true);
+            const res = await ParticipantsService.addParticipant(state.shiftId, userId, false);
+            toggleLoader(false);
+
+            if (res.needsConfirmation) {
+                showConfirm("Le créneau est complet. Voulez-vous augmenter la capacité et ajouter ce bénévole quand même ?", async () => {
+                    toggleLoader(true);
+                    const forceRes = await ParticipantsService.addParticipant(state.shiftId, userId, true);
+                    toggleLoader(false);
+
+                    if (forceRes.error) {
+                        showToast(forceRes.error.message || "Erreur ajout forcé", "error");
+                    } else {
+                        showToast("Participant ajouté (capacité augmentée)");
+                        handleSuccessAdd();
+                    }
+                }, { type: 'warning', confirmText: 'Forcer l\'ajout' });
+                return;
+            }
+
+            if (res.error) {
+                showToast(res.error.message || "Erreur ajout", "error");
             } else {
-                updateModalContent();
-            }
-        }
-    }
-
-    // Export CSV
-    if (e.target.closest('#btn-export-csv')) {
-        ParticipantsService.exportParticipantsCSV(state.shiftId).then(({ data }) => {
-            if (data) {
-                const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `participants_export.csv`;
-                a.click();
-                showToast("Export téléchargé");
+                showToast("Participant ajouté");
+                handleSuccessAdd();
             }
         });
     }
-});
+
+    async function handleSuccessAdd() {
+        state.registrations = []; // Force reload
+        await loadRegistrations();
+        state.currentTab = 'list';
+        updateModalContent();
+    }
+
+    // =============================================================================
+    // ⚡ EVENT LISTENERS
+    // =============================================================================
+
+    document.addEventListener('click', (e) => {
+        // Close Modal
+        if (e.target.closest('#btn-close-participants')) {
+            document.getElementById('participants-modal')?.remove();
+        }
+
+        // Tab Switching
+        const tabBtn = e.target.closest('.tab-btn');
+        if (tabBtn && document.getElementById('participants-modal')) {
+            const tab = tabBtn.dataset.tab;
+            if (tab !== state.currentTab) {
+                state.currentTab = tab;
+                if (tab === 'add') {
+                    loadUsersForSearch().then(() => {
+                        updateModalContent();
+                    });
+                } else {
+                    updateModalContent();
+                }
+            }
+        }
+
+        // Export CSV
+        if (e.target.closest('#btn-export-csv')) {
+            ParticipantsService.exportParticipantsCSV(state.shiftId).then(({ data }) => {
+                if (data) {
+                    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `participants_export.csv`;
+                    a.click();
+                    showToast("Export téléchargé");
+                }
+            });
+        }
+    });

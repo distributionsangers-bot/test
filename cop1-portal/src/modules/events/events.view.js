@@ -198,7 +198,7 @@ function renderEventGroup(group, userId, countsMap) {
     const diffHours = (date - now) / (1000 * 60 * 60);
     const isSoon = diffHours <= 48 && diffHours > 0;
 
-    const shiftsHtml = shifts.map(s => renderShiftCard(s, userId, countsMap)).join('');
+    const shiftsHtml = shifts.map(s => renderShiftCard(s, userId, countsMap, event)).join('');
 
     return `
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden ${hasRegistration ? 'ring-2 ring-emerald-400' : ''}">
@@ -233,100 +233,45 @@ function renderEventGroup(group, userId, countsMap) {
     `;
 }
 
-function renderShiftCard(shift, userId, countsMap) {
+function renderShiftCard(shift, userId, countsMap, event) {
     const isRegistered = shift.registrations.some(r => r.user_id === userId);
-    const total = shift.max_slots || 0;
-    const reservedTotal = shift.reserved_slots || 0;
+    // ... code ...
+    // Store event data in a safe way (JSON stringified) or just pass needed fields
+    // Simplest: store JSON in data-event
+    const eventData = encodeURIComponent(JSON.stringify(event));
 
-    // Counts
-    const counts = countsMap ? countsMap[shift.id] : null;
-    const globalCount = counts ? counts.total : shift.registrations.length;
-    const reservedTaken = counts ? counts.reservedTaken : 0; // fallback if simplified
-
-    const taken = globalCount;
-    const remaining = total - taken;
-    const isFull = remaining <= 0;
-    const isAlmostFull = remaining <= 2 && remaining > 0;
-
-    // Check Reserved Availability
-    const reservedRemaining = Math.max(0, reservedTotal - reservedTaken);
-    // If reservedTotal is 0, remaining is 0, so it IS full (effectively 0 slots available for students)
-    const isReserveFull = reservedRemaining <= 0;
-
-    // Status badge
-    let statusBadge = '';
-    if (isFull) {
-        statusBadge = '<span class="text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg" data-status-badge>🔴 Complet</span>';
-    } else if (isAlmostFull) {
-        statusBadge = `<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg" data-status-badge>🟠 <span data-available-slots>${remaining}</span> place${remaining > 1 ? 's' : ''}</span>`;
-    } else {
-        statusBadge = `<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg" data-status-badge>🟢 <span data-available-slots>${remaining}</span> places</span>`;
-    }
-
-    // Reserved Badge
-    let reservedBadge = '';
-    if (reservedTotal > 0 && !isFull) {
-        if (reservedRemaining > 0) {
-            reservedBadge = `<span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1" title="${reservedRemaining} places réservées restantes"><span data-reserved-badge-text>🎓 ${reservedRemaining} réservées</span></span>`;
-        } else {
-            reservedBadge = `<span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1" title="Places réservées complètes"><span data-reserved-badge-text>🎓 Complet</span></span>`;
-        }
-    }
-
-    return `
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3 ${isRegistered ? 'bg-emerald-50 border-emerald-200' : ''} hover:shadow-sm transition" data-shift-id="${shift.id}">
-            <!-- Time -->
-            <div class="text-center flex-shrink-0 w-16">
-                <div class="text-sm font-bold ${isRegistered ? 'text-emerald-700' : 'text-slate-700'}">${(shift.start_time || '').slice(0, 5)}</div>
-                <div class="text-[10px] text-slate-400">${(shift.end_time || '').slice(0, 5)}</div>
-            </div>
-
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-semibold text-sm ${isRegistered ? 'text-emerald-800' : 'text-slate-700'} truncate" data-shift-title>${escapeHtml(shift.title)}</span>
-                    ${statusBadge}
-                    ${reservedBadge}
-                </div>
-                ${shift.referent_name ? `
-                    <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                        <i data-lucide="user" class="w-3 h-3"></i>
-                        Réf: ${escapeHtml(shift.referent_name)}
-                    </div>
-                ` : ''}
-            </div>
-
-            <!-- Action -->
-            <button 
-                data-action="toggle-reg" 
-                data-shift-id="${shift.id}" 
-                data-hours="${shift.hours_value || 0}"
-                data-reserved-full="${isReserveFull}"
-                data-registered="${isRegistered}"
-                ${isFull && !isRegistered ? 'disabled' : ''}
-                class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
+    // ... inside return HTML button ...
+    <button
+        data-action="toggle-reg"
+        data-shift-id="${shift.id}"
+        data-event="${eventData}"
+        data-hours="${shift.hours_value || 0}"
+        data-reserved-full="${isReserveFull}"
+        data-registered="${isRegistered}"
+        ${isFull && !isRegistered ? 'disabled' : ''}
+        class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
             ? 'bg-red-100 text-red-600 hover:bg-red-200 active:scale-95'
             : isFull
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
         } min-h-[44px] flex items-center justify-center"
-            >
-                ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
-            </button>
-        </div>
-    `;
+    >
+        ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
+    </button>
+        </div >
+        `;
 }
 
 function renderEmptyState() {
     return `
-        <div class="text-center py-16 bg-white rounded-2xl border border-slate-100">
+        < div class="text-center py-16 bg-white rounded-2xl border border-slate-100" >
             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
             </div>
             <p class="text-slate-400 font-semibold">${currentFilter === 'mine' ? 'Aucune inscription' : 'Aucune mission disponible'}</p>
             <p class="text-xs text-slate-300 mt-1">${currentFilter === 'mine' ? 'Inscrivez-vous à une mission' : 'Revenez bientôt'}</p>
-        </div>
-    `;
+        </div >
+        `;
 }
 
 export function initEvents() {
@@ -361,7 +306,16 @@ export function initEvents() {
             const hours = parseFloat(btn.dataset.hours || 0);
             const isReserveFull = btn.dataset.reservedFull === 'true';
             const isRegistered = btn.dataset.registered === 'true';
-            await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull);
+            const eventData = btn.dataset.event ? JSON.parse(decodeURIComponent(btn.dataset.event)) : null;
+            
+            // Pass event data correctly (it contains description etc.)
+            // Merge shift into event/shifts for modal context if needed, but passing event object is enough
+            if (eventData) {
+                // Ensure shifts array exists in eventData if we need it
+                if (!eventData.shifts) eventData.shifts = [{ id: shiftId }]; // minimal fallback
+            }
+
+            await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull, eventData);
         }
     }, { signal });
 }
@@ -411,7 +365,7 @@ function setupRegistrationSubscription() {
             }
         )
         .subscribe((status, err) => {
-            console.log(`🔌 [Realtime] Statut de connection: ${status}`, err ? err : '');
+            console.log(`🔌[Realtime] Statut de connection: ${ status } `, err ? err : '');
         });
 }
 
@@ -435,7 +389,7 @@ function handleShiftUpdate(shiftData) {
     const reservedFull = reservedRemaining <= 0;
 
     // 1. Trouve l'élément HTML du créneau
-    const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
+    const shiftEl = document.querySelector(`[data - shift - id= "${shiftId}"]`);
     if (!shiftEl) return;
 
     // 2. Met à jour le texte des places disponibles (Standard)
@@ -449,10 +403,10 @@ function handleShiftUpdate(shiftData) {
     const reservedBadgeSpan = shiftEl.querySelector('[data-reserved-badge-text]');
     if (reservedBadgeSpan) {
         if (reservedRemaining > 0) {
-            reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} réservées`;
+            reservedBadgeSpan.textContent = `🎓 ${ reservedRemaining } réservées`;
             // Assure le style correct
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1";
-            reservedBadgeSpan.parentElement.title = `${reservedRemaining} places réservées restantes`;
+            reservedBadgeSpan.parentElement.title = `${ reservedRemaining } places réservées restantes`;
         } else {
             reservedBadgeSpan.textContent = `🎓 Complet`;
             // Style gris
@@ -505,68 +459,100 @@ function updateMissionVisualStatus(shiftEl, available) {
         badgeEl.innerHTML = '🔴 Complet';
     } else if (available <= 2) {
         badgeEl.className = 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${available > 1 ? 's' : ''}`;
+        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${ available > 1 ? 's' : '' } `;
     } else {
         badgeEl.className = 'text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg'; // Ou vert si on veut
         // Remet le style par défaut (slate-400 dans le code original) ou emerald ?
         // Le code original utilisait slate-400. Le vôtre utilise emerald. Gardons une cohérence.
         // Si vous préférez Emerald :
         // badgeEl.className = 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `<span data-available-slots>${available}</span> places`;
+        badgeEl.innerHTML = `< span data - available - slots > ${ available }</span > places`;
     }
 }
 
-async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false) {
-    // WARN: Student logic updated
-    if (!isRegistered && store.state.profile?.mandatory_hours) {
-        // Case 1: Shift credits 0 hours anyway
-        if (hours === 0) {
-            const confirmed = await new Promise(resolve => {
-                showConfirm(
-                    "Ce créneau ne permet pas de valider d'heures (0h). En tant qu'étudiant devant valider un quota, ces heures ne compteront pas. Voulez-vous continuer ?",
-                    () => resolve(true),
-                    { type: 'warning', confirmText: "M'inscrire quand même", cancelText: "Annuler", onCancel: () => resolve(false) }
-                );
-            });
-            if (!confirmed) return;
+// Updated handleToggleRegistration to use Modal
+async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isReserveFull = false, event = null) {
+
+    // Import Modal dynamically
+    const { renderRegistrationModal } = await import('./registration-modal.view.js');
+
+    // Create Modal Element
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = renderRegistrationModal(event, {
+        id: shiftId,
+        start_time: event.shifts.find(s => s.id === shiftId)?.start_time,
+        end_time: event.shifts.find(s => s.id === shiftId)?.end_time
+    }, isRegistered); // Pass shift info correctly
+
+    document.body.appendChild(modalContainer);
+    createIcons({ icons, root: modalContainer });
+
+    // Modal Logic
+    const backdrop = modalContainer.querySelector('#reg-modal-backdrop');
+    const closeBtn = modalContainer.querySelector('#btn-close-modal');
+    const cancelBtn = modalContainer.querySelector('#btn-cancel');
+    const confirmBtn = modalContainer.querySelector('#btn-confirm-reg');
+    const noteInput = modalContainer.querySelector('#reg-note');
+
+    const closeModal = () => modalContainer.remove();
+
+    cancelBtn.onclick = closeModal;
+    closeBtn.onclick = closeModal;
+    backdrop.onclick = (e) => { if (e.target === backdrop) closeModal(); };
+
+    confirmBtn.onclick = async () => {
+        const note = noteInput ? noteInput.value.trim() : null;
+        closeModal();
+
+        // Proceed with verification logic (Student Quota / Reserve Full)
+        if (!isRegistered && store.state.profile?.mandatory_hours) {
+            // Case 1: Shift credits 0 hours anyway
+            if (hours === 0) {
+                const confirmed = await new Promise(resolve => {
+                    showConfirm(
+                        "Ce créneau ne permet pas de valider d'heures (0h). En tant qu'étudiant devant valider un quota, ces heures ne compteront pas. Voulez-vous continuer ?",
+                        () => resolve(true),
+                        { type: 'warning', confirmText: "M'inscrire quand même", cancelText: "Annuler", onCancel: () => resolve(false) }
+                    );
+                });
+                if (!confirmed) return;
+            }
+            // Case 2: Shift has hours, but reserved slots are full
+            else if (isReserveFull) {
+                const confirmed = await new Promise(resolve => {
+                    showConfirm(
+                        "Les places réservées aux étudiants sont complètes sur ce créneau. Vous pouvez vous inscrire sur une place standard, mais vos heures NE SERONT PAS COMPTABILISÉES pour votre quota. Voulez-vous continuer ?",
+                        () => resolve(true),
+                        { type: 'warning', confirmText: "M'inscrire sans valider mes heures", cancelText: "Annuler", onCancel: () => resolve(false) }
+                    );
+                });
+                if (!confirmed) return;
+            }
         }
-        // Case 2: Shift has hours, but reserved slots are full
-        else if (isReserveFull) {
-            const confirmed = await new Promise(resolve => {
-                showConfirm(
-                    "Les places réservées aux étudiants sont complètes sur ce créneau. Vous pouvez vous inscrire sur une place standard, mais vos heures NE SERONT PAS COMPTABILISÉES pour votre quota. Voulez-vous continuer ?",
-                    () => resolve(true),
-                    { type: 'warning', confirmText: "M'inscrire sans valider mes heures", cancelText: "Annuler", onCancel: () => resolve(false) }
-                );
-            });
 
-            // If user cancels, stop here
-            if (!confirmed) return;
+        // Execute Action
+        toggleLoader(true);
+        try {
+            const userId = store.state.user.id;
+            // Pass NOTE to service
+            const result = await EventsService.toggleRegistration(shiftId, userId, isRegistered, note);
 
-            // If user confirms, we proceed to the API call below
+            if (result.error) throw result.error;
+
+            if (result.action === 'unregister') {
+                showToast("Désinscription validée ✓", "success");
+            } else {
+                showToast("Inscription validée ! 🎉", "success");
+            }
+
+            // Refresh view
+            import('../../core/router.js').then(({ router }) => router.handleLocation());
+
+        } catch (err) {
+            console.error(err);
+            showToast(err.message || "Une erreur est survenue", "error");
+        } finally {
+            toggleLoader(false);
         }
-    }
-
-    toggleLoader(true);
-    try {
-        const userId = store.state.user.id;
-        const result = await EventsService.toggleRegistration(shiftId, userId, isRegistered);
-
-        if (result.error) throw result.error;
-
-        if (result.action === 'unregister') {
-            showToast("Désinscription validée ✓", "success");
-        } else {
-            showToast("Inscription validée ! 🎉", "success");
-        }
-
-        // Refresh view
-        import('../../core/router.js').then(({ router }) => router.handleLocation());
-
-    } catch (err) {
-        console.error(err);
-        showToast(err.message || "Une erreur est survenue", "error");
-    } finally {
-        toggleLoader(false);
-    }
+    };
 }

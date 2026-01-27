@@ -27,6 +27,8 @@ export const ParticipantsService = {
                 .from('registrations')
                 .select(`
                     *,
+                    note,
+                    profiles (
                     profiles (
                         id,
                         first_name,

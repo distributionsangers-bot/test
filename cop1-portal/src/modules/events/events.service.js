@@ -11,7 +11,7 @@ export const EventsService = {
             const today = new Date().toISOString().split('T')[0];
             const { data, error } = await supabase
                 .from('events')
-                .select('*, shifts(*, registrations(count))') // count checks how many regs total
+                .select('*, description, shifts(*, registrations(count))') // count checks how many regs total
                 .gte('date', today)
                 .order('date', { ascending: true });
 
@@ -74,7 +74,7 @@ export const EventsService = {
      * Use RPC 'register_to_shift' for join to handle concurrency/quotas.
      * Use DELETE for leave.
      */
-    async toggleRegistration(shiftId, userId, isCurrentlyRegistered) {
+    async toggleRegistration(shiftId, userId, isCurrentlyRegistered, note = null) {
         try {
             if (isCurrentlyRegistered) {
                 // UNREGISTER
@@ -90,7 +90,8 @@ export const EventsService = {
                 // REGISTER (Secure RPC)
                 // Force update: ensuring singular argument
                 const { error } = await supabase.rpc('register_to_shift', {
-                    p_shift_id: shiftId
+                    p_shift_id: shiftId,
+                    p_note: note // Add note
                 });
 
                 if (error) throw error;

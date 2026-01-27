@@ -29,7 +29,6 @@ export const ParticipantsService = {
                     *,
                     note,
                     profiles (
-                    profiles (
                         id,
                         first_name,
                         last_name,

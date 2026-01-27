@@ -8,7 +8,7 @@
 
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://translate.google.com https://translate.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https://translate.google.com https://www.google.com blob:; connect-src 'self' https://*.supabase.co https://translate.googleapis.com; object-src 'none'; base-uri 'self';">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self';">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>COP1 Angers - Espace Bénévoles</title>
@@ -42,8 +42,7 @@
         class="fixed top-20 md:top-4 right-4 z-[9998] flex flex-col items-end gap-2 pointer-events-none" role="status"
         aria-live="polite"></div>
 
-    <!-- Hidden Google Translate Element -->
-    <div id="google_translate_element" style="display:none"></div>
+
 
     <!-- App Root -->
     <div id="app" class="h-full w-full relative" role="main" id="main-content"></div>
@@ -54,21 +53,7 @@
         <div class="w-16 h-16 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
     </div>
 
-    <!-- Google Translate Script -->
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({ pageLanguage: 'fr', includedLanguages: 'en,fr', autoDisplay: false }, 'google_translate_element');
-        }
-        // Expose global toggle for the header button
-        window.toggleLanguage = function () {
-            const currentCookie = document.cookie.split('; ').find(row => row.startsWith('googtrans='));
-            const isEnglish = currentCookie && currentCookie.includes('/fr/en');
-            document.cookie = isEnglish ? "googtrans=/fr/fr; domain=" + window.location.hostname + "; path=/" : "googtrans=/fr/en; domain=" + window.location.hostname + "; path=/";
-            window.location.reload();
-        }
-    </script>
-    <script type="text/javascript"
-        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 
     <!-- Main Module Script -->
     <script type="module" src="/src/main.js"></script>

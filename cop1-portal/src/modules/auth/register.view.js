@@ -3,6 +3,7 @@ import { supabase } from '../../services/supabase.js';
 import { toggleLoader, showToast } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { APP_CONFIG } from '../../core/constants.js';
+import { SCHOOLS } from '../../core/schools.js';
 
 const { LOGO_URL, BUCKET_PROOF } = APP_CONFIG;
 
@@ -114,6 +115,22 @@ export function renderRegister() {
                         <div><span class="text-sm font-bold text-orange-900 block">Heures Obligatoires</span><span class="text-[10px] text-orange-700">Pour validation stage/école.</span></div>
                     </label>
 
+                    <!-- School Selection (Hidden by default, shown if student/mandatory or always shown?)
+                         Let's show it always but maybe make it required if mandatory is checked?
+                         For now, let's just add it as a standard field.
+                    -->
+                    <div class="space-y-1 pt-2">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">École / Université / Structure</label>
+                        <div class="relative">
+                            <i data-lucide="graduation-cap" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <select id="reg-school" class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300 appearance-none cursor-pointer">
+                                <option value="" disabled selected>Sélectionner votre établissement</option>
+                                ${SCHOOLS.map(s => `<option value="${s}">${s}</option>`).join('')}
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+
                     <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 mt-4 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
                         Créer mon compte
                     </button>
@@ -215,7 +232,8 @@ export function initRegister() {
                             last_name: ln,
                             phone: phone,
                             has_permit: permit,
-                            mandatory_hours: mandatory
+                            mandatory_hours: mandatory,
+                            school: document.getElementById('reg-school').value
                         }
                     }
                 });

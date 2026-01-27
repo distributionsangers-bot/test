@@ -385,7 +385,7 @@ export const DirectoryService = {
             if (error) throw error;
 
             // Génère le CSV
-            const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Statut', 'Permis', 'Heures Obligatoires', 'Date inscription'];
+            const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Statut', 'Permis', 'Heures Obligatoires', 'École', 'Date inscription'];
             const rows = users.map(u => [
                 u.first_name,
                 u.last_name,
@@ -394,6 +394,7 @@ export const DirectoryService = {
                 u.status,
                 u.has_permit ? 'Oui' : 'Non',
                 u.mandatory_hours ? 'Oui' : 'Non',
+                u.school || 'N/A',
                 new Date(u.created_at).toLocaleDateString('fr-FR')
             ]);
 

@@ -217,6 +217,7 @@ function renderUserCard(u) {
     const badges = [];
     if (hasPermit) badges.push(`<span class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">🚗</span>`);
     if (isMandatory) badges.push(`<span class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">🎓</span>`);
+    if (u.school) badges.push(`<span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg truncate max-w-[150px] inline-block align-bottom" title="${escapeHtml(u.school)}">🏫 ${escapeHtml(u.school)}</span>`);
     if (isNew) badges.push(`<span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">✨ Nouveau</span>`);
 
     return `
@@ -506,6 +507,11 @@ async function viewUserDetails(uid) {
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Inscription</span>
                             <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">École</span>
+                            <span class="font-bold text-slate-700 truncate max-w-[200px]" title="${escapeHtml(u.school || '')}">${escapeHtml(u.school || 'Non renseigné')}</span>
                         </div>
                         
                         <!-- Toggle Type -->

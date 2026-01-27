@@ -3,6 +3,7 @@ import { store } from '../../core/store.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
+import { SCHOOLS } from '../../core/schools.js';
 
 export async function renderProfile(container, params) {
     if (!container) return;
@@ -93,6 +94,7 @@ export async function renderProfile(container, params) {
                                     ${isMandatory ? '🎓 Scolaire' : '💚 Bénévole'}
                                 </span>
                                 ${hasPermit ? `<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>` : ''}
+                                ${profile.school ? `<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm flex items-center gap-1"><i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> ${escapeHtml(profile.school)}</span>` : ''}
                             </div>
                         </div>
 
@@ -213,6 +215,17 @@ export async function renderProfile(container, params) {
                         <div class="pt-4 border-t border-slate-100">
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Nouveau mot de passe (optionnel)</label>
                             <input name="password" type="password" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="••••••••">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">École / Établissement</label>
+                            <div class="relative">
+                                <select name="school" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all appearance-none cursor-pointer">
+                                    <option value="">Non renseigné</option>
+                                    ${SCHOOLS.map(s => `<option value="${s}" ${profile.school === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                </select>
+                                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                            </div>
                         </div>
                         <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                             <i data-lucide="save" class="w-5 h-5"></i>
@@ -445,6 +458,7 @@ function setupEditForm(c, uid) {
             phone: fd.get('phone'),
             has_permit: fd.get('has_permit') === 'on',
             mandatory_hours: fd.get('mandatory_hours') === 'on',
+            school: fd.get('school'),
             password: fd.get('password')
         };
 
@@ -463,6 +477,7 @@ function setupEditForm(c, uid) {
                 store.state.profile.phone = data.phone;
                 store.state.profile.has_permit = data.has_permit;
                 store.state.profile.mandatory_hours = data.mandatory_hours;
+                store.state.profile.school = data.school;
             }
             // Trigger UI Refresh
             refreshProfile(uid);
@@ -567,6 +582,10 @@ async function refreshProfile(userId) {
 
         if (profile.has_permit) {
             tagsHtml += '<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm">🚗 Permis</span>';
+        }
+
+        if (profile.school) {
+            tagsHtml += '<span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white backdrop-blur-sm flex items-center gap-1"><i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> ' + escapeHtml(profile.school) + '</span>';
         }
 
         elTags.innerHTML = tagsHtml;

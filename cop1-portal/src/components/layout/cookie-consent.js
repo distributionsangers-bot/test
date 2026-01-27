@@ -18,7 +18,7 @@ export const CookieConsent = {
             <div class="flex items-center gap-3">
                 <span class="text-2xl">🍪</span>
                 <div class="text-sm text-slate-500 font-medium">
-                    Nous utilisons des cookies essentiels pour l'authentification et la traduction.
+                    Nous utilisons des cookies essentiels pour l'authentification.
                 </div>
             </div>
             <button id="btn-accept-cookies" class="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition shadow-lg w-full md:w-auto">

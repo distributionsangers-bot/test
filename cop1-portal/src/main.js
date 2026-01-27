@@ -144,7 +144,7 @@ function renderAppLayout() {
     // Init Mobile Nav Events
     initMobileNav();
 
-    // Init Header Events (Google Translate)
+    // Init Header Events
     initHeader();
 
     // NOTE: attachGlobalListeners a été déplacé dans init() pour garantir son exécution

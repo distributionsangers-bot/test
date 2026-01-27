@@ -28,10 +28,23 @@ export function renderRegistrationModal(event, shift, isRegistered) {
                 <!-- Content -->
                 <div class="pt-12 px-6 pb-6">
                     <h2 class="text-2xl font-black text-slate-900 leading-tight mb-1">${escapeHtml(event.title)}</h2>
-                    <p class="text-sm font-medium text-emerald-600 flex items-center gap-1.5 mb-4">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                        ${shiftTime}
-                    </p>
+                    
+                    <!-- Shift Info -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            ${shiftTime}
+                        </div>
+                        ${shift.title ? `
+                            <span class="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg">${escapeHtml(shift.title)}</span>
+                        ` : ''}
+                        ${shift.referent_name ? `
+                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                                <i data-lucide="user" class="w-3 h-3"></i>
+                                ${escapeHtml(shift.referent_name)}
+                            </span>
+                        ` : ''}
+                    </div>
 
                     <!-- Description Section (Requested by User) -->
                     <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">

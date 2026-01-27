@@ -254,47 +254,67 @@ function renderShiftCard(shift, userId, countsMap, event) {
     const eventData = encodeURIComponent(JSON.stringify(event));
     const shiftData = encodeURIComponent(JSON.stringify({
         id: shift.id,
+        title: shift.title,
         start_time: shift.start_time,
         end_time: shift.end_time,
-        description: shift.description
+        description: shift.description,
+        referent_name: shift.referent_name
     }));
 
     return `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-emerald-200 transition-colors group" data-shift-id="${shift.id}">
             
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                    <div class="font-bold text-slate-700 font-mono text-lg tracking-tight">
-                        ${(shift.start_time || '').slice(0, 5)} - ${(shift.end_time || '').slice(0, 5)}
+            <!-- Time Column -->
+            <div class="flex items-center gap-4">
+                <div class="text-center min-w-[50px]">
+                    <div class="font-bold text-emerald-600 font-mono text-lg tracking-tight leading-none">
+                        ${(shift.start_time || '').slice(0, 5)}
                     </div>
-                    
-                    <!-- Badge Places -->
-                    <div data-status-badge class="${isFull
+                    <div class="text-[10px] text-slate-400 font-mono">
+                        ${(shift.end_time || '').slice(0, 5)}
+                    </div>
+                </div>
+                
+                <!-- Shift Info -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                        <!-- Shift Title -->
+                        <span class="font-bold text-slate-800">${escapeHtml(shift.title || 'Créneau')}</span>
+                        
+                        <!-- Badge Places -->
+                        <div data-status-badge class="${isFull
             ? 'text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg'
             : available <= 2
                 ? 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg'
                 : 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg'
         }">
-                        ${isFull
+                            ${isFull
             ? '🔴 Complet'
             : available <= 2
                 ? `🟠 <span data-available-slots>${available}</span> places`
                 : `<span data-available-slots>${available}</span> places`
         }
-                    </div>
+                        </div>
 
-                    <!-- Badge Réservé -->
-                    ${reservedTotal > 0 ? `
-                        <div class="${reservedRemaining > 0
-                ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1'
-                : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1'
+                        <!-- Badge Réservé -->
+                        ${reservedTotal > 0 ? `
+                            <div class="${reservedRemaining > 0
+                ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg'
+                : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg'
             }" title="${reservedRemaining} places réservées restantes">
-                            <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} réservées` : '🎓 Complet'}</span>
+                                <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} réservées` : '🎓 Complet'}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Referent Name -->
+                    ${shift.referent_name ? `
+                        <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                            <i data-lucide="user" class="w-3 h-3"></i>
+                            Réf: ${escapeHtml(shift.referent_name)}
                         </div>
                     ` : ''}
                 </div>
-                
-                ${shift.description ? `<p class="text-xs text-slate-500 line-clamp-1">${escapeHtml(shift.description)}</p>` : ''}
             </div>
 
             <button

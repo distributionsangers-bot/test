@@ -266,13 +266,9 @@ function renderShiftCard(shift, userId, countsMap, event) {
             
             <!-- Time Column -->
             <div class="flex items-center gap-4">
-                <div class="text-center min-w-[50px]">
-                    <div class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 text-xl tracking-tight leading-none tabular-nums">
-                        ${(shift.start_time || '').slice(0, 5)}
-                    </div>
-                    <div class="text-[10px] text-slate-400 font-medium tabular-nums">
-                        ${(shift.end_time || '').slice(0, 5)}
-                    </div>
+                <div class="w-12 sm:w-14 text-center flex-shrink-0">
+                    <div class="text-xs sm:text-sm font-bold text-slate-700">${(shift.start_time || '').slice(0, 5)}</div>
+                    <div class="text-[9px] sm:text-[10px] text-slate-400">${(shift.end_time || '').slice(0, 5)}</div>
                 </div>
                 
                 <!-- Shift Info -->

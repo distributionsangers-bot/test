@@ -180,78 +180,77 @@ function renderParticipantRow(r) {
         `;
     }
 
-    // Note Indicator
+    // Note Indicator - Make it more visible
     let noteHtml = '';
     if (r.note) {
         noteHtml = `
-            <div class="group/note relative">
-                <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center cursor-help border border-blue-100">
-                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="absolute bottom-full right-0 mb-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover/note:opacity-100 transition pointer-events-none z-50">
-                    <div class="font-bold text-slate-300 mb-1">Remarque du bénévole :</div>
-                    "${escapeHtml(r.note)}"
-                    <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+            <div class="mt-2 p-2.5 bg-blue-50 rounded-xl border border-blue-100">
+                <div class="flex items-start gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-0.5">Remarque</div>
+                        <p class="text-xs text-blue-800 leading-relaxed">"${escapeHtml(r.note)}"</p>
+                    </div>
                 </div>
             </div>
         `;
     }
 
     return `
-        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3 hover:shadow-md transition-all group">
-            ${avatarHtml}
-            
-            <div class="flex-1 min-w-0 pt-0.5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-sm truncate">
-                            ${escapeHtml(profile.first_name)} ${escapeHtml(profile.last_name)}
-                        </h4>
-                        <p class="text-xs text-slate-400 font-medium truncate">${escapeHtml(profile.phone || 'Pas de numéro')}</p>
-                    </div>
-                </div>
+        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+            <div class="flex items-start gap-3">
+                ${avatarHtml}
                 
-                <div class="flex flex-wrap gap-2 mt-1.5 items-center">
-                    ${badgeHtml}
-                    ${warningHtml}
+                <div class="flex-1 min-w-0 pt-0.5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm truncate">
+                                ${escapeHtml(profile.first_name)} ${escapeHtml(profile.last_name)}
+                            </h4>
+                            <p class="text-xs text-slate-400 font-medium truncate">${escapeHtml(profile.phone || 'Pas de numéro')}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mt-1.5 items-center">
+                        ${badgeHtml}
+                        ${warningHtml}
+                    </div>
+                </div>
+
+                <!-- Actions Column -->
+                <div class="flex flex-col items-end gap-2">
+                    <!-- Toggle Presence -->
+                    <label class="cursor-pointer select-none">
+                        <input type="checkbox" class="peer sr-only action-toggle-presence" data-reg-id="${r.id}" ${isPresent ? 'checked' : ''}>
+                        <div class="
+                            px-3 py-1.5 rounded-xl text-xs font-bold transition-all border
+                            peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-600 peer-checked:shadow-sm
+                            bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100
+                            flex items-center gap-1.5
+                        ">
+                            <i data-lucide="${isPresent ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
+                            <span>${isPresent ? 'Présent' : 'Absent'}</span>
+                        </div>
+                    </label>
+
+                    <!-- More Actions Dropdown Trigger (simulated with hover group for simplicity or click) -->
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        ${isSchool ? `
+                            <button class="action-force px-2 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold hover:bg-amber-100 border border-amber-200 transition" 
+                                title="Forcer la validation des heures" data-reg-id="${r.id}" data-current-val="${isValidated}">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                            </button>
+                        ` : ''}
+                        <button class="action-delete px-2 py-1.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-bold hover:bg-red-100 border border-red-200 transition" 
+                            title="Désinscrire" data-reg-id="${r.id}">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <!-- Note Column -->
-            <div class="flex flex-col justify-center px-1">
-                ${noteHtml}
-            </div>
-
-            <!-- Actions Column -->
-            <div class="flex flex-col items-end gap-2">
-                <!-- Toggle Presence -->
-                <label class="cursor-pointer select-none">
-                    <input type="checkbox" class="peer sr-only action-toggle-presence" data-reg-id="${r.id}" ${isPresent ? 'checked' : ''}>
-                    <div class="
-                        px-3 py-1.5 rounded-xl text-xs font-bold transition-all border
-                        peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-600 peer-checked:shadow-sm
-                        bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100
-                        flex items-center gap-1.5
-                    ">
-                        <i data-lucide="${isPresent ? 'check' : 'circle'}" class="w-3.5 h-3.5"></i>
-                        <span>${isPresent ? 'Présent' : 'Absent'}</span>
-                    </div>
-                </label>
-
-                <!-- More Actions Dropdown Trigger (simulated with hover group for simplicity or click) -->
-                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${isSchool ? `
-                        <button class="action-force px-2 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold hover:bg-amber-100 border border-amber-200 transition" 
-                            title="Forcer la validation des heures" data-reg-id="${r.id}" data-current-val="${isValidated}">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                        </button>
-                    ` : ''}
-                    <button class="action-delete px-2 py-1.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-bold hover:bg-red-100 border border-red-200 transition" 
-                        title="Désinscrire" data-reg-id="${r.id}">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- Note Section - Full Width Below -->
+            ${noteHtml}
         </div>
     `;
 }

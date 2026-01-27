@@ -32,10 +32,10 @@ let state = {
 export function renderChat(container, params = {}) {
     // 1. Static Layout (Premium Glassmorphism)
     return `
-        <div id="chat-view" class="relative w-full h-[calc(100dvh-160px)] lg:h-[calc(100vh-64px)] flex flex-col lg:flex-row overflow-hidden lg:p-6 gap-6">
+        <div id="chat-view" class="relative w-full h-[calc(100dvh-160px)] xl:h-[calc(100vh-64px)] flex flex-col xl:flex-row overflow-hidden xl:p-6 gap-6">
             
             <!-- BLUR BACKDROP (Desktop) -->
-            <div class="absolute inset-0 pointer-events-none hidden lg:block">
+            <div class="absolute inset-0 pointer-events-none hidden xl:block">
                 <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px]"></div>
                 <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]"></div>
             </div>
@@ -43,8 +43,8 @@ export function renderChat(container, params = {}) {
             <!-- 1. LEFT PANEL: LIST (Glassmorphism) -->
             <div id="chat-list-panel" class="
                 absolute inset-0 z-20 bg-slate-50 flex flex-col transition-transform duration-300
-                lg:relative lg:w-80 xl:w-96 lg:bg-white/80 lg:backdrop-blur-xl lg:rounded-3xl lg:shadow-lg lg:border lg:border-white/50
-                ${params.id ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'}
+                xl:relative xl:w-96 xl:bg-white/80 xl:backdrop-blur-xl xl:rounded-3xl xl:shadow-lg xl:border xl:border-white/50
+                ${params.id ? '-translate-x-full xl:translate-x-0' : 'translate-x-0'}
             ">
                 <!-- Header & Search -->
                 <div class="p-6 md:p-5 flex flex-col gap-4 border-b border-slate-100">
@@ -74,8 +74,8 @@ export function renderChat(container, params = {}) {
             <!-- 2. RIGHT PANEL: CONVERSATION (Glassmorphism) -->
             <div id="chat-content-panel" class="
                 absolute inset-0 z-30 bg-white flex flex-col transition-transform duration-300
-                lg:relative lg:flex-1 lg:bg-white/80 lg:backdrop-blur-xl lg:rounded-3xl lg:shadow-lg lg:border lg:border-white/50
-                ${params.id ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+                xl:relative xl:flex-1 xl:bg-white/80 xl:backdrop-blur-xl xl:rounded-3xl xl:shadow-lg xl:border xl:border-white/50
+                ${params.id ? 'translate-x-0' : 'translate-x-full xl:translate-x-0'}
             ">
                 <!-- Empty State (Desktop Default) -->
                 <div id="chat-empty" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-0 ${params.id ? 'hidden' : ''}">
@@ -92,7 +92,7 @@ export function renderChat(container, params = {}) {
                     <!-- Header -->
                     <div class="h-[72px] px-4 md:px-6 flex items-center justify-between border-b border-slate-100 bg-white/50 backdrop-blur-md flex-shrink-0 z-20">
                         <div class="flex items-center gap-3">
-                            <button id="btn-back" class="lg:hidden w-8 h-8 flex items-center justify-center -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition">
+                            <button id="btn-back" class="xl:hidden w-8 h-8 flex items-center justify-center -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition">
                                 <i data-lucide="chevron-left" class="w-6 h-6"></i>
                             </button>
                             <div id="active-chat-info" class="flex items-center gap-3 min-w-0">
@@ -296,7 +296,7 @@ async function openTicket(id) {
     if (ticket) ticket.is_unread = false;
 
     // 1. Mobile/Tablet & Desktop Transition
-    const isMobileOrTablet = window.innerWidth < 1024;
+    const isMobileOrTablet = window.innerWidth < 1280;
     if (isMobileOrTablet) {
         document.getElementById('chat-list-panel').classList.add('-translate-x-full');
         document.getElementById('chat-list-panel').classList.remove('translate-x-0');
@@ -720,7 +720,7 @@ function bindEvents(container) {
 
     // Bind other existing events (Back, New, Emoji, Options...)
     container.querySelector('#btn-back')?.addEventListener('click', () => {
-        const isMobileOrTablet = window.innerWidth < 1024;
+        const isMobileOrTablet = window.innerWidth < 1280;
         if (isMobileOrTablet) {
             document.getElementById('chat-list-panel').classList.remove('-translate-x-full');
             document.getElementById('chat-content-panel').classList.add('translate-x-full');

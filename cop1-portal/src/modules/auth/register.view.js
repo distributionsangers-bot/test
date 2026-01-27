@@ -55,22 +55,31 @@ export function renderRegister() {
                         </div>
                     </div>
 
-                     <div class="space-y-1">
+                    <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Téléphone</label>
                         <div class="relative">
                             <i data-lucide="phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                            <input id="reg-phone" type="tel" required class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="06 12 34 56 78">
+                            <input id="reg-phone" type="tel" required class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="+33 6 12 34 56 78">
                         </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
-                        <div class="relative group">
-                            <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                            <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-10 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
-                            <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
+                            <div class="relative group">
+                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-10 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                                <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Confirmer</label>
+                            <div class="relative group">
+                                <i data-lucide="lock-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input id="reg-pass-confirm" type="password" autocomplete="new-password" required class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                            </div>
                         </div>
                     </div>
                     
@@ -100,7 +109,12 @@ export function renderRegister() {
 
                     <!-- 2. Justificatif (Proof) -->
                     <div class="space-y-2 pt-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Justificatif (Carte Étudiant)</label>
+                        <div class="ml-1 mb-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Justificatif</label>
+                            <p class="text-[10px] text-slate-400 leading-tight mt-1">
+                                Acceptés : Carte Étudiant, Certificat de Scolarité, Carte ISIC, Carte d'identité, Certificat d'admission.
+                            </p>
+                        </div>
                         
                         <div id="upload-zone" class="relative group cursor-pointer bg-slate-50/50 border-2 border-dashed border-slate-300 hover:border-brand-500 rounded-2xl p-6 text-center transition-all hover:bg-white/80 hover:shadow-lg hover:shadow-brand-500/5">
                             
@@ -108,7 +122,7 @@ export function renderRegister() {
                             
                             <div id="upload-default" class="flex flex-col items-center gap-2">
                                 <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-brand-600 group-hover:scale-110 group-hover:text-brand-700 transition-all duration-300 ring-4 ring-slate-50 group-hover:ring-brand-50">
-                                    <i data-lucide="cloud-upload" class="w-6 h-6"></i>
+                                    <i data-lucide="upload" class="w-6 h-6"></i>
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold text-slate-700 group-hover:text-brand-700 transition-colors">Cliquez pour ajouter</p>
@@ -126,6 +140,14 @@ export function renderRegister() {
                                 </div>
                             </div>
 
+                        </div>
+
+                        <!-- Privacy Note -->
+                        <div class="flex items-start gap-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"></i>
+                            <p class="text-[10px] text-blue-400/80 leading-snug font-medium">
+                                <strong>Vérification :</strong> Ce document sert uniquement à vérifier votre statut. Il sera <strong class="text-blue-500">automatiquement supprimé</strong> de nos serveurs dès validation de votre compte.
+                            </p>
                         </div>
                     </div>
                     
@@ -304,12 +326,15 @@ export function initRegister() {
             const email = document.getElementById('reg-email').value.trim();
             const phone = document.getElementById('reg-phone').value.trim();
             const pass = document.getElementById('reg-pass').value.trim();
+            const passConfirm = document.getElementById('reg-pass-confirm').value.trim();
             const permit = document.getElementById('reg-permit').checked;
             const mandatory = document.getElementById('reg-mandatory').checked;
+            const school = document.getElementById('reg-school').value;
 
             const file = fileInput.files[0];
 
-            if (!fn || !ln || !email || !pass || !phone) return showToast("Veuillez remplir tous les champs", "error");
+            if (!fn || !ln || !email || !pass || !passConfirm || !phone) return showToast("Veuillez remplir tous les champs", "error");
+            if (pass !== passConfirm) return showToast("Les mots de passe ne correspondent pas", "error");
             if (!file) return showToast("Le justificatif étudiant est obligatoire", "error");
 
             toggleLoader(true);

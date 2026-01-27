@@ -84,6 +84,9 @@ async function renderUserDashboard(container) {
     // Count total missions completed
     const completedMissions = myRegs?.filter(r => r.attended).length || 0;
 
+    // Count upcoming registrations (not yet attended, future dates)
+    const upcomingRegsCount = myRegs?.filter(r => !r.attended && new Date(r.shifts?.events?.date) >= today).length || 0;
+
     // Next scheduled mission
     let nextMission = null;
     if (myRegs && myRegs.length > 0) {
@@ -254,7 +257,7 @@ async function renderUserDashboard(container) {
     ` : '';
 
     container.innerHTML = `
-        <div class="animate-fade-in max-w-lg mx-auto pb-24 pt-2">
+        <div class="animate-fade-in max-w-2xl mx-auto pb-24 pt-2">
             
             <!-- HERO HEADER -->
             <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-6 mb-6 shadow-2xl shadow-brand-500/20">
@@ -276,53 +279,8 @@ async function renderUserDashboard(container) {
                 </div>
             </div>
 
-            <!-- STATS BENTO GRID -->
-            <div class="grid grid-cols-2 ${isMandatory ? 'md:grid-cols-3' : ''} gap-3 mb-6">
-                <!-- Hours (Gradient Card) -->
-                <div class="relative group bg-gradient-to-br from-brand-500 to-indigo-600 p-5 rounded-3xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute -bottom-4 -right-4 text-white/10 group-hover:text-white/20 transition-colors transform group-hover:rotate-12 duration-500">
-                        <i data-lucide="clock" class="w-16 h-16"></i>
-                    </div>
-                    <div class="relative z-10 text-white">
-                        <div class="text-3xl font-black mb-1">${totalHours}h</div>
-                        <div class="text-[10px] font-bold text-brand-100 uppercase tracking-wider">Heures cumulées</div>
-                    </div>
-                </div>
-
-                <!-- Missions Count -->
-                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
-                        <i data-lucide="calendar-check-2" class="w-12 h-12 text-emerald-600"></i>
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-3xl font-black text-emerald-600 mb-1">${completedMissions}</div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Missions</div>
-                    </div>
-                </div>
-
-                ${quotaHtml}
-            </div>
-
-            <!-- ANNOUNCEMENTS -->
-            ${announcementsHtml}
-
-            <!-- NEXT MISSION -->
-            <div class="mb-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                    <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
-                    Prochaine Mission
-                </h2>
-                ${missionHtml}
-            </div>
-
-            <!-- AVAILABLE MISSION -->
-            ${availableMissionHtml}
-
-            <!-- ACTIVITY -->
-            ${activityHtml}
-
-            <!-- QUICK ACTIONS -->
-            <div class="grid grid-cols-3 gap-3">
+            <!-- QUICK ACTIONS (moved to top) -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
                 <button data-link="/events" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
                     <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                         <i data-lucide="calendar-plus" class="w-6 h-6"></i>
@@ -347,6 +305,83 @@ async function renderUserDashboard(container) {
                     <div class="text-[10px] text-slate-400">Contacter</div>
                 </button>
             </div>
+
+            <!-- STATS BENTO GRID (4 columns like admin) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <!-- Hours (Gradient Card) -->
+                <div class="relative group bg-gradient-to-br from-brand-500 to-indigo-600 p-5 rounded-3xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute -bottom-4 -right-4 text-white/10 group-hover:text-white/20 transition-colors transform group-hover:rotate-12 duration-500">
+                        <i data-lucide="clock" class="w-16 h-16"></i>
+                    </div>
+                    <div class="relative z-10 text-white">
+                        <div class="text-3xl font-black mb-1">${totalHours}h</div>
+                        <div class="text-[10px] font-bold text-brand-100 uppercase tracking-wider">Cumulées</div>
+                    </div>
+                </div>
+
+                <!-- Missions Completed -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
+                        <i data-lucide="calendar-check-2" class="w-12 h-12 text-emerald-600"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-emerald-600 mb-1">${completedMissions}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Effectuées</div>
+                    </div>
+                </div>
+
+                <!-- Next Mission Countdown -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-amber-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-amber-400/20 transition-colors"></div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black ${nextMissionDays !== null ? (nextMissionDays <= 1 ? 'text-amber-500' : 'text-slate-700') : 'text-slate-300'} mb-1">
+                            ${nextMissionDays !== null ? (nextMissionDays === 0 ? "Auj." : nextMissionDays === 1 ? "Dem." : "J-" + nextMissionDays) : '—'}
+                        </div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            ${nextMissionDays !== null && nextMissionDays <= 1 ? '<span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>' : ''}
+                            Prochaine
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Registrations or Scolaire Badge -->
+                ${isMandatory ? `
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-indigo-400/20 transition-colors"></div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-indigo-600 mb-1">🎓</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scolaire</div>
+                    </div>
+                </div>
+                ` : `
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-blue-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-blue-400/20 transition-colors"></div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-blue-600 mb-1">${upcomingRegsCount}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inscriptions</div>
+                    </div>
+                </div>
+                `}
+            </div>
+
+            <!-- ANNOUNCEMENTS -->
+            ${announcementsHtml}
+
+            <!-- NEXT MISSION -->
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
+                    Prochaine Mission
+                </h2>
+                ${missionHtml}
+            </div>
+
+            <!-- AVAILABLE MISSION -->
+            ${availableMissionHtml}
+
+            <!-- ACTIVITY -->
+            ${activityHtml}
+
         </div>
     `;
 }

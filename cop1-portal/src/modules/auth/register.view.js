@@ -63,7 +63,7 @@ export function renderRegister() {
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-3">
+                    <div class="space-y-3">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
                             <div class="relative group">
@@ -77,8 +77,11 @@ export function renderRegister() {
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Confirmer</label>
                             <div class="relative group">
-                                <i data-lucide="lock-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input id="reg-pass-confirm" type="password" autocomplete="new-password" required class="w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                                <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input id="reg-pass-confirm" type="password" autocomplete="new-password" required class="w-full pl-10 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                                <button type="button" id="toggle-reg-password-confirm" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -273,13 +276,27 @@ export function initRegister() {
     // 0. Password Toggle
     const toggleBtn = document.getElementById('toggle-reg-password');
     const passInput = document.getElementById('reg-pass');
+
     if (toggleBtn && passInput) {
         toggleBtn.addEventListener('click', () => {
             const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passInput.setAttribute('type', type);
-
             // Update Icon
             toggleBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
+            createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
+        });
+    }
+
+    // 0b. Confirm Password Toggle
+    const toggleConfirmBtn = document.getElementById('toggle-reg-password-confirm');
+    const passConfirmInput = document.getElementById('reg-pass-confirm');
+
+    if (toggleConfirmBtn && passConfirmInput) {
+        toggleConfirmBtn.addEventListener('click', () => {
+            const type = passConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passConfirmInput.setAttribute('type', type);
+            // Update Icon
+            toggleConfirmBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
             createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
         });
     }

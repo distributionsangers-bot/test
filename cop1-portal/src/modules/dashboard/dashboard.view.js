@@ -134,7 +134,7 @@ async function renderUserDashboard(container) {
     const { data: recentActivity } = await supabase
         .from('registrations')
         .select(`
-            id, created_at, attended, hours_counted, validated,
+            id, created_at, attended, hours_counted,
             shifts (title, start_time, end_time, events (title, date))
         `)
         .eq('user_id', user.id)
@@ -248,7 +248,7 @@ async function renderUserDashboard(container) {
                 label: 'Absent',
                 badgeClass: 'text-red-500 bg-red-50'
             };
-        } else if (r.attended && (r.hours_counted === 0 || !r.validated)) {
+        } else if (r.attended && r.hours_counted === 0) {
             // Attended but no hours (hors quota)
             return {
                 icon: 'alert-triangle',

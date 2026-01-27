@@ -313,52 +313,91 @@ async function renderAdminDashboard(container) {
                 </div>
             </div>
 
-            <!-- STATS GRID -->
-            <div class="grid grid-cols-4 gap-3 mb-6">
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
-                    <div class="text-2xl font-black text-slate-900">${volunteersCount}</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Bénévoles</div>
+            <!-- CONTROL CENTER GRID (Bento Style) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                
+                <!-- 1. Bénévoles -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
+                        <i data-lucide="users" class="w-12 h-12 text-slate-800"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-slate-800 mb-1">${volunteersCount}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bénévoles</div>
+                    </div>
                 </div>
-                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-4 rounded-2xl shadow-lg shadow-emerald-500/20 text-center text-white">
-                    <div class="text-2xl font-black">${Math.round(totalHours)}h</div>
-                    <div class="text-[10px] font-bold text-emerald-100 uppercase">Total</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center ${pendingCount > 0 ? 'ring-2 ring-amber-400' : ''}">
-                    <div class="text-2xl font-black ${pendingCount > 0 ? 'text-amber-500' : 'text-slate-400'}">${pendingCount}</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">En attente</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
-                    <div class="text-2xl font-black text-blue-500">${newThisWeek}</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Cette sem.</div>
-                </div>
-            </div>
 
-            <!-- QUICK ACTIONS -->
-            <div class="grid grid-cols-4 gap-3 mb-6">
-                <button data-link="/admin_planning" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-10 h-10 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition">
-                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                <!-- 2. Total Heures (Gradient) -->
+                <div class="relative group bg-gradient-to-br from-brand-500 to-indigo-600 p-5 rounded-3xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute -bottom-4 -right-4 text-white/10 group-hover:text-white/20 transition-colors transform group-hover:rotate-12 duration-500">
+                        <i data-lucide="clock" class="w-20 h-20"></i>
                     </div>
-                    <div class="text-xs font-bold text-slate-700">Planning</div>
-                </button>
-                <button data-link="/admin_users" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition">
-                        <i data-lucide="users" class="w-5 h-5"></i>
+                    <div class="relative z-10 text-white">
+                        <div class="text-3xl font-black mb-1">${Math.round(totalHours)}h</div>
+                        <div class="text-[10px] font-bold text-brand-100 uppercase tracking-wider">Cumulé</div>
                     </div>
-                    <div class="text-xs font-bold text-slate-700">Annuaire</div>
-                </button>
-                <button id="btn-create-event" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                </div>
+
+                <!-- 3. En Attente -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-amber-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-amber-400/20 transition-colors"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black ${pendingCount > 0 ? 'text-amber-500' : 'text-slate-400'} mb-1">${pendingCount}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            ${pendingCount > 0 ? '<span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>' : ''}
+                            En attente
+                        </div>
                     </div>
-                    <div class="text-xs font-bold text-slate-700">Événement</div>
-                </button>
-                <button data-link="/messages" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all text-center group">
-                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition">
-                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                </div>
+
+                <!-- 4. Cette Semaine -->
+                <div class="relative group bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                     <div class="absolute top-0 right-0 w-16 h-16 bg-blue-400/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-blue-400/20 transition-colors"></div>
+                    <div class="relative z-10">
+                        <div class="text-3xl font-black text-blue-600 mb-1">${newThisWeek}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nouveaux</div>
                     </div>
-                    <div class="text-xs font-bold text-slate-700">Messages</div>
+                </div>
+
+                <!-- ACTIONS ROW -->
+                
+                <!-- 5. Planning -->
+                <button data-link="/admin_planning" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-brand-500/10 transition-all duration-300 hover:-translate-y-1 group text-left relative overflow-hidden">
+                    <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="calendar" class="w-6 h-6"></i>
+                    </div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-brand-600 transition-colors">Planning</div>
+                    <div class="text-[10px] text-slate-400 font-medium">Gérer les créneaux</div>
                 </button>
+
+                <!-- 6. Annuaire -->
+                <button data-link="/admin_users" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:-translate-y-1 group text-left relative overflow-hidden">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-purple-600 transition-colors">Annuaire</div>
+                    <div class="text-[10px] text-slate-400 font-medium">Gérer les bénévoles</div>
+                </button>
+
+                <!-- 7. Événement -->
+                <button id="btn-create-event" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 group text-left relative overflow-hidden">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-emerald-600 transition-colors">Créer</div>
+                    <div class="text-[10px] text-slate-400 font-medium">Nouvel événement</div>
+                </button>
+
+                <!-- 8. Messages -->
+                <button data-link="/messages" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 group text-left relative overflow-hidden">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="message-square" class="w-6 h-6"></i>
+                    </div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">Messages</div>
+                    <div class="text-[10px] text-slate-400 font-medium">Contacter l'équipe</div>
+                </button>
+
             </div>
 
             <!-- TWO COLUMNS -->

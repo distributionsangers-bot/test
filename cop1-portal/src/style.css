@@ -304,7 +304,7 @@ body {
     overscroll-behavior-y: contain;
 
     /* Ensure padding for safe areas is handled here if needed */
-    padding-top: env(safe-area-inset-top);
+    /* Padding handled by Tailwind utility classes in main.js */
 }
 
 /* iOS Touch Responsiveness */

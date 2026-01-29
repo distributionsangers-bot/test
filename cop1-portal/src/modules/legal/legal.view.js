@@ -197,7 +197,7 @@ export async function renderLegal(container, params) {
     `;
 
     container.innerHTML = `
-        <div class="min-h-screen bg-slate-50/50 pb-20">
+        <div class="min-h-[100dvh] bg-slate-50/50 pb-20">
             <!-- HERO HEADER with Curved Bottom -->
             <div class="relative bg-gradient-to-br ${data.gradient} pb-24 pt-12 px-6 rounded-b-[2.5rem] shadow-xl shadow-brand-900/10 mb-[-4rem]">
                  <!-- Background Pattern -->

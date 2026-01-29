@@ -7,7 +7,7 @@ const { LOGO_URL } = APP_CONFIG;
 
 export function renderLogin() {
     return `
-        <div class="min-h-screen w-full bg-slate-50 relative overflow-hidden flex flex-col items-center justify-center p-4">
+        <div class="min-h-[100dvh] w-full bg-slate-50 relative overflow-hidden flex flex-col items-center justify-center p-4">
             <!-- Background Decorations -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div class="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] bg-blue-400/20 rounded-full blur-[100px] animate-pulse-slow"></div>

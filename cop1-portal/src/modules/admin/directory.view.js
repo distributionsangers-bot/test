@@ -806,7 +806,7 @@ async function openDocumentViewer(url, userId) {
         let contentHtml = '';
         if (isImage) {
             // FIX: User's specific request for robust containment
-            contentHtml = `<img src="${blobUrl}" class="drop-shadow-2xl" alt="Justificatif" style="object-fit: contain !important; width: 100%; height: 100%;">`;
+            contentHtml = `<img src="${blobUrl}" class="drop-shadow-2xl" alt="Justificatif" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
         } else {
             contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }

@@ -230,7 +230,6 @@ class Store {
      */
     setDebug(enabled) {
         this.debug = enabled;
-        console.log(`🐛 Store debug mode: ${enabled ? 'ON' : 'OFF'}`);
     }
 
     /**

@@ -210,29 +210,34 @@ export const ChatService = {
     },
 
     async editMessage(messageId, newContent) {
-        if (!newContent?.trim()) return { success: false, error: "Contenu vide" };
+        if (!newContent?.trim()) return { success: false, error: { message: "Contenu vide" } };
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('messages')
             .update({
                 content: newContent.trim(),
                 edited_at: new Date().toISOString()
             })
             .eq('id', messageId)
-            .eq('user_id', store.state.user.id); // Sécurité côté client (RLS doit aussi vérifier)
+            .eq('user_id', store.state.user.id)
+            .select()
+            .single();
 
-        return { success: !error, error };
+        if (error) return { success: false, error };
+        return { success: true, data };
     },
 
     async deleteMessage(messageId) {
-        // Soft Key Delete
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('messages')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', messageId)
-            .eq('user_id', store.state.user.id);
+            .eq('user_id', store.state.user.id)
+            .select()
+            .single();
 
-        return { success: !error, error };
+        if (error) return { success: false, error };
+        return { success: true, data };
     },
 
     async createTicket({ type, subject, content, targetUserId }) {

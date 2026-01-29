@@ -18,6 +18,56 @@ export const PolesService = {
     },
 
     /**
+     * Récupère les Directions (pôles sans parent)
+     */
+    async getDirections() {
+        const { data, error } = await supabase
+            .from('teams')
+            .select('*')
+            .is('parent_id', null)
+            .order('name');
+
+        if (error) {
+            console.error(error);
+            return [];
+        }
+        return data;
+    },
+
+    /**
+     * Récupère les pôles groupés par Direction (hiérarchie complète)
+     * Retourne: { antenne: [...], directions: [...], poles: {directionId: [...]} }
+     */
+    async getTeamsHierarchy() {
+        const { data: allTeams, error } = await supabase
+            .from('teams')
+            .select('*')
+            .order('name');
+
+        if (error) {
+            console.error(error);
+            return { antenne: [], directions: [], poles: {} };
+        }
+
+        // Séparer par type
+        const antenne = allTeams.filter(t => t.team_type === 'antenne');
+        const directions = allTeams.filter(t => !t.parent_id && t.team_type !== 'antenne');
+        const poles = {};
+
+        // Grouper les pôles par direction
+        for (const team of allTeams) {
+            if (team.parent_id) {
+                if (!poles[team.parent_id]) {
+                    poles[team.parent_id] = [];
+                }
+                poles[team.parent_id].push(team);
+            }
+        }
+
+        return { antenne, directions, poles };
+    },
+
+    /**
      * Récupère les responsables (ceux qui ont un pole_id défini)
      */
     async getLeaders() {

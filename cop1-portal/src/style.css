@@ -7,7 +7,9 @@
    ========================================= */
 body {
     background-color: #F8FAFC;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 /* Glass Effect for Header */
@@ -220,14 +222,16 @@ body>.skiptranslate {
 /* Fix for iOS Chrome dynamic viewport */
 html,
 body {
-    min-height: 100dvh;
-    min-height: -webkit-fill-available;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    overflow: hidden;
+    /* Prevent body scroll bounce */
 }
 
 /* iOS Safari 100vh fix */
 @supports (-webkit-touch-callout: none) {
     body {
-        min-height: -webkit-fill-available;
+        height: -webkit-fill-available;
     }
 }
 
@@ -279,8 +283,27 @@ body {
 
 /* App container with safe areas */
 #app {
-    min-height: 100dvh;
-    min-height: -webkit-fill-available;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    /* padding-top removed here, handled in main layout or header */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main content scroll area - CRITICAL for mobile scroll */
+#main-slot {
+    /* Critical for scrolling within flex container */
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    height: 100%;
+
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+
+    /* Ensure padding for safe areas is handled here if needed */
     padding-top: env(safe-area-inset-top);
 }
 
@@ -374,6 +397,7 @@ input:-webkit-autofill:active {
         opacity: 0;
         transform: scale(0.95) translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -385,6 +409,7 @@ input:-webkit-autofill:active {
         opacity: 1;
         transform: scale(1) translateY(0);
     }
+
     to {
         opacity: 0;
         transform: scale(0.95) translateY(20px);
@@ -396,6 +421,7 @@ input:-webkit-autofill:active {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

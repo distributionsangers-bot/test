@@ -531,10 +531,19 @@ function bindAddButtons() {
 }
 
 async function handleSuccessAdd() {
-    state.registrations = []; // Force reload
+    // Refresh registrations to update the "already registered" state
     await loadRegistrations();
-    state.currentTab = 'list';
-    updateModalContent();
+    // Stay on the same tab and just refresh the search results
+    const searchResultsList = document.getElementById('search-results-list');
+    if (searchResultsList) {
+        searchResultsList.innerHTML = renderSearchResults();
+        createIcons({ icons, root: searchResultsList });
+    }
+    // Update the badge count
+    const badge = document.getElementById('badge-count');
+    if (badge) {
+        badge.textContent = state.registrations.length;
+    }
 }
 
 // =============================================================================
@@ -545,6 +554,8 @@ document.addEventListener('click', (e) => {
     // Close Modal
     if (e.target.closest('#btn-close-participants')) {
         document.getElementById('participants-modal')?.remove();
+        // Dispatch custom event to notify planning view to refresh
+        window.dispatchEvent(new CustomEvent('participants-updated'));
     }
 
     // Tab Switching

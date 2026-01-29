@@ -16,8 +16,8 @@ const LEGAL_CONTENT = {
                 content: `
                     <p class="font-bold text-slate-800 text-base">Association COP1 Angers</p>
                     <p>Association loi 1901 à but non lucratif.</p>
-                    <p>Siège social : Angers, France</p>
-                    <p>Contact : via la messagerie interne de l'application.</p>
+                    <p>Siège social : 34 rue des Noyers, 49000 Angers, France</p>
+                    <p>Contact : angers@cop1.fr</p>
                 `
             },
             {
@@ -117,8 +117,8 @@ const LEGAL_CONTENT = {
         gradient: "from-amber-500 via-orange-500 to-orange-600",
         alert: {
             title: "Engagement Bénévole",
-            icon: "handshake",
-            content: "Toute inscription à une mission est un engagement ferme. En cas d'empêchement, désinscrivez-vous au moins 24h à l'avance par respect pour l'équipe et les bénéficiaires."
+            icon: "heart-handshake",
+            content: "Toute inscription à une mission est un engagement. En cas d'empêchement, désinscrivez-vous au moins 24h à l'avance par respect pour l'équipe et les bénéficiaires."
         },
         sections: [
             {

@@ -137,6 +137,8 @@ export async function initPlanningList() {
     // Listen for template saves
     window.addEventListener('templateSaved', () => loadEvents(), { signal });
     window.addEventListener('eventSaved', () => loadEvents(), { signal });
+    // Listen for participants updates (from participants modal)
+    window.addEventListener('participants-updated', () => loadEvents(), { signal });
 
     // Search
     let searchTimeout;
@@ -186,8 +188,6 @@ function setupRegistrationSubscription() {
         supabase.removeChannel(registrationSubscription);
     }
 
-    console.log("🔌 [Admin Realtime] Initialisation de l'écoute sur public:shifts...");
-
     const channel = supabase.channel('admin-planning-realtime');
 
     registrationSubscription = channel
@@ -195,15 +195,12 @@ function setupRegistrationSubscription() {
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'shifts' },
             (payload) => {
-                console.log("📨 [Admin Realtime] Update sur shift:", payload);
                 if (payload.new) {
                     handleShiftUpdate(payload.new);
                 }
             }
         )
-        .subscribe((status) => {
-            console.log(`🔌 [Admin Realtime] Statut: ${status}`);
-        });
+        .subscribe();
 }
 
 /**
@@ -221,6 +218,8 @@ function handleShiftUpdate(shiftData) {
     // const reservedTotal = shiftData.reserved_slots || 0;
 
     const available = Math.max(0, max - taken);
+    const percent = max > 0 ? (taken / max) * 100 : 0;
+    const isFull = taken >= max;
 
     // 1. Trouve l'élément HTML du créneau
     const shiftEl = document.querySelector(`[data-shift-id="${shiftId}"]`);
@@ -240,10 +239,28 @@ function handleShiftUpdate(shiftData) {
     if (availEl) availEl.textContent = available;
     if (maxEl) maxEl.textContent = max;
 
-    // 3. Mets à jour les badges visuels (Full, Available, etc.)
+    // 3. Met à jour la barre de progression
+    const progressBar = shiftEl.querySelector('[data-progress-bar]');
+    if (progressBar) {
+        progressBar.style.width = `${percent}%`;
+        // Mettre à jour la couleur
+        progressBar.className = progressBar.className.replace(/bg-(emerald|amber|red)-500/g, '');
+        if (isFull) {
+            progressBar.classList.add('bg-emerald-500');
+        } else if (percent >= 50) {
+            progressBar.classList.add('bg-amber-500');
+        } else {
+            progressBar.classList.add('bg-red-500');
+        }
+    }
+
+    // 4. Mets à jour les badges visuels (Full, Available, etc.)
     updateShiftVisualStatus(shiftEl, taken, max, available);
 
-    // 4. Met à jour les stats globales
+    // 5. Met à jour le cercle de progression de l'événement parent
+    updateEventFillRate(shiftEl);
+
+    // 6. Met à jour les stats globales
     requestAnimationFrame(() => updateStatsFromCurrentDOM());
 }
 
@@ -260,20 +277,20 @@ function updateShiftVisualStatus(shiftEl, taken, max, available) {
     let statusClass = '';
 
     if (available === 0) {
-        badge = '🔴 Complet';
-        statusClass = 'bg-red-50 border-red-200 text-red-700';
+        badge = '●';
+        statusClass = 'text-red-500';
     } else if (available <= 2) {
-        badge = '🟠 Presque complet';
-        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+        badge = '●';
+        statusClass = 'text-amber-500';
     } else {
-        badge = '🟢 Disponible';
-        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
+        badge = '●';
+        statusClass = 'text-emerald-500';
     }
 
     if (badge) {
         const badgeEl = document.createElement('span');
         badgeEl.setAttribute('data-status-badge', 'true');
-        badgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}`;
+        badgeEl.className = `text-[8px] ${statusClass}`;
         badgeEl.textContent = badge;
 
         // Ajouter après le titre du créneau
@@ -321,6 +338,54 @@ function updateStatsFromCurrentDOM() {
 
     if (statUrgent) statUrgent.textContent = urgentShifts;
     if (statFill) statFill.textContent = `${fillRate}%`;
+}
+
+/**
+ * Met à jour le cercle de progression d'un événement basé sur ses créneaux
+ */
+function updateEventFillRate(shiftEl) {
+    // Trouver l'événement parent
+    const eventCard = shiftEl.closest('[data-event-id]');
+    if (!eventCard) return;
+
+    // Calculer le taux de remplissage pour tous les créneaux de cet événement
+    let totalSlots = 0;
+    let filledSlots = 0;
+
+    eventCard.querySelectorAll('[data-shift-id]').forEach(s => {
+        const maxEl = s.querySelector('[data-counter="max"]');
+        const takenEl = s.querySelector('[data-counter="taken"]');
+        if (maxEl && takenEl) {
+            totalSlots += parseInt(maxEl.textContent) || 0;
+            filledSlots += parseInt(takenEl.textContent) || 0;
+        }
+    });
+
+    const fillRate = totalSlots > 0 ? Math.round((filledSlots / totalSlots) * 100) : 0;
+    const fillColor = fillRate >= 80 ? 'emerald' : fillRate >= 50 ? 'amber' : 'red';
+    const colorMap = { 'emerald': '#10b981', 'amber': '#f59e0b', 'red': '#ef4444' };
+
+    // Mettre à jour le cercle SVG (desktop)
+    const circleProgress = eventCard.querySelector('[data-fill-circle]');
+    if (circleProgress) {
+        const circumference = 2 * Math.PI * 16;
+        circleProgress.setAttribute('stroke-dashoffset', circumference * (1 - fillRate / 100));
+        circleProgress.setAttribute('stroke', colorMap[fillColor]);
+    }
+
+    // Mettre à jour le texte du pourcentage (desktop)
+    const percentText = eventCard.querySelector('[data-fill-text]');
+    if (percentText) {
+        percentText.textContent = `${fillRate}%`;
+    }
+
+    // Mettre à jour le badge mobile
+    const mobileBadge = eventCard.querySelector('[data-fill-mobile]');
+    if (mobileBadge) {
+        mobileBadge.textContent = `${fillRate}%`;
+        // Reset classes and apply new color
+        mobileBadge.className = `sm:hidden text-[10px] font-bold px-2 py-1 rounded-lg bg-${fillColor}-100 text-${fillColor}-700`;
+    }
 }
 
 async function loadEvents() {
@@ -488,14 +553,14 @@ function renderEventCard(e) {
                     <div class="hidden sm:block relative w-10 h-10">
                         <svg class="w-10 h-10 transform -rotate-90">
                             <circle cx="20" cy="20" r="16" stroke="#f1f5f9" stroke-width="3" fill="transparent"/>
-                            <circle cx="20" cy="20" r="16" stroke="${fillColor === 'emerald' ? '#10b981' : fillColor === 'amber' ? '#f59e0b' : '#ef4444'}" stroke-width="3" fill="transparent" 
+                            <circle data-fill-circle cx="20" cy="20" r="16" stroke="${fillColor === 'emerald' ? '#10b981' : fillColor === 'amber' ? '#f59e0b' : '#ef4444'}" stroke-width="3" fill="transparent" 
                                 stroke-dasharray="${2 * Math.PI * 16}" 
                                 stroke-dashoffset="${2 * Math.PI * 16 * (1 - fillRate / 100)}" 
                                 stroke-linecap="round"/>
                         </svg>
-                        <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-600">${fillRate}%</span>
+                        <span data-fill-text class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-600">${fillRate}%</span>
                     </div>
-                    <span class="sm:hidden text-[10px] font-bold px-2 py-1 rounded-lg ${fillColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : fillColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                    <span data-fill-mobile class="sm:hidden text-[10px] font-bold px-2 py-1 rounded-lg ${fillColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : fillColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
                         ${fillRate}%
                     </span>
 
@@ -537,14 +602,14 @@ function renderShiftItem(s, eventId) {
     let statusBadge = '';
     let statusClass = '';
     if (available === 0) {
-        statusBadge = '🔴 Complet';
-        statusClass = 'bg-red-50 border-red-200 text-red-700';
+        statusBadge = '●';
+        statusClass = 'text-red-500';
     } else if (available <= 2) {
-        statusBadge = '🟠 Presque complet';
-        statusClass = 'bg-amber-50 border-amber-200 text-amber-700';
+        statusBadge = '●';
+        statusClass = 'text-amber-500';
     } else {
-        statusBadge = '🟢 Disponible';
-        statusClass = 'bg-emerald-50 border-emerald-200 text-emerald-700';
+        statusBadge = '●';
+        statusClass = 'text-emerald-500';
     }
 
     return `
@@ -559,7 +624,7 @@ function renderShiftItem(s, eventId) {
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="font-semibold text-xs sm:text-sm text-slate-800 truncate" data-shift-title>${escapeHtml(s.title)}</span>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${statusClass}" data-status-badge>${statusBadge}</span>
+                    <span class="text-[8px] ${statusClass}" data-status-badge>${statusBadge}</span>
                     ${reservedBadge}
                 </div>
                 <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">Réf: ${escapeHtml(s.referent_name || '-')}</div>
@@ -572,7 +637,7 @@ function renderShiftItem(s, eventId) {
                     <span class="text-slate-400">(<span data-counter="available">${available}</span>)</span>
                 </div>
                 <div class="h-1 sm:h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                    <div class="${barColor} h-full transition-all" style="width: ${percent}%"></div>
+                    <div data-progress-bar class="${barColor} h-full transition-all" style="width: ${percent}%"></div>
                 </div>
             </div>
 

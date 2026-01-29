@@ -344,7 +344,7 @@ function handleAdminToggle() {
     store.state.adminMode = !store.state.adminMode;
     localStorage.setItem('cop1_admin_mode', store.state.adminMode.toString());
     showToast(store.state.adminMode ? 'Mode Admin activé' : 'Mode Bénévole activé', 'success');
-    window.location.reload();
+    window.location.href = '/dashboard';
 }
 
 async function handleLogout() {

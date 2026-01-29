@@ -151,7 +151,7 @@ export const ParticipantsService = {
                 .select('id')
                 .eq('shift_id', shiftId)
                 .eq('user_id', userId)
-                .single();
+                .maybeSingle();
 
             if (existing) {
                 return { data: null, error: { message: 'Participant déjà inscrit à ce créneau' } };

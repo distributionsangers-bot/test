@@ -136,13 +136,13 @@ export function renderChat(container, params = {}) {
                             <span id="typing-users">Quelqu'un écrit...</span>
                         </div>
 
-                        <div class="relative flex items-end gap-2 bg-white md:bg-slate-100 p-2 rounded-[24px] shadow-lg shadow-slate-200/50 md:shadow-none border border-slate-200 md:border-transparent focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/10 transition-all z-10">
+                        <div class="relative flex items-center gap-2 bg-white md:bg-slate-100 p-2 rounded-[24px] shadow-lg shadow-slate-200/50 md:shadow-none border border-slate-200 md:border-transparent focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/10 transition-all z-10">
                             
                             <button type="button" id="btn-emoji-toggle" class="w-10 h-10 flex-shrink-0 text-slate-400 hover:text-amber-500 hover:bg-slate-100 rounded-full flex items-center justify-center transition">
                                 <i data-lucide="smile" class="w-6 h-6"></i>
                             </button>
 
-                            <textarea id="msg-input" rows="1" placeholder="Votre message..." class="flex-1 bg-transparent border-0 focus:ring-0 text-slate-800 placeholder:text-slate-400 resize-none py-2.5 max-h-32 text-sm leading-relaxed overflow-hidden"></textarea>
+                            <textarea id="msg-input" rows="1" placeholder="Votre message..." class="flex-1 bg-transparent border-0 focus:ring-0 text-slate-800 placeholder:text-slate-400 resize-none py-2.5 min-h-[40px] max-h-32 text-sm leading-normal overflow-hidden"></textarea>
                             
                             <button type="submit" class="w-10 h-10 flex-shrink-0 bg-brand-600 text-white rounded-full flex items-center justify-center hover:bg-brand-700 active:scale-95 transition shadow-md shadow-brand-500/20">
                                 <i data-lucide="send-horizontal" class="w-5 h-5 ml-0.5"></i>
@@ -402,6 +402,30 @@ async function openTicket(id) {
                 setTimeout(() => loadTickets(), 500);
             }
         )
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'tickets' },
+            async (payload) => {
+                // Handle read status updates in realtime
+                const updatedTicket = payload.new;
+
+                // If we're viewing this ticket, update check marks without full re-render
+                if (state.activeTicketId && String(state.activeTicketId) === String(updatedTicket.id)) {
+                    // Update local ticket data with new read timestamps
+                    const ticket = state.tickets.find(t => String(t.id) === String(updatedTicket.id));
+                    if (ticket) {
+                        ticket.admin_last_read_at = updatedTicket.admin_last_read_at;
+                        ticket.volunteer_last_read_at = updatedTicket.volunteer_last_read_at;
+                    }
+
+                    // Update only the check icons (no full re-render to avoid jumps)
+                    updateReadStatusIcons(updatedTicket);
+                }
+
+                // Also reload ticket list to update unread badges
+                loadTickets();
+            }
+        )
         .subscribe();
     // END NEW LOGIC
 
@@ -458,7 +482,37 @@ function renderMessages(messages) {
     container.querySelectorAll('.msg-bubble').forEach(el => {
         // Desktop: Right click
         el.addEventListener('contextmenu', (e) => showMessageContext(e, el.dataset.msgId, el.dataset.isMe === 'true'));
-        // Mobile: Double tap or Long press (HammerJS would be better, but simple click for now)
+
+        // Mobile: Long press (500ms hold)
+        let longPressTimer;
+        let touchStartX, touchStartY;
+
+        el.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            longPressTimer = setTimeout(() => {
+                // Create a synthetic event with touch coordinates for the context menu position
+                const syntheticEvent = {
+                    preventDefault: () => { },
+                    clientX: touchStartX,
+                    clientY: touchStartY
+                };
+                showMessageContext(syntheticEvent, el.dataset.msgId, el.dataset.isMe === 'true');
+            }, 500);
+        }, { passive: true });
+
+        el.addEventListener('touchend', () => {
+            clearTimeout(longPressTimer);
+        });
+
+        el.addEventListener('touchmove', (e) => {
+            // Cancel if user moves finger (scrolling)
+            const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+            const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+            if (moveX > 10 || moveY > 10) {
+                clearTimeout(longPressTimer);
+            }
+        }, { passive: true });
     });
 
     // Reply buttons
@@ -473,6 +527,38 @@ function renderMessages(messages) {
 
     scrollToBottom();
     createIcons({ icons, root: container });
+}
+
+/**
+ * Met à jour uniquement les icônes de check (lu/non lu) sans re-render
+ * Évite les sauts visuels lors de la mise à jour du statut de lecture
+ */
+function updateReadStatusIcons(ticketData) {
+    const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+    // Si je suis admin, je regarde quand le bénévole a lu. Si je suis bénévole, je regarde quand l'admin a lu.
+    const theirLastRead = isAdmin ? ticketData.volunteer_last_read_at : ticketData.admin_last_read_at;
+    const readDate = theirLastRead ? new Date(theirLastRead) : null;
+
+    // Trouve tous les messages que J'AI envoyés et met à jour leurs icônes
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    container.querySelectorAll('.msg-bubble[data-is-me="true"]').forEach(bubble => {
+        const statusIcon = bubble.querySelector('.read-status-icon');
+        if (!statusIcon) return;
+
+        // Le message a été créé à cette date
+        const msgCreatedAt = bubble.dataset.createdAt;
+        if (msgCreatedAt && readDate) {
+            const msgDate = new Date(msgCreatedAt);
+            const isRead = msgDate <= readDate;
+
+            // Met à jour la classe de couleur du wrapper (qui s'applique au SVG enfant)
+            statusIcon.classList.remove('text-cyan-300', 'text-white/50');
+            statusIcon.classList.add(isRead ? 'text-cyan-300' : 'text-white/50');
+            statusIcon.dataset.read = isRead;
+        }
+    });
 }
 
 function createMessageHtml(msg) {
@@ -551,6 +637,7 @@ function createMessageHtml(msg) {
                         "
                         data-msg-id="${msg.id}"
                         data-is-me="${isMe}"
+                        data-created-at="${msg.created_at}"
                     >
                         ${replyBlock}
                         ${content}
@@ -558,9 +645,17 @@ function createMessageHtml(msg) {
                         <div class="flex items-center justify-end gap-1 mt-1 opacity-70">
                              ${isEdited ? '<span class="text-[9px] italic mr-1">(modifié)</span>' : ''}
                              <span class="text-[10px] font-medium">${time}</span>
-                             ${isMe && !isDeleted ? `
-                                <i data-lucide="check-check" class="w-3 h-3 text-white/90"></i>
-                             ` : ''}
+                             ${isMe && !isDeleted ? (() => {
+            // Check if message was read by the other party
+            const ticket = state.tickets.find(t => String(t.id) === String(state.activeTicketId));
+            const isAdmin = store.state.profile?.is_admin && store.state.adminMode;
+            // If I'm admin, check volunteer_last_read_at. If I'm volunteer, check admin_last_read_at
+            const theirLastRead = isAdmin ? ticket?.volunteer_last_read_at : ticket?.admin_last_read_at;
+            const msgDate = new Date(msg.created_at);
+            const readDate = theirLastRead ? new Date(theirLastRead) : null;
+            const isRead = readDate && msgDate <= readDate;
+            return `<span class="read-status-icon ${isRead ? 'text-cyan-300' : 'text-white/50'}" data-read="${isRead}"><i data-lucide="check-check" class="w-3 h-3"></i></span>`;
+        })() : ''}
                         </div>
 
                          <!-- Hover Actions (Desktop) -->
@@ -628,9 +723,26 @@ function showMessageContext(e, msgId, isMe) {
     document.querySelector('.context-menu')?.remove();
 
     const menu = document.createElement('div');
-    menu.className = 'context-menu fixed bg-white shadow-xl rounded-xl border border-slate-100 z-[100] w-40 overflow-hidden animate-scale-in origin-top-left';
-    menu.style.left = `${e.clientX}px`;
-    menu.style.top = `${e.clientY}px`;
+    menu.className = 'context-menu fixed bg-white shadow-xl rounded-xl border border-slate-100 z-[100] w-40 overflow-hidden animate-scale-in';
+
+    // Position menu with bounds checking
+    const menuWidth = 160;
+    const menuHeight = 100;
+    let left = e.clientX;
+    let top = e.clientY;
+
+    // Keep menu within viewport
+    if (left + menuWidth > window.innerWidth) {
+        left = window.innerWidth - menuWidth - 10;
+    }
+    if (top + menuHeight > window.innerHeight) {
+        top = e.clientY - menuHeight;
+    }
+    if (left < 10) left = 10;
+    if (top < 10) top = 10;
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
 
     menu.innerHTML = `
         <button id="ctx-edit" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2">
@@ -654,16 +766,48 @@ function showMessageContext(e, msgId, isMe) {
 
     // Actions
     menu.querySelector('#ctx-delete').onclick = async () => {
-        if (showConfirm("Êtes-vous sûr de vouloir supprimer ce message ?")) {
-            await ChatService.deleteMessage(msgId);
-            const { data } = await ChatService.getMessages(state.activeTicketId);
-            renderMessages(data || []);
-            menu.remove();
-        }
+        menu.remove();
+        showConfirm("Êtes-vous sûr de vouloir supprimer ce message ?", async () => {
+            const { success } = await ChatService.deleteMessage(msgId);
+            if (success) {
+                // Update only the specific message bubble instead of full re-render
+                const msgBubble = document.querySelector(`.msg-bubble[data-msg-id="${msgId}"]`);
+                if (msgBubble) {
+                    // Replace content with "Message supprimé"
+                    const contentArea = msgBubble.querySelector('.msg-content');
+                    if (contentArea) {
+                        contentArea.innerHTML = '<span class="italic text-white/70 text-xs flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Message supprimé</span>';
+                        createIcons({ icons, root: contentArea });
+                    } else {
+                        // Fallback: modify direct content
+                        const replyBlock = msgBubble.querySelector('.border-l-2');
+                        const timeBlock = msgBubble.querySelector('.flex.items-center.justify-end');
+                        msgBubble.innerHTML = `
+                            ${replyBlock ? replyBlock.outerHTML : ''}
+                            <span class="italic text-white/70 text-xs flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Message supprimé</span>
+                            ${timeBlock ? timeBlock.outerHTML : ''}
+                        `;
+                        createIcons({ icons, root: msgBubble });
+                    }
+                }
+                showToast("Message supprimé", "success");
+            }
+        }, { type: 'danger', confirmText: 'Supprimer' });
     };
 
-    menu.querySelector('#ctx-edit').onclick = () => {
+    menu.querySelector('#ctx-edit').onclick = async () => {
         menu.remove();
+        // Check 1-hour limit
+        const { data: msg } = await ChatService.getMessageById(msgId);
+        if (msg) {
+            const msgDate = new Date(msg.created_at);
+            const now = new Date();
+            const hoursDiff = (now - msgDate) / (1000 * 60 * 60);
+            if (hoursDiff > 1) {
+                showToast("Vous ne pouvez modifier un message que dans l'heure suivant son envoi", "error");
+                return;
+            }
+        }
         showEditMessageModal(msgId);
     };
 }
@@ -1110,8 +1254,27 @@ function showEditMessageModal(msgId) {
             if (success) {
                 showToast("Message modifié", "success");
                 modal.remove();
-                const { data } = await ChatService.getMessages(state.activeTicketId);
-                renderMessages(data || []);
+
+                // Update only the specific message bubble instead of full re-render
+                const msgBubble = document.querySelector(`.msg-bubble[data-msg-id="${msgId}"]`);
+                if (msgBubble) {
+                    // Find the text content (skip reply block and time block)
+                    const replyBlock = msgBubble.querySelector('.border-l-2');
+                    const timeBlock = msgBubble.querySelector('.flex.items-center.justify-end');
+                    const replyBtn = msgBubble.querySelector('.btn-reply-inline');
+
+                    // Rebuild content with new text
+                    msgBubble.innerHTML = `
+                        ${replyBlock ? replyBlock.outerHTML : ''}
+                        ${escapeHtml(newContent)}
+                        <div class="flex items-center justify-end gap-1 mt-1 opacity-70">
+                            <span class="text-[9px] italic mr-1">(modifié)</span>
+                            ${timeBlock ? timeBlock.innerHTML : ''}
+                        </div>
+                        ${replyBtn ? replyBtn.outerHTML : ''}
+                    `;
+                    createIcons({ icons, root: msgBubble });
+                }
             } else {
                 showToast("Erreur : " + (error?.message || "Impossible de modifier"), "error");
             }

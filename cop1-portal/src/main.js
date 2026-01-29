@@ -132,7 +132,7 @@ function renderAppLayout() {
             ${renderSidebar(profile, currentView, adminMode)}
             <div class="flex-1 flex flex-col h-full relative min-w-0">
                 ${renderHeader(profile)}
-                <main id="main-slot" class="flex-1 overflow-y-auto pt-20 pb-28 px-4 md:p-10 w-full scroll-smooth focus:outline-none" tabindex="-1"></main>
+                <main id="main-slot" class="flex-1 overflow-y-auto pt-[calc(5rem+env(safe-area-inset-top))] pb-28 px-4 md:p-10 w-full scroll-smooth focus:outline-none" tabindex="-1"></main>
                 ${renderMobileNav(profile, currentView, adminMode)}
             </div>
         </div>

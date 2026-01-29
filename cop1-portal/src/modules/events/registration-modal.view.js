@@ -63,7 +63,7 @@ export function renderRegistrationModal(event, shift, isRegistered) {
                             <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">
                                 Ajouter une remarque <span class="text-slate-400 font-normal lowercase">(optionnel)</span>
                             </label>
-                            <textarea id="reg-note" rows="2" class="w-full rounded-xl bg-slate-50 border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition placeholder:text-slate-400" placeholder="Ex: J'arriverai avec 10 min de retard..."></textarea>
+                            <textarea id="reg-note" rows="2" class="w-full rounded-xl bg-slate-50 border-slate-200 text-sm py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition placeholder:text-slate-400" placeholder="Ex: J'arriverai avec 10 min de retard..."></textarea>
                             <p class="text-[10px] text-slate-400 mt-1">Visible uniquement par les administrateurs.</p>
                         </div>
                     ` : `
@@ -78,9 +78,9 @@ export function renderRegistrationModal(event, shift, isRegistered) {
                          <button id="btn-cancel" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
                             Fermer
                         </button>
-                        <button id="btn-confirm-reg" class="flex-[2] py-3 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2
+                        <button id="btn-confirm-reg" class="flex-[2] py-3 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95
                             ${isRegistered ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30'}">
-                            ${isRegistered ? '<i data-lucide="x-circle" class="w-5 h-5"></i> Me désister' : '<i data-lucide="check-circle" class="w-5 h-5"></i> Confirmer l\'inscription'}
+                            ${isRegistered ? 'Me désister' : 'Confirmer l\'inscription'}
                         </button>
                     </div>
 

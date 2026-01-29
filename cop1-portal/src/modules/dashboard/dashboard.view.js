@@ -269,8 +269,29 @@ async function renderUserDashboard(container) {
         }
     };
 
+    // Group activities by event and limit to 3 most recent events
+    const groupedByEvent = {};
+    if (recentActivity && recentActivity.length > 0) {
+        recentActivity.forEach(r => {
+            const eventId = r.shifts?.events?.title + '|' + r.shifts?.events?.date;
+            if (!groupedByEvent[eventId]) {
+                groupedByEvent[eventId] = {
+                    eventTitle: r.shifts?.events?.title || '',
+                    eventDate: r.shifts?.events?.date,
+                    shifts: []
+                };
+            }
+            groupedByEvent[eventId].shifts.push(r);
+        });
+    }
+
+    // Sort events by date (most recent first) and limit to 3
+    const sortedEvents = Object.values(groupedByEvent)
+        .sort((a, b) => new Date(b.eventDate) - new Date(a.eventDate))
+        .slice(0, 3);
+
     // Activity panel HTML
-    const activityHtml = recentActivity && recentActivity.length > 0 ? `
+    const activityHtml = sortedEvents.length > 0 ? `
         <div class="mb-6">
             <div class="flex items-center justify-between mb-3 px-1">
                 <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -282,21 +303,33 @@ async function renderUserDashboard(container) {
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-100 overflow-hidden">
-                ${recentActivity.map(r => {
+            <div class="space-y-3">
+                ${sortedEvents.map(event => `
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <!-- Event Header -->
+                        <div class="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3 border-b border-slate-100">
+                            <p class="font-bold text-slate-800 text-sm truncate">${escapeHtml(event.eventTitle)}</p>
+                            <p class="text-[10px] text-slate-400">${new Date(event.eventDate).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
+                        </div>
+                        <!-- Shifts -->
+                        <div class="divide-y divide-slate-50">
+                            ${event.shifts.map(r => {
         const status = getActivityStatus(r);
         return `
-                    <div class="p-3 flex items-center gap-3 hover:bg-slate-50 transition">
-                        <div class="w-10 h-10 rounded-xl ${status.bgColor} ${status.textColor} flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="${status.icon}" class="w-5 h-5"></i>
+                                <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition">
+                                    <div class="w-8 h-8 rounded-lg ${status.bgColor} ${status.textColor} flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="${status.icon}" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-600 truncate">${escapeHtml(r.shifts?.title || 'Créneau')}</p>
+                                        <p class="text-[10px] text-slate-400">${(r.shifts?.start_time || '').slice(0, 5)} - ${(r.shifts?.end_time || '').slice(0, 5)}</p>
+                                    </div>
+                                    <span class="text-[10px] font-bold ${status.badgeClass} px-2 py-0.5 rounded-lg">${status.label}</span>
+                                </div>
+                            `}).join('')}
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold text-slate-700 truncate">${escapeHtml(r.shifts?.events?.title || '')}</p>
-                            <p class="text-[10px] text-slate-400">${new Date(r.shifts?.events?.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} • ${escapeHtml(r.shifts?.title || '')}</p>
-                        </div>
-                        <span class="text-xs font-bold ${status.badgeClass} px-2 py-0.5 rounded-lg">${status.label}</span>
                     </div>
-                `}).join('')}
+                `).join('')}
             </div>
         </div>
     ` : '';

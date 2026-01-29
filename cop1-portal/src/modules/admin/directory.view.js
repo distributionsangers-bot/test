@@ -805,8 +805,8 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            // FIX: Robust Flexbox approach + !important to ensure no cropping
-            contentHtml = `<img src="${blobUrl}" class="max-w-full max-h-full object-contain drop-shadow-2xl" alt="Justificatif" style="object-fit: contain !important; width: auto; height: auto; max-width: 100%; max-height: 100%;">`;
+            // FIX: User's specific request for robust containment
+            contentHtml = `<img src="${blobUrl}" class="drop-shadow-2xl" alt="Justificatif" style="object-fit: contain !important; width: 100%; height: 100%;">`;
         } else {
             contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }

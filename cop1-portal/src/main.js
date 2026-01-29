@@ -128,7 +128,7 @@ function renderAppLayout() {
     const currentView = view || (adminMode ? 'dashboard' : 'events');
 
     app.innerHTML = `
-        <div class="flex h-full w-full overflow-hidden bg-[#F8FAFC]">
+        <div class="flex h-screen w-full bg-[#F8FAFC]">
             ${renderSidebar(profile, currentView, adminMode)}
             <div class="flex-1 flex flex-col h-full relative min-w-0">
                 ${renderHeader(profile)}

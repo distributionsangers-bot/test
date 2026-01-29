@@ -416,3 +416,8 @@ input:-webkit-autofill:active {
 .animate-slide-down {
     animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Fix scroll tactile iOS */
+#main-slot {
+    -webkit-overflow-scrolling: touch;
+}

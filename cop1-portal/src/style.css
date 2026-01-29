@@ -7,9 +7,7 @@
    ========================================= */
 body {
     background-color: #F8FAFC;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
 /* Glass Effect for Header */
@@ -222,16 +220,14 @@ body>.skiptranslate {
 /* Fix for iOS Chrome dynamic viewport */
 html,
 body {
-    height: 100dvh;
-    height: -webkit-fill-available;
-    overflow: hidden;
-    /* Prevent body scroll bounce */
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
 }
 
 /* iOS Safari 100vh fix */
 @supports (-webkit-touch-callout: none) {
     body {
-        height: -webkit-fill-available;
+        min-height: -webkit-fill-available;
     }
 }
 
@@ -283,28 +279,9 @@ body {
 
 /* App container with safe areas */
 #app {
-    height: 100dvh;
-    height: -webkit-fill-available;
-    /* padding-top removed here, handled in main layout or header */
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Main content scroll area - CRITICAL for mobile scroll */
-#main-slot {
-    /* Critical for scrolling within flex container */
-    flex: 1 1 0%;
-    min-height: 0;
-    overflow-y: auto;
-    /* height: 100%; Removed to allow flex to calculate correct height */
-
-    -webkit-overflow-scrolling: touch;
-    /* touch-action: pan-y; Removed to allow full touch interactions if needed */
-    overscroll-behavior-y: contain;
-
-    /* Ensure padding for safe areas is handled here if needed */
-    /* Padding handled by Tailwind utility classes in main.js */
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    padding-top: env(safe-area-inset-top);
 }
 
 /* iOS Touch Responsiveness */

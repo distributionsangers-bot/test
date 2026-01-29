@@ -335,7 +335,7 @@ async function renderUserDashboard(container) {
     ` : '';
 
     container.innerHTML = `
-        <div class="animate-fade-in max-w-2xl mx-auto pb-24 pt-2">
+        <div class="animate-fade-in max-w-4xl mx-auto pb-24 pt-2">
             
             <!-- HERO HEADER -->
             <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-6 mb-6 shadow-2xl shadow-brand-500/20">

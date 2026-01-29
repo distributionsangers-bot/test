@@ -15,7 +15,7 @@ export function renderLogin() {
             </div>
 
             <!-- Card -->
-            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 z-10 animate-fade-in">
+            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 z-10 animate-fade-in">
                 <!-- Header -->
                 <div class="text-center mb-8"> 
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">

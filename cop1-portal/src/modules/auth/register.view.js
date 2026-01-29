@@ -17,7 +17,7 @@ export function renderRegister() {
             </div>
 
             <!-- Card -->
-            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 sm:p-8 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
                 
                 <!-- Header -->
                 <div class="text-center mb-8"> 
@@ -39,11 +39,21 @@ export function renderRegister() {
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1.5">
                             <label class="text-xs font-bold text-slate-500 uppercase ml-1">Prénom</label>
-                            <input id="reg-fn" type="text" required class="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Prénom">
+                            <div class="relative group">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
+                                    <i data-lucide="user" class="w-5 h-5"></i>
+                                </div>
+                                <input id="reg-fn" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Prénom">
+                            </div>
                         </div>
                         <div class="space-y-1.5">
                             <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nom</label>
-                            <input id="reg-ln" type="text" required class="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
+                            <div class="relative group">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
+                                    <i data-lucide="tag" class="w-5 h-5"></i>
+                                </div>
+                                <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
+                            </div>
                         </div>
                     </div>
 

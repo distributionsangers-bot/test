@@ -805,15 +805,15 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            // FIX: User's specific request for robust containment
-            contentHtml = `<img src="${blobUrl}" class="absolute inset-0 w-full h-full object-contain" alt="Justificatif">`;
+            // FIX: Full View - image never cropped, centered with letterboxing
+            contentHtml = `<img src="${blobUrl}" style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;" alt="Justificatif">`;
         } else {
             contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }
 
         m.innerHTML = `
             <!-- Flex Column Layout: Header -> Content (Flexible) -> Footer -->
-            <div class="flex flex-col w-full h-full">
+            <div style="display: flex; flex-direction: column; width: 100%; height: 100%;">
 
                 <!-- 1. Header (Fixed Height) -->
                 <div class="flex-none h-20 flex items-center justify-end px-4">
@@ -827,8 +827,8 @@ async function openDocumentViewer(url, userId) {
                     </div>
                 </div>
 
-                <!-- 2. Main Content (Takes all remaining space, no overflow) -->
-                <div class="flex-1 relative min-h-0 w-full bg-slate-900/10">
+                <!-- 2. Main Content: Flex container that centers the image -->
+                <div style="flex: 1 1 0%; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     ${contentHtml}
                 </div>
 

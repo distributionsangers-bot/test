@@ -812,29 +812,29 @@ async function openDocumentViewer(url, userId) {
         }
 
         m.innerHTML = `
-            <!-- Header: absolute positioned at top -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 60px; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; z-index: 10;">
+            <!-- Full-screen content container -->
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px;">
+                ${contentHtml}
+            </div>
+
+            <!-- Header overlay with gradient -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, rgba(15,23,42,0.9) 0%, transparent 100%); display: flex; align-items: flex-start; justify-content: flex-end; padding: 16px; z-index: 20;">
                 <div class="flex gap-3">
-                    <a href="${url}" download="justificatif_${userId}.${ext}" class="bg-white/10 text-white p-3 rounded-full hover:bg-white/20 transition backdrop-blur-md" title="Télécharger">
+                    <a href="${url}" download="justificatif_${userId}.${ext}" class="bg-white/20 text-white p-3 rounded-full hover:bg-white/30 transition backdrop-blur-md shadow-lg" title="Télécharger">
                         <i data-lucide="download" class="w-5 h-5"></i>
                     </a>
-                    <button id="close-doc-btn" class="bg-white/10 text-white p-3 rounded-full hover:bg-red-500/80 transition backdrop-blur-md">
+                    <button id="close-doc-btn" class="bg-white/20 text-white p-3 rounded-full hover:bg-red-500 transition backdrop-blur-md shadow-lg">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Image Container: takes middle space, avoids header/footer -->
-            <div style="position: absolute; top: 60px; bottom: 80px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; padding: 8px;">
-                ${contentHtml}
-            </div>
-
-            <!-- Footer: absolute positioned at bottom -->
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 80px; display: flex; align-items: center; justify-content: center; gap: 16px; z-index: 10;" class="animate-slide-up">
-                <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition flex items-center gap-2">
+            <!-- Footer overlay with gradient -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to top, rgba(15,23,42,0.95) 0%, transparent 100%); display: flex; align-items: flex-end; justify-content: center; gap: 16px; padding-bottom: 24px; z-index: 20;" class="animate-slide-up">
+                <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 hover:scale-105 transition-all flex items-center gap-2">
                     <i data-lucide="x-circle" class="w-5 h-5"></i> Refuser
                 </button>
-                <button id="btn-doc-accept" class="px-6 py-3 bg-emerald-500 text-white font-bold rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center gap-2">
+                <button id="btn-doc-accept" class="px-6 py-3 bg-emerald-500 text-white font-bold rounded-full shadow-lg hover:bg-emerald-600 hover:scale-105 transition-all flex items-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i> Valider le dossier
                 </button>
             </div>

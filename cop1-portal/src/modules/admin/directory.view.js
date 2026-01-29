@@ -805,14 +805,15 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            // FIX: Utilisation de max-w-full/max-h-full dans un conteneur avec padding pour éviter tout chevauchement
-            contentHtml = `<img src="${blobUrl}" class="max-w-full max-h-full object-contain drop-shadow-2xl" alt="Justificatif">`;
+            // FIX: Force strict containment using absolute positioning and specific object-fit
+            contentHtml = `<img src="${blobUrl}" class="w-full h-full object-contain drop-shadow-2xl" alt="Justificatif" style="max-height: 100%; max-width: 100%;">`;
         } else {
-            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl" style="max-height: 100%;"></iframe>`;
+            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }
 
         m.innerHTML = `
-            <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <!-- Header Actions (Top) -->
+            <div class="absolute top-4 right-4 flex gap-3 z-[110]">
                 <a href="${url}" download="justificatif_${userId}.${ext}" class="bg-white/10 text-white p-3 rounded-full hover:bg-white/20 transition backdrop-blur-md" title="Télécharger">
                     <i data-lucide="download" class="w-5 h-5"></i>
                 </a>
@@ -821,12 +822,13 @@ async function openDocumentViewer(url, userId) {
                 </button>
             </div>
 
-            <!-- Conteneur Full Screen avec Padding pour éviter les boutons (Top & Bottom) -->
-            <div class="w-full h-full flex items-center justify-center p-4 pt-20 pb-28">
+            <!-- Main Content Area (Absolute Positioned between Header and Footer) -->
+            <div class="absolute inset-x-4 top-24 bottom-32 flex items-center justify-center z-[100]">
                ${contentHtml}
             </div>
 
-            <div class="absolute bottom-8 flex gap-4 animate-slide-up z-50">
+            <!-- Footer Actions (Bottom) -->
+            <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-4 animate-slide-up z-[110]">
                 <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition flex items-center gap-2">
                     <i data-lucide="x-circle" class="w-5 h-5"></i> Refuser
                 </button>

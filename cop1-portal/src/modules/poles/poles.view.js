@@ -767,18 +767,18 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                 e.preventDefault();
                 const uid = btn.dataset.removeLeader;
 
-                if (!confirm("Retirer ce responsable ?")) return;
+                showConfirm("Retirer ce responsable ?", () => {
+                    // Add to removal list
+                    leaderChanges.toRemove.push({ userId: uid });
 
-                // Add to removal list
-                leaderChanges.toRemove.push({ userId: uid });
-
-                // Remove from DOM immediately for UX
-                const leaderCard = btn.closest('[data-leader-card]');
-                if (leaderCard) {
-                    leaderCard.style.opacity = '0.5';
-                    leaderCard.style.textDecoration = 'line-through';
-                }
-                showToast("Responsable marqué pour suppression");
+                    // Remove from DOM immediately for UX
+                    const leaderCard = btn.closest('[data-leader-card]');
+                    if (leaderCard) {
+                        leaderCard.style.opacity = '0.5';
+                        leaderCard.style.textDecoration = 'line-through';
+                    }
+                    showToast("Responsable marqué pour suppression");
+                }, { type: 'danger', confirmText: 'Retirer' });
             };
         });
 
@@ -922,27 +922,27 @@ async function openCandidatesModal(teamId, teamName) {
         const date = new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
         return `
-    <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between mb-3 shadow-sm hover:shadow-md transition group" >
-                 <div class="flex items-center gap-4">
+    <div class="bg-white p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between mb-3 shadow-sm hover:shadow-md transition group gap-3" id="candidate-row-${p.id}">
+                 <div class="flex items-center gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-brand-600 font-bold text-lg overflow-hidden">
                         ${p.photo_url
                 ? `<img src="${p.photo_url}" class="w-full h-full object-cover">`
                 : p.first_name[0]
             }
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-bold text-slate-900">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</h4>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">${date}</span>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="font-bold text-slate-900 truncate">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium whitespace-nowrap">${date}</span>
                         </div>
-                        <div class="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
-                            <span><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.phone || '-')}</span>
-                            <span><i data-lucide="mail" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.email || '-')}</span>
+                        <div class="text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-0.5">
+                            <span class="truncate"><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.phone || '-')}</span>
+                            <span class="truncate"><i data-lucide="mail" class="w-3 h-3 inline mr-1"></i> ${escapeHtml(p.email || '-')}</span>
                         </div>
                     </div>
                  </div>
 
-                 <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <div class="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button data-action="contact-candidate" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="Contacter">
                         <i data-lucide="message-circle" class="w-5 h-5"></i>
                     </button>
@@ -959,22 +959,22 @@ async function openCandidatesModal(teamId, teamName) {
     `;
 
     m.innerHTML = `
-    <div class="bg-white w-full max-w-2xl rounded-3xl p-0 h-[75vh] flex flex-col shadow-2xl animate-scale-in relative overflow-hidden" >
-            < !--Header(Premium) -->
+    <div class="bg-white w-full max-w-2xl rounded-3xl p-0 h-[75vh] flex flex-col shadow-2xl animate-scale-in relative overflow-hidden mx-4" >
+            <!-- Header (Premium) -->
             <div class="bg-gradient-to-br from-brand-50/80 to-indigo-50/50 p-6 border-b border-slate-100 flex justify-between items-start">
-                <div>
+                <div class="min-w-0 pr-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider border border-brand-200/30 mb-2">
                         <i data-lucide="users" class="w-3.5 h-3.5"></i> Recrutement
                     </div>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Intéressés par: ${escapeHtml(teamName)}</h3>
-                    <p class="text-slate-500 text-sm mt-1 font-medium">${candidates.length} bénévole${candidates.length > 1 ? 's' : ''} en attente</p>
+                    <h3 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight truncate">Intéressés par: ${escapeHtml(teamName)}</h3>
+                    <p class="text-slate-500 text-sm mt-1 font-medium truncate">${candidates.length} bénévole${candidates.length > 1 ? 's' : ''} en attente</p>
                 </div>
-                <button class="bg-white/80 backdrop-blur-sm p-2.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-white transition duration-300 btn-close shadow-sm border border-slate-100/50">
+                <button class="bg-white/80 backdrop-blur-sm p-2.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-white transition duration-300 btn-close shadow-sm border border-slate-100/50 flex-shrink-0">
                     <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6">
                 ${listHtml}
             </div>
             
@@ -996,13 +996,32 @@ async function openCandidatesModal(teamId, teamName) {
             const action = btn.dataset.action;
 
             if (action === 'remove-interest') {
-                if (!confirm("Retirer ce bénévole de la liste ?\n(Cela décochera son intérêt)")) return;
-                toggleLoader(true);
-                await PolesService.removeCandidateInterest(uid, teamId);
-                toggleLoader(false);
-                showToast("Intérêt retiré");
-                m.remove();
-                await openCandidatesModal(teamId, teamName); // Refresh
+                showConfirm("Retirer ce bénévole de la liste ?\n(Cela décochera son intérêt)", async () => {
+                    const row = document.getElementById(`candidate-row-${uid}`);
+                    if (row) {
+                        row.style.opacity = '0.5';
+                        row.style.pointerEvents = 'none';
+                    }
+
+                    toggleLoader(true);
+                    try {
+                        await PolesService.removeCandidateInterest(uid, teamId);
+                        showToast("Intérêt retiré");
+                        // Remove locally
+                        if (row) {
+                            row.classList.add('transition-all', 'duration-500', 'translate-x-full', 'opacity-0');
+                            setTimeout(() => row.remove(), 500);
+                        }
+                    } catch (e) {
+                        showToast("Erreur lors de la suppression", "error");
+                        if (row) {
+                            row.style.opacity = '1';
+                            row.style.pointerEvents = 'auto';
+                        }
+                    } finally {
+                        toggleLoader(false);
+                    }
+                }, { type: 'danger', confirmText: 'Retirer', title: 'Confirmation' });
             }
 
             if (action === 'contact-candidate') {

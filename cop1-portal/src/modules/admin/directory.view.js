@@ -769,73 +769,118 @@ async function openProof(userId) {
     openDocumentViewer(signedUrl, userId);
 }
 
-function openDocumentViewer(url, userId) {
+import heic2any from 'heic2any';
+
+async function openDocumentViewer(url, userId) {
     const m = document.createElement('div');
     m.id = 'doc-viewer-modal';
     m.className = 'fixed inset-0 bg-slate-900/95 z-[100] flex flex-col items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
 
-    m.innerHTML = `
-        <div class="absolute top-4 right-4 flex gap-3 z-50">
-            <a href="${url}" download="justificatif_${userId}" class="bg-white/10 text-white p-3 rounded-full hover:bg-white/20 transition backdrop-blur-md" title="Télécharger">
-                <i data-lucide="download" class="w-5 h-5"></i>
-            </a>
-            <button id="close-doc-btn" class="bg-white/10 text-white p-3 rounded-full hover:bg-red-500/80 transition backdrop-blur-md">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
+    // 🔧 FIX: Télécharger le fichier et le convertir en blob pour l'affichage
+    try {
+        const response = await fetch(url);
+        let blob = await response.blob();
 
-        <div class="w-full h-full max-w-4xl max-h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative">
-            <object data="${url}" type="application/pdf" class="w-full h-full">
-                <img src="${url}" class="w-full h-full object-contain bg-slate-100" alt="Justificatif">
-            </object>
-        </div>
+        // Détecter le type de fichier
+        const ext = url.split('?')[0].split('.').pop().toLowerCase();
+        let isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'heic'].includes(ext);
 
-        <div class="absolute bottom-8 flex gap-4 animate-slide-up">
-            <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition flex items-center gap-2">
-                <i data-lucide="x-circle" class="w-5 h-5"></i> Refuser
-            </button>
-            <button id="btn-doc-accept" class="px-6 py-3 bg-emerald-500 text-white font-bold rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center gap-2">
-                <i data-lucide="check-circle" class="w-5 h-5"></i> Valider le dossier
-            </button>
-        </div>
-    `;
-
-    document.body.appendChild(m);
-    createIcons({ icons, root: m });
-
-    m.querySelector('#close-doc-btn').addEventListener('click', () => m.remove());
-
-    m.querySelector('#btn-doc-accept').addEventListener('click', async () => {
-        showConfirm("Valider ce dossier ?", async () => {
-            m.remove();
-            toggleLoader(true);
-            await DirectoryService.deleteProofFile(userId);
-            const res = await DirectoryService.updateUserStatus(userId, 'approved');
-            toggleLoader(false);
-            if (res.error) showToast("Erreur validation", "error");
-            else {
-                showToast("Dossier validé ! ✓");
-                document.getElementById('user-details-modal')?.remove();
-                loadUsers();
+        // 🍏 HEIC Conversion
+        if (ext === 'heic') {
+            try {
+                showToast("Conversion de l'image HEIC...", "info");
+                blob = await heic2any({
+                    blob: blob,
+                    toType: "image/jpeg",
+                    quality: 0.8
+                });
+                isImage = true; // Confirmed image now
+            } catch (err) {
+                console.error("HEIC Conversion error:", err);
+                showToast("Erreur conversion HEIC", "error");
             }
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+
+        let contentHtml = '';
+        if (isImage) {
+            contentHtml = `<img src="${blobUrl}" class="w-full h-full object-contain" alt="Justificatif">`;
+        } else {
+            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white"></iframe>`;
+        }
+
+        m.innerHTML = `
+            <div class="absolute top-4 right-4 flex gap-3 z-50">
+                <a href="${url}" download="justificatif_${userId}.${ext}" class="bg-white/10 text-white p-3 rounded-full hover:bg-white/20 transition backdrop-blur-md" title="Télécharger">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                </a>
+                <button id="close-doc-btn" class="bg-white/10 text-white p-3 rounded-full hover:bg-red-500/80 transition backdrop-blur-md">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="w-full h-full max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50">
+               ${contentHtml}
+            </div>
+
+            <div class="absolute bottom-8 flex gap-4 animate-slide-up">
+                <button id="btn-doc-reject" class="px-6 py-3 bg-red-500 text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition flex items-center gap-2">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i> Refuser
+                </button>
+                <button id="btn-doc-accept" class="px-6 py-3 bg-emerald-500 text-white font-bold rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i> Valider le dossier
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(m);
+        createIcons({ icons, root: m });
+
+        // 🔧 FIX: Nettoyer la mémoire en libérant le blob à la fermeture
+        const closeModal = () => {
+            URL.revokeObjectURL(blobUrl);
+            m.remove();
+        };
+
+        m.querySelector('#close-doc-btn').addEventListener('click', closeModal);
+
+        m.querySelector('#btn-doc-accept').addEventListener('click', async () => {
+            showConfirm("Valider ce dossier ?", async () => {
+                closeModal();
+                toggleLoader(true);
+                await DirectoryService.deleteProofFile(userId);
+                const res = await DirectoryService.updateUserStatus(userId, 'approved');
+                toggleLoader(false);
+                if (res.error) showToast("Erreur validation", "error");
+                else {
+                    showToast("Dossier validé ! ✓");
+                    document.getElementById('user-details-modal')?.remove();
+                    loadUsers();
+                }
+            });
         });
-    });
 
-    m.querySelector('#btn-doc-reject').addEventListener('click', async () => {
-        showConfirm("Refuser ce dossier ?", async () => {
-            m.remove();
-            toggleLoader(true);
-            await DirectoryService.deleteProofFile(userId);
-            const res = await DirectoryService.updateUserStatus(userId, 'rejected');
-            toggleLoader(false);
-            if (res.error) showToast("Erreur refus", "error");
-            else {
-                showToast("Dossier refusé");
-                document.getElementById('user-details-modal')?.remove();
-                loadUsers();
-            }
-        }, { type: 'danger', confirmText: 'Refuser' });
-    });
+        m.querySelector('#btn-doc-reject').addEventListener('click', async () => {
+            showConfirm("Refuser ce dossier ?", async () => {
+                closeModal();
+                toggleLoader(true);
+                await DirectoryService.deleteProofFile(userId);
+                const res = await DirectoryService.updateUserStatus(userId, 'rejected');
+                toggleLoader(false);
+                if (res.error) showToast("Erreur refus", "error");
+                else {
+                    showToast("Dossier refusé");
+                    document.getElementById('user-details-modal')?.remove();
+                    loadUsers();
+                }
+            }, { type: 'danger', confirmText: 'Refuser' });
+        });
+
+    } catch (error) {
+        console.error('Erreur chargement document:', error);
+        showToast("Erreur lors du chargement du document", "error");
+    }
 }
 
 export function cleanup() {

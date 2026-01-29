@@ -139,7 +139,7 @@ export function renderRegister() {
                         
                         <div id="upload-zone" class="relative group cursor-pointer bg-slate-50/50 border-2 border-dashed border-slate-300 hover:border-brand-500 rounded-2xl p-6 text-center transition-all hover:bg-white/80 hover:shadow-lg hover:shadow-brand-500/5">
                             
-                            <input id="reg-proof" type="file" required accept="image/*,.pdf" class="hidden">
+                            <input id="reg-proof" type="file" required accept="image/*,.pdf,.heic,.HEIC" class="hidden">
                             
                             <div id="upload-default" class="flex flex-col items-center gap-2">
                                 <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-brand-600 group-hover:scale-110 group-hover:text-brand-700 transition-all duration-300 ring-4 ring-slate-50 group-hover:ring-brand-50">

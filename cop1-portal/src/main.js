@@ -22,6 +22,10 @@ import { renderPoles } from './modules/poles/poles.view.js';
 import { renderLegal } from './modules/legal/legal.view.js';
 
 // Configuration Router
+// Import Status Views
+import { renderPending, initPending, renderRejected, initRejected } from './modules/auth/status.view.js';
+
+// Configuration Router
 router.addRoute('/login', { render: renderLogin, init: initLogin });
 router.addRoute('/register', { render: renderRegister, init: initRegister });
 router.addRoute('/dashboard', { render: renderDashboard, init: initDashboard });
@@ -34,16 +38,9 @@ router.addRoute('/profile', { render: renderProfile, init: initProfile });
 router.addRoute('/legal/:type', { render: renderLegal });
 router.addRoute('/poles', { render: renderPoles });
 
-// Routes d'état spéciales (Inline pour l'instant)
-router.addRoute('/pending', {
-    render: () => `<div class="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-fade-in"><div class="w-24 h-24 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-6"><i data-lucide="clock" class="w-10 h-10"></i></div><h2 class="text-2xl font-bold">Inscription en attente</h2><p class="text-slate-500 mt-2 mb-6">Validation administrateur requise.</p><button data-action="logout" class="text-red-500 font-bold hover:underline">Déconnexion</button></div>`,
-    init: () => createIcons({ icons })
-});
-
-router.addRoute('/rejected', {
-    render: () => `<div class="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-fade-in"><h2 class="text-xl font-bold text-red-600">Accès refusé</h2><button data-action="logout" class="mt-4 font-bold hover:underline">Déconnexion</button></div>`,
-    init: () => { }
-});
+// Routes d'état spéciales
+router.addRoute('/pending', { render: renderPending, init: initPending });
+router.addRoute('/rejected', { render: renderRejected, init: initRejected });
 
 const app = document.getElementById('app');
 

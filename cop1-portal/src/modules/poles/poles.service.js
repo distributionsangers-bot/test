@@ -122,12 +122,14 @@ export const PolesService = {
      * Supprime complètement un intérêt (Action Admin)
      */
     async removeCandidateInterest(userId, teamId) {
-        const { error } = await supabase
+        const { error, count } = await supabase
             .from('pole_interests')
-            .delete()
+            .delete({ count: 'exact' })
             .eq('user_id', userId)
             .eq('team_id', teamId);
+
         if (error) throw error;
+        if (count === 0) throw new Error("Permission refusée ou élément introuvable");
     },
 
     /**

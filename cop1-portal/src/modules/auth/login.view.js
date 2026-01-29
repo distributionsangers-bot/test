@@ -141,7 +141,11 @@ async function handleLoginSubmit(e) {
     try {
         const { error } = await AuthService.login(email, password);
         if (error) {
-            showToast(error.message, "error");
+            let msg = error.message;
+            if (msg && msg.includes('Invalid login credentials')) {
+                msg = "Email ou mot de passe incorrect";
+            }
+            showToast(msg, "error");
         } else {
             showToast("Connexion réussie", "success");
             document.dispatchEvent(new CustomEvent('auth:login-success'));
@@ -163,7 +167,11 @@ async function handleForgotPassword() {
         toggleLoader(false);
 
         if (error) {
-            showToast(error.message, "error");
+            let msg = error.message;
+            if (msg && msg.includes('Invalid login credentials')) {
+                msg = "Email ou mot de passe incorrect";
+            }
+            showToast(msg, "error");
         } else {
             showToast('Email de réinitialisation envoyé', 'success');
         }

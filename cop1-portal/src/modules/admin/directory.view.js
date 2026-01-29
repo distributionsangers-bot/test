@@ -805,9 +805,9 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            contentHtml = `<img src="${blobUrl}" class="w-full h-full object-contain" alt="Justificatif">`;
+            contentHtml = `<img src="${blobUrl}" class="max-w-full max-h-full object-contain rounded-lg shadow-sm" alt="Justificatif">`;
         } else {
-            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white"></iframe>`;
+            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg"></iframe>`;
         }
 
         m.innerHTML = `

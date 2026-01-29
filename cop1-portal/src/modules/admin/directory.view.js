@@ -820,7 +820,7 @@ async function openDocumentViewer(url, userId) {
                 </button>
             </div>
 
-            <div class="w-full h-full max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50">
+            <div class="w-auto h-auto max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50 p-4">
                ${contentHtml}
             </div>
 

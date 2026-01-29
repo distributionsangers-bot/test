@@ -805,9 +805,10 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            contentHtml = `<img src="${blobUrl}" class="max-w-[90vw] max-w-4xl max-h-[80vh] object-contain rounded-lg shadow-sm" alt="Justificatif">`;
+            // FIX: "Full View" par défaut - object-contain pour tout voir sans rognage
+            contentHtml = `<img src="${blobUrl}" class="max-w-[95vw] max-h-[85vh] object-contain drop-shadow-2xl" alt="Justificatif">`;
         } else {
-            contentHtml = `<iframe src="${blobUrl}" class="w-[90vw] max-w-4xl h-[80vh] border-none bg-white rounded-lg"></iframe>`;
+            contentHtml = `<iframe src="${blobUrl}" class="w-[90vw] max-w-6xl h-[85vh] border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }
 
         m.innerHTML = `
@@ -820,7 +821,8 @@ async function openDocumentViewer(url, userId) {
                 </button>
             </div>
 
-            <div class="w-auto h-auto rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50 p-4">
+            <!-- Conteneur centré sans overflow-hidden pour éviter le rognage -->
+            <div class="flex items-center justify-center relative p-2">
                ${contentHtml}
             </div>
 

@@ -806,7 +806,7 @@ async function openDocumentViewer(url, userId) {
         let contentHtml = '';
         if (isImage) {
             // FIX: User's specific request for robust containment
-            contentHtml = `<img src="${blobUrl}" class="drop-shadow-2xl" alt="Justificatif" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+            contentHtml = `<img src="${blobUrl}" class="drop-shadow-2xl" alt="Justificatif" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;">`;
         } else {
             contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg shadow-xl"></iframe>`;
         }
@@ -828,7 +828,7 @@ async function openDocumentViewer(url, userId) {
                 </div>
 
                 <!-- 2. Main Content (Takes all remaining space, no overflow) -->
-                <div class="flex-1 min-h-0 w-full flex items-center justify-center p-4">
+                <div class="flex-1 min-h-0 flex items-center justify-center p-4">
                     ${contentHtml}
                 </div>
 

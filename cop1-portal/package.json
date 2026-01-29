@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "heic2any": "^0.0.4",
     "html5-qrcode": "^2.3.8",
     "lucide": "^0.300.0",
     "qrcode": "^1.5.3"

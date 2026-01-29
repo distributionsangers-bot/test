@@ -564,7 +564,7 @@ async function renderAdminDashboard(container) {
         : '<div class="p-4 text-center text-slate-400 text-sm bg-emerald-50 rounded-2xl border border-emerald-100"><i data-lucide="check-circle" class="w-5 h-5 mx-auto mb-1 text-emerald-500"></i>Aucune urgence !</div>';
 
     container.innerHTML = `
-        <div class="animate-fade-in max-w-2xl mx-auto pb-24">
+        <div class="animate-fade-in max-w-4xl mx-auto pb-24">
             
             <!-- ADMIN HERO -->
             <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black p-6 mb-6 shadow-2xl">

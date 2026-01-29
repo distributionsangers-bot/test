@@ -87,7 +87,7 @@ export async function renderEvents() {
             .join('');
 
         return `
-            <div id="events-view-container" class="animate-fade-in pb-24 max-w-3xl mx-auto">
+            <div id="events-view-container" class="animate-fade-in pb-24 max-w-4xl mx-auto">
                 
                 <!-- PREMIUM HEADER -->
                 <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-6 mb-6 shadow-2xl shadow-emerald-500/20">

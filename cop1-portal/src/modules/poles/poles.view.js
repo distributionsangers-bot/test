@@ -326,7 +326,7 @@ export async function renderPoles(container) {
     `;
 
     container.innerHTML = `
-        <div class="max-w-7xl mx-auto pb-24">
+        <div class="max-w-4xl mx-auto pb-24">
             ${header}
             <div id="poles-content" class="animate-fade-in">
                 ${renderContent()}

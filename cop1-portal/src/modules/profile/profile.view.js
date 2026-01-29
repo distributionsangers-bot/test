@@ -14,7 +14,7 @@ export async function renderProfile(container, params) {
 
     // Skeleton
     container.innerHTML = `
-        <div class="animate-pulse max-w-2xl mx-auto mt-10 space-y-6">
+        <div class="animate-pulse max-w-4xl mx-auto mt-10 space-y-6">
             <div class="h-48 bg-gradient-to-r from-slate-200 to-slate-300 rounded-3xl"></div>
             <div class="h-24 bg-slate-100 rounded-3xl"></div>
             <div class="grid grid-cols-3 gap-4">
@@ -60,7 +60,7 @@ export async function renderProfile(container, params) {
     else if (profile.status === 'rejected') statusConfig = { bg: 'bg-red-100', text: 'text-red-700', label: 'Refusé', icon: 'x-circle' };
 
     container.innerHTML = `
-        <div class="max-w-2xl mx-auto pb-32 space-y-6 animate-fade-in">
+        <div class="max-w-4xl mx-auto pb-32 space-y-6 animate-fade-in">
             
             <!-- HERO HEADER -->
             <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 shadow-2xl shadow-brand-500/30">

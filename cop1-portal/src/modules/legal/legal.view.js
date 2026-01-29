@@ -211,7 +211,7 @@ export async function renderLegal(container, params) {
                     <span class="pointer-events-none">Retour</span>
                 </button>
 
-                <div class="max-w-3xl mx-auto text-center text-white mt-10 animate-fade-in relative z-10">
+                <div class="max-w-4xl mx-auto text-center text-white mt-10 animate-fade-in relative z-10">
                     <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl border border-white/20 ring-4 ring-white/5">
                         <i data-lucide="${data.icon}" class="w-10 h-10 text-white"></i>
                     </div>
@@ -221,7 +221,7 @@ export async function renderLegal(container, params) {
             </div>
 
             <!-- CONTENT CONTAINER -->
-            <div class="max-w-3xl mx-auto px-4 md:px-6 space-y-6 relative z-10 pt-4">
+            <div class="max-w-4xl mx-auto px-4 md:px-6 space-y-6 relative z-10 pt-4">
                 ${data.alert ? `
                 <div class="bg-white rounded-2xl p-1.5 shadow-lg shadow-orange-500/10 border border-orange-100 animate-slide-up-subtle">
                     <div class="bg-orange-50/50 rounded-xl p-6 flex flex-col md:flex-row gap-5 items-start">

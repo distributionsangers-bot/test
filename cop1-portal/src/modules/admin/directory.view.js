@@ -37,7 +37,7 @@ export async function renderDirectory(container) {
 
     // Main Layout
     container.innerHTML = `
-        <div class="pb-24 max-w-5xl mx-auto space-y-6">
+        <div class="pb-24 max-w-4xl mx-auto space-y-6">
             
             <!-- HEADER PREMIUM -->
             <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 shadow-2xl shadow-purple-500/20 p-8">

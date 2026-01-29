@@ -805,9 +805,9 @@ async function openDocumentViewer(url, userId) {
 
         let contentHtml = '';
         if (isImage) {
-            contentHtml = `<img src="${blobUrl}" class="max-w-full max-h-full object-contain rounded-lg shadow-sm" alt="Justificatif">`;
+            contentHtml = `<img src="${blobUrl}" class="max-w-[90vw] max-w-4xl max-h-[80vh] object-contain rounded-lg shadow-sm" alt="Justificatif">`;
         } else {
-            contentHtml = `<iframe src="${blobUrl}" class="w-full h-full border-none bg-white rounded-lg"></iframe>`;
+            contentHtml = `<iframe src="${blobUrl}" class="w-[90vw] max-w-4xl h-[80vh] border-none bg-white rounded-lg"></iframe>`;
         }
 
         m.innerHTML = `
@@ -820,7 +820,7 @@ async function openDocumentViewer(url, userId) {
                 </button>
             </div>
 
-            <div class="w-auto h-auto max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50 p-4">
+            <div class="w-auto h-auto rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center relative bg-slate-900/50 p-4">
                ${contentHtml}
             </div>
 

@@ -214,7 +214,41 @@ export async function renderProfile(container, params) {
                         </div>
                         <div class="pt-4 border-t border-slate-100">
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Nouveau mot de passe (optionnel)</label>
-                            <input name="password" type="password" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="••••••••">
+                            <div class="relative">
+                                <input id="profile-password" name="password" type="password" class="w-full p-4 pr-12 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all" placeholder="••••••••">
+                                <button type="button" id="toggle-profile-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Password Strength Indicator -->
+                            <div id="profile-password-strength" class="hidden mt-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 space-y-2.5 animate-fade-in">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Force du mot de passe</span>
+                                    <span id="profile-strength-label" class="text-[10px] font-bold uppercase tracking-wide text-slate-400">—</span>
+                                </div>
+                                <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div id="profile-strength-bar" class="h-full w-0 rounded-full transition-all duration-300 ease-out"></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5 pt-1">
+                                    <div id="profile-req-length" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>8 caractères min.</span>
+                                    </div>
+                                    <div id="profile-req-upper" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 majuscule</span>
+                                    </div>
+                                    <div id="profile-req-lower" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 minuscule</span>
+                                    </div>
+                                    <div id="profile-req-number" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 chiffre</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
@@ -448,9 +482,109 @@ function setupEditForm(c, uid) {
     const form = c.querySelector('#form-profile-update');
     if (!form) return;
 
+    // Password Toggle
+    const toggleBtn = c.querySelector('#toggle-profile-password');
+    const passInput = c.querySelector('#profile-password');
+
+    if (toggleBtn && passInput) {
+        toggleBtn.addEventListener('click', () => {
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+            toggleBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
+            createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
+        });
+    }
+
+    // Password Strength Validation
+    const strengthContainer = c.querySelector('#profile-password-strength');
+    const strengthBar = c.querySelector('#profile-strength-bar');
+    const strengthLabel = c.querySelector('#profile-strength-label');
+    const reqLength = c.querySelector('#profile-req-length');
+    const reqUpper = c.querySelector('#profile-req-upper');
+    const reqLower = c.querySelector('#profile-req-lower');
+    const reqNumber = c.querySelector('#profile-req-number');
+
+    function updateRequirement(el, isValid) {
+        if (!el) return;
+        const icon = el.querySelector('i');
+        if (!icon) return;
+
+        if (isValid) {
+            el.classList.remove('text-slate-400');
+            el.classList.add('text-green-600');
+            icon.setAttribute('data-lucide', 'check-circle');
+        } else {
+            el.classList.remove('text-green-600');
+            el.classList.add('text-slate-400');
+            icon.setAttribute('data-lucide', 'circle');
+        }
+    }
+
+    function checkPasswordStrength(password) {
+        if (!strengthBar || !strengthLabel) return null;
+
+        const checks = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /[0-9]/.test(password)
+        };
+
+        updateRequirement(reqLength, checks.length);
+        updateRequirement(reqUpper, checks.upper);
+        updateRequirement(reqLower, checks.lower);
+        updateRequirement(reqNumber, checks.number);
+
+        createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-3 h-3" } });
+
+        const score = Object.values(checks).filter(Boolean).length;
+
+        const configs = [
+            { width: '0%', color: 'bg-slate-300', label: '—', labelColor: 'text-slate-400' },
+            { width: '25%', color: 'bg-red-500', label: 'Faible', labelColor: 'text-red-500' },
+            { width: '50%', color: 'bg-orange-500', label: 'Moyen', labelColor: 'text-orange-500' },
+            { width: '75%', color: 'bg-yellow-500', label: 'Bon', labelColor: 'text-yellow-500' },
+            { width: '100%', color: 'bg-green-500', label: 'Fort', labelColor: 'text-green-600' }
+        ];
+
+        const config = configs[score];
+        strengthBar.className = `h-full rounded-full transition-all duration-300 ease-out ${config.color}`;
+        strengthBar.style.width = config.width;
+        strengthLabel.textContent = config.label;
+        strengthLabel.className = `text-[10px] font-bold uppercase tracking-wide ${config.labelColor}`;
+
+        return checks;
+    }
+
+    if (passInput && strengthContainer) {
+        passInput.addEventListener('focus', () => {
+            strengthContainer.classList.remove('hidden');
+        });
+
+        passInput.addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+        });
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(form);
+        const password = fd.get('password')?.trim();
+
+        // Validate password if provided
+        if (password) {
+            const checks = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /[0-9]/.test(password)
+            };
+            const allValid = Object.values(checks).every(Boolean);
+            if (!allValid) {
+                showToast("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre", "error");
+                return;
+            }
+        }
 
         const data = {
             first_name: fd.get('first_name'),
@@ -459,7 +593,7 @@ function setupEditForm(c, uid) {
             has_permit: fd.get('has_permit') === 'on',
             mandatory_hours: fd.get('mandatory_hours') === 'on',
             school: fd.get('school'),
-            password: fd.get('password')
+            password: password
         };
 
         toggleLoader(true);
@@ -483,6 +617,8 @@ function setupEditForm(c, uid) {
             refreshProfile(uid);
 
             if (data.password) form.querySelector('[name=password]').value = '';
+            // Hide strength indicator
+            if (strengthContainer) strengthContainer.classList.add('hidden');
         }
     });
 }

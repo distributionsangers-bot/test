@@ -50,7 +50,7 @@ export function renderRegister() {
                             <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nom</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
-                                    <i data-lucide="tag" class="w-5 h-5"></i>
+                                    <i data-lucide="user" class="w-5 h-5"></i>
                                 </div>
                                 <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
                             </div>
@@ -73,7 +73,7 @@ export function renderRegister() {
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="phone" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-phone" type="tel" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="+33 6 12 34 56 78">
+                            <input id="reg-phone" type="tel" inputmode="tel" pattern="[0-9+\s\-]*" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="+33 6 12 34 56 78">
                         </div>
                     </div>
 
@@ -88,6 +88,35 @@ export function renderRegister() {
                                 <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
                                     <i data-lucide="eye" class="w-5 h-5"></i>
                                 </button>
+                            </div>
+                            
+                            <!-- Password Strength Indicator -->
+                            <div id="password-strength-container" class="hidden mt-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 space-y-2.5 animate-fade-in">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Force du mot de passe</span>
+                                    <span id="password-strength-label" class="text-[10px] font-bold uppercase tracking-wide text-slate-400">—</span>
+                                </div>
+                                <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div id="password-strength-bar" class="h-full w-0 rounded-full transition-all duration-300 ease-out"></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5 pt-1">
+                                    <div id="req-length" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>8 caractères min.</span>
+                                    </div>
+                                    <div id="req-upper" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 majuscule</span>
+                                    </div>
+                                    <div id="req-lower" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 minuscule</span>
+                                    </div>
+                                    <div id="req-number" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                        <i data-lucide="circle" class="w-3 h-3"></i>
+                                        <span>1 chiffre</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="space-y-1.5">
@@ -305,6 +334,81 @@ export function initRegister() {
         });
     }
 
+    // 0a. Password Strength Validation
+    const strengthContainer = document.getElementById('password-strength-container');
+    const strengthBar = document.getElementById('password-strength-bar');
+    const strengthLabel = document.getElementById('password-strength-label');
+    const reqLength = document.getElementById('req-length');
+    const reqUpper = document.getElementById('req-upper');
+    const reqLower = document.getElementById('req-lower');
+    const reqNumber = document.getElementById('req-number');
+
+    function updateRequirement(el, isValid) {
+        if (!el) return;
+        const icon = el.querySelector('i');
+        if (!icon) return;
+
+        if (isValid) {
+            el.classList.remove('text-slate-400');
+            el.classList.add('text-green-600');
+            icon.setAttribute('data-lucide', 'check-circle');
+        } else {
+            el.classList.remove('text-green-600');
+            el.classList.add('text-slate-400');
+            icon.setAttribute('data-lucide', 'circle');
+        }
+    }
+
+    function checkPasswordStrength(password) {
+        if (!strengthBar || !strengthLabel) return null;
+
+        const checks = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /[0-9]/.test(password)
+        };
+
+        // Update visual indicators
+        updateRequirement(reqLength, checks.length);
+        updateRequirement(reqUpper, checks.upper);
+        updateRequirement(reqLower, checks.lower);
+        updateRequirement(reqNumber, checks.number);
+
+        // Refresh icons ONCE after all updates
+        createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-3 h-3" } });
+
+        // Calculate strength score (0-4)
+        const score = Object.values(checks).filter(Boolean).length;
+
+        // Update bar and label
+        const configs = [
+            { width: '0%', color: 'bg-slate-300', label: '—', labelColor: 'text-slate-400' },
+            { width: '25%', color: 'bg-red-500', label: 'Faible', labelColor: 'text-red-500' },
+            { width: '50%', color: 'bg-orange-500', label: 'Moyen', labelColor: 'text-orange-500' },
+            { width: '75%', color: 'bg-yellow-500', label: 'Bon', labelColor: 'text-yellow-500' },
+            { width: '100%', color: 'bg-green-500', label: 'Fort', labelColor: 'text-green-600' }
+        ];
+
+        const config = configs[score];
+        strengthBar.className = `h-full rounded-full transition-all duration-300 ease-out ${config.color}`;
+        strengthBar.style.width = config.width;
+        strengthLabel.textContent = config.label;
+        strengthLabel.className = `text-[10px] font-bold uppercase tracking-wide ${config.labelColor}`;
+
+        return checks;
+    }
+
+    if (passInput && strengthContainer) {
+        passInput.addEventListener('focus', () => {
+            strengthContainer.classList.remove('hidden');
+        });
+
+        passInput.addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+        });
+    }
+
     // 0b. Confirm Password Toggle
     const toggleConfirmBtn = document.getElementById('toggle-reg-password-confirm');
     const passConfirmInput = document.getElementById('reg-pass-confirm');
@@ -369,6 +473,19 @@ export function initRegister() {
             const file = fileInput.files[0];
 
             if (!fn || !ln || !email || !pass || !passConfirm || !phone) return showToast("Veuillez remplir tous les champs", "error");
+
+            // Password strength validation
+            const passwordChecks = {
+                length: pass.length >= 8,
+                upper: /[A-Z]/.test(pass),
+                lower: /[a-z]/.test(pass),
+                number: /[0-9]/.test(pass)
+            };
+            const allChecksPassed = Object.values(passwordChecks).every(Boolean);
+            if (!allChecksPassed) {
+                return showToast("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre", "error");
+            }
+
             if (pass !== passConfirm) return showToast("Les mots de passe ne correspondent pas", "error");
             if (!file) return showToast("Le justificatif étudiant est obligatoire", "error");
 

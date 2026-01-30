@@ -58,7 +58,7 @@ async function renderUserDashboard(container) {
     const { data: announcements } = await supabase
         .from('tickets')
         .select('id, subject, created_at')
-        .eq('is_announcement', true)
+        .eq('category', 'announcement')
         .order('created_at', { ascending: false })
         .limit(3);
 

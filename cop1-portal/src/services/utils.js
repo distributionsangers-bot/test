@@ -100,8 +100,13 @@ export function formatDate(dateString) {
  * @param {function} onConfirm - Callback si confirmé
  * @param {object} options - Options (title, confirmText, cancelText, type: 'info'|'danger', onCancel)
  */
+/**
+ * Lance une modale de confirmation Premium
+ * @param {string} message - Message affiché
+ * @param {function} onConfirm - Callback si confirmé
+ * @param {object} options - Options (title, confirmText, cancelText, type: 'info'|'danger', onCancel)
+ */
 export function showConfirm(message, onConfirm, options = {}) {
-    // S'assurer que le container de modale n'existe pas déjà
     const modalId = 'custom-confirm-modal';
     const existing = document.getElementById(modalId);
     if (existing) existing.remove();
@@ -110,26 +115,47 @@ export function showConfirm(message, onConfirm, options = {}) {
         title = 'Confirmation',
         confirmText = 'Confirmer',
         cancelText = 'Annuler',
-        type = 'info' // 'info' (bleu/brand) ou 'danger' (rouge)
+        type = 'info' // 'info' (bleu) ou 'danger' (rouge)
     } = options;
+
+    const isDanger = type === 'danger';
+    const iconName = isDanger ? 'alert-triangle' : 'help-circle';
+    const headerGradient = isDanger
+        ? 'from-red-600 to-red-700'
+        : 'from-slate-900 to-slate-800';
+    const confirmBtnClass = isDanger
+        ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-red-500/30'
+        : 'bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-brand-500/30';
 
     const el = document.createElement('div');
     el.id = modalId;
-    el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in';
-
-    const confirmBtnClass = type === 'danger'
-        ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-        : 'bg-brand-600 hover:bg-brand-700 focus:ring-brand-500';
+    el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in';
 
     el.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-slate-100">
-            <h3 class="text-xl font-bold text-slate-800 mb-2">${title}</h3>
-            <p class="text-slate-600 mb-6 whitespace-pre-line">${escapeHtml(message)}</p>
-            <div class="flex justify-end gap-3">
-                <button id="confirm-cancel-btn" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium transition-colors">
+        <div class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r ${headerGradient} p-5 relative">
+                <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
+                <div class="relative z-10 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl ${isDanger ? 'bg-white/20' : 'bg-white/10'} flex items-center justify-center">
+                        <i data-lucide="${iconName}" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">${title}</h3>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-5 bg-slate-50">
+                <p class="text-slate-600 text-sm font-medium">${message}</p>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex gap-3 p-4 bg-white border-t border-slate-100">
+                <button id="confirm-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-sm transition">
                     ${cancelText}
                 </button>
-                <button id="confirm-ok-btn" class="px-4 py-2 text-white ${confirmBtnClass} rounded-lg font-medium shadow-lg shadow-brand-500/20 transition-all hover:shadow-xl focus:ring-2 focus:ring-offset-2">
+                <button id="confirm-ok-btn" class="flex-1 px-4 py-3 text-white ${confirmBtnClass} rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="${isDanger ? 'trash-2' : 'check'}" class="w-4 h-4"></i>
                     ${confirmText}
                 </button>
             </div>
@@ -137,6 +163,7 @@ export function showConfirm(message, onConfirm, options = {}) {
     `;
 
     document.body.appendChild(el);
+    createIcons({ icons, root: el });
 
     const close = () => {
         el.remove();
@@ -163,7 +190,7 @@ export function showConfirm(message, onConfirm, options = {}) {
 }
 
 /**
- * Lance une modale de saisie textuelle
+ * Lance une modale de saisie Premium
  * @param {string} message - Message/Question
  * @param {function} onConfirm - Callback avec la valeur saisie
  * @param {object} options - Options (title, confirmText, cancelText, placeholder, inputType, onCancel)
@@ -184,18 +211,36 @@ export function showPrompt(message, onConfirm, options = {}) {
 
     const el = document.createElement('div');
     el.id = modalId;
-    el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in';
+    el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in';
 
     el.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100 border border-slate-100">
-            <h3 class="text-xl font-bold text-slate-800 mb-2">${title}</h3>
-            <p class="text-slate-600 mb-4">${escapeHtml(message)}</p>
-            <input type="${inputType}" id="prompt-input" value="${escapeHtml(defaultValue)}" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none mb-6 transition-all" placeholder="${placeholder}">
-            <div class="flex justify-end gap-3">
-                <button id="prompt-cancel-btn" class="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium transition-colors">
+        <div class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 relative">
+                <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
+                <div class="relative z-10 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                        <i data-lucide="edit-3" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">${title}</h3>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-5 bg-slate-50 space-y-4">
+                <p class="text-slate-600 text-sm font-medium">${message}</p>
+                <input type="${inputType}" id="prompt-input" value="${escapeHtml(defaultValue)}" 
+                    class="w-full p-4 bg-white rounded-2xl border-2 border-slate-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none font-semibold text-slate-900 transition-all" 
+                    placeholder="${placeholder}">
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex gap-3 p-4 bg-white border-t border-slate-100">
+                <button id="prompt-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-sm transition">
                     ${cancelText}
                 </button>
-                <button id="prompt-ok-btn" class="px-4 py-2 text-white bg-brand-600 hover:bg-brand-700 rounded-lg font-medium shadow-lg shadow-brand-500/20 transition-all hover:shadow-xl focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                <button id="prompt-ok-btn" class="flex-1 px-4 py-3 text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
                     ${confirmText}
                 </button>
             </div>
@@ -203,6 +248,7 @@ export function showPrompt(message, onConfirm, options = {}) {
     `;
 
     document.body.appendChild(el);
+    createIcons({ icons, root: el });
 
     // Focus input
     setTimeout(() => {

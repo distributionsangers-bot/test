@@ -14,7 +14,7 @@
 import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
 import { store, storeActions } from '../../core/store.js';
-import { showConfirm, showToast } from '../../services/utils.js';
+import { showConfirm, showToast, formatIdentity } from '../../services/utils.js';
 
 /**
  * Configuration des menus de navigation
@@ -56,17 +56,27 @@ export function renderSidebar(profile, currentView, adminMode) {
     const navItemsHtml = navItems.map(item => {
         const isActive = isItemActive(item.id, currentView);
 
+        const activeClass = isActive
+            ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-brand-500/25`
+            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
+
+        const iconBgClass = isActive
+            ? 'bg-white/20'
+            : (item.iconBgLight || 'bg-slate-100') + ' group-hover:bg-white group-hover:shadow-sm';
+
+        const iconTextClass = isActive
+            ? 'text-white'
+            : (item.iconText || 'text-slate-500');
+
         return `
             <button 
                 data-link="${item.id}" 
                 aria-label="${item.label}" 
                 aria-current="${isActive ? 'page' : 'false'}"
+                class="nav-link group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${activeClass}"
             >
-                <div class="relative flex items-center justify-center w-9 h-9 rounded-lg ${isActive
-                ? 'bg-white/20'
-                : (item.iconBgLight || 'bg-slate-100') + ' group-hover:bg-white group-hover:shadow-sm'
-            } transition-all duration-200">
-                    <i data-lucide="${item.icon}" class="w-[18px] h-[18px] ${isActive ? 'text-white' : (item.iconText || 'text-slate-500')}"></i>
+                <div class="relative flex items-center justify-center w-9 h-9 rounded-lg ${iconBgClass} transition-all duration-200">
+                    <i data-lucide="${item.icon}" class="w-[18px] h-[18px] ${iconTextClass}"></i>
                     ${item.badge ? `<span id="sidebar-chat-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>` : ''}
                 </div>
                 <span class="flex-1 ${isActive ? 'font-semibold' : ''}">${item.label}</span>
@@ -101,7 +111,7 @@ export function renderSidebar(profile, currentView, adminMode) {
         <aside class="hidden md:flex w-72 flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/50 z-50 flex-shrink-0 h-full shadow-xl shadow-slate-200/50">
             <!-- Header avec Logo -->
             <div class="h-20 flex items-center gap-3 px-6 flex-shrink-0 border-b border-slate-100/50">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center">
                     <img src="${LOGO_URL}" class="h-6 w-auto" alt="Logo COP1">
                 </div>
                 <div>
@@ -117,7 +127,7 @@ export function renderSidebar(profile, currentView, adminMode) {
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="font-bold text-slate-900 text-sm truncate">${firstName} ${lastName}</div>
+                        <div class="font-bold text-slate-900 text-sm truncate">${formatIdentity(firstName, lastName)}</div>
                         <div class="text-xs text-slate-400 truncate">${email}</div>
                     </div>
                     ${isEffectiveAdmin ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-lg">Admin</span>' : ''}
@@ -185,53 +195,71 @@ export function updateActiveNavLink(path) {
         const btnPath = btn.dataset.link;
         const isActive = isItemActive(btnPath, normalizedPath);
 
+        // Get nav item config
+        const navItems = store.state.adminMode ? NAV_ITEMS.admin : NAV_ITEMS.volunteer;
+        const navItem = navItems.find(item => item.id === btnPath);
+        if (!navItem) return;
+
+        const colors = (navItem.color || 'from-brand-500 to-brand-600').split(' ');
+
+        // --- 1. Reset to Inactive ---
         btn.classList.remove('bg-gradient-to-r', 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+        btn.classList.remove(...colors);
+
         btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
         btn.setAttribute('aria-current', 'false');
 
         const iconContainer = btn.querySelector('div');
-        const icon = btn.querySelector('i');
+        if (iconContainer) {
+            iconContainer.className = `relative flex items-center justify-center w-9 h-9 rounded-lg ${navItem.iconBgLight || 'bg-slate-100'} group-hover:bg-white group-hover:shadow-sm transition-all duration-200`;
+        }
+
+        const icon = btn.querySelector('i, svg');
+        if (icon) {
+            // Note: We reset to base class provided in config or default
+            const baseIconClass = navItem.iconText || 'text-slate-500';
+            icon.setAttribute('class', `w-[18px] h-[18px] ${baseIconClass}`);
+        }
+
+        const label = btn.querySelector('span');
+        if (label) label.classList.remove('font-semibold');
 
         // Remove active dot
         const activeDot = btn.querySelector('.bg-white\\/80');
         if (activeDot) activeDot.remove();
 
-        // Get nav item config
-        const navItems = store.state.adminMode ? NAV_ITEMS.admin : NAV_ITEMS.volunteer;
-        const navItem = navItems.find(item => item.id === btnPath);
-        const iconBgLight = navItem?.iconBgLight || 'bg-slate-100';
-        const iconText = navItem?.iconText || 'text-slate-500';
-
+        // --- 2. Apply Active State ---
         if (isActive) {
-            const colorClass = navItem?.color || 'from-brand-500 to-brand-600';
-            const colors = colorClass.split(' ');
-
             btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
-            btn.classList.add('bg-gradient-to-r', ...colors, 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+            btn.classList.add('bg-gradient-to-r', 'text-white', 'shadow-lg', 'shadow-brand-500/25');
+            btn.classList.add(...colors);
+
             btn.setAttribute('aria-current', 'page');
 
             if (iconContainer) {
-                // Remove inactive classes
                 iconContainer.className = 'relative flex items-center justify-center w-9 h-9 rounded-lg bg-white/20 transition-all duration-200';
             }
             if (icon) {
-                icon.className = `w-[18px] h-[18px] text-white`;
+                icon.setAttribute('class', 'w-[18px] h-[18px] text-white');
             }
+
+            if (label) label.classList.add('font-semibold');
 
             // Add active dot
             const dot = document.createElement('div');
             dot.className = 'w-1.5 h-1.5 rounded-full bg-white/80';
             btn.appendChild(dot);
-        } else {
-            // Inactive State
-            if (iconContainer) {
-                iconContainer.className = `relative flex items-center justify-center w-9 h-9 rounded-lg ${iconBgLight} group-hover:bg-white group-hover:shadow-sm transition-all duration-200`;
-            }
-            if (icon) {
-                icon.className = `w-[18px] h-[18px] ${iconText}`;
-            }
         }
     });
+
+    // Re-render Lucide icons (Safeguard)
+    /* 
+       NOTE: cop1-stock re-calls createIcons here. 
+       However, calling createIcons constantly can replace SVGs with new SVGs or cause flickering.
+       Since we are manipulating classes on existing elements (i or svg), we might not strictly need it 
+       unless new icons are injected. But to be "exactly the same", we should consider it.
+       In this case, since we updated the `class` attribute of the SVG, we don't need to re-render the SVG itself.
+    */
 }
 
 /**
@@ -253,7 +281,7 @@ export function initSidebar() {
  * Gère la déconnexion
  */
 async function handleLogout() {
-    showConfirm("Voulez-vous vraiment vous déconnecter ?", async () => {
+    showConfirm('Voulez-vous vous déconnecter ?', async () => {
         try {
             await AuthService.logout();
             store.state.user = null;
@@ -264,7 +292,7 @@ async function handleLogout() {
             console.error('❌ Erreur déconnexion:', error);
             window.location.reload();
         }
-    }, { confirmText: 'Se déconnecter', type: 'danger' });
+    }, { type: 'danger', confirmText: 'Déconnecter' });
 }
 
 /**

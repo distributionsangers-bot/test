@@ -106,8 +106,8 @@ export const ChatService = {
             .from('messages')
             .select(`
                 *,
-                profiles(first_name, last_name, is_admin),
-                parent:reply_to_id(content, profiles(first_name, last_name))
+                profiles(first_name, last_name, is_admin, role_title),
+                parent:reply_to_id(content, profiles(first_name, last_name, role_title))
             `)
             .eq('ticket_id', ticketId)
             .order('created_at', { ascending: true });

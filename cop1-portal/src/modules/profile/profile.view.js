@@ -1,6 +1,6 @@
 import { ProfileService } from './profile.service.js';
 import { store } from '../../core/store.js';
-import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm, showPrompt, formatIdentity } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 import { SCHOOLS } from '../../core/schools.js';
@@ -44,7 +44,7 @@ export async function renderProfile(container, params) {
     const stats = computeStats(history, profile);
     const badges = computeBadges(stats, profile);
 
-    const fullName = escapeHtml(`${profile.first_name || ''} ${profile.last_name || ''}`);
+    const fullName = escapeHtml(formatIdentity(profile.first_name, profile.last_name));
     const email = escapeHtml(profile.email || '');
     const initial = (profile.first_name || '?')[0].toUpperCase();
     const avatarUrl = profile.avatar_url || null;
@@ -253,12 +253,41 @@ export async function renderProfile(container, params) {
 
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">École / Établissement</label>
-                            <div class="relative">
-                                <select name="school" class="w-full p-4 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all appearance-none cursor-pointer">
-                                    <option value="">Non renseigné</option>
-                                    ${SCHOOLS.map(s => `<option value="${s}" ${profile.school === s ? 'selected' : ''}>${s}</option>`).join('')}
-                                </select>
-                                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                            
+                            <!-- Premium Combobox Container -->
+                            <div class="space-y-2 relative z-50">
+                                <div class="relative group">
+                                    <input type="hidden" name="school" id="profile-school-hidden" value="${escapeHtml(profile.school || '')}">
+                                    
+                                    <!-- Search Input -->
+                                    <input type="text" id="profile-school-search" placeholder="Rechercher votre école..." autocomplete="off"
+                                        class="w-full p-4 pl-12 bg-slate-50 rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all cursor-pointer hover:bg-white placeholder:text-slate-400 text-slate-800"
+                                        value="${escapeHtml(profile.school || '')}">
+                                    
+                                    <!-- Icons -->
+                                    <i data-lucide="graduation-cap" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-brand-500 transition-colors pointer-events-none"></i>
+                                    <i id="profile-school-chevron" data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
+
+                                    <!-- Dropdown -->
+                                    <div id="profile-school-dropdown" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl max-h-60 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-50">
+                                        <div id="profile-school-list" class="p-2 space-y-0.5">
+                                            <!-- Injected via JS -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom "Autre" Input -->
+                                <div id="profile-school-other-container" class="hidden space-y-1.5 animate-fade-in relative z-40 pt-1">
+                                    <label class="text-[10px] font-bold text-brand-600 uppercase ml-1">Précisez votre établissement</label>
+                                    <div class="relative group">
+                                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
+                                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                                        </div>
+                                        <input id="profile-school-other" type="text" 
+                                            class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border-2 border-slate-100 rounded-2xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 transition-all duration-300" 
+                                            placeholder="Nom de l'établissement">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
@@ -298,13 +327,12 @@ function computeStats(history, profile) {
     let upcoming = 0;
 
     history?.forEach(item => {
-        const shift = item.shifts;
-        const event = shift?.events;
-        if (!shift || !event) return;
+        // Data is already flattened by ProfileService
+        if (!item.date || !item.endTime) return;
 
-        const eventEnd = new Date(`${event.date}T${shift.end_time}`);
+        const eventEnd = new Date(`${item.date}T${item.endTime}`);
         const isPast = now > eventEnd;
-        const isPresent = item.attended === true || item.status === 'present' || (item.hours_added && item.hours_added > 0);
+        const isPresent = item.attended === true;
 
         if (isPast) {
             pastCount++;
@@ -506,17 +534,22 @@ function setupEditForm(c, uid) {
 
     function updateRequirement(el, isValid) {
         if (!el) return;
-        const icon = el.querySelector('i');
-        if (!icon) return;
+        // Find existing icon element (could be i or svg after Lucide processing)
+        const existingIcon = el.querySelector('i, svg');
 
         if (isValid) {
             el.classList.remove('text-slate-400');
             el.classList.add('text-green-600');
-            icon.setAttribute('data-lucide', 'check-circle');
+            // Replace with new icon if needed
+            if (existingIcon) {
+                existingIcon.outerHTML = '<i data-lucide="check-circle" class="w-3 h-3"></i>';
+            }
         } else {
             el.classList.remove('text-green-600');
             el.classList.add('text-slate-400');
-            icon.setAttribute('data-lucide', 'circle');
+            if (existingIcon) {
+                existingIcon.outerHTML = '<i data-lucide="circle" class="w-3 h-3"></i>';
+            }
         }
     }
 
@@ -566,6 +599,107 @@ function setupEditForm(c, uid) {
         });
     }
 
+    // --- Premium School Combobox Logic (Profile) ---
+    const schoolInput = c.querySelector('#profile-school-search');
+    const schoolHidden = c.querySelector('#profile-school-hidden');
+    const schoolDropdown = c.querySelector('#profile-school-dropdown');
+    const schoolList = c.querySelector('#profile-school-list');
+    const schoolChevron = c.querySelector('#profile-school-chevron');
+
+    // "Other" Elements
+    const otherContainer = c.querySelector('#profile-school-other-container');
+    const otherInput = c.querySelector('#profile-school-other');
+
+    if (schoolInput && schoolHidden) {
+        const sortedSchools = [...SCHOOLS].sort((a, b) => a.localeCompare(b));
+
+        const renderSchools = (filter = '') => {
+            if (!schoolList) return;
+            const search = filter.toLowerCase();
+            const filtered = sortedSchools.filter(s => s.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                schoolList.innerHTML = `<div class="px-3 py-2 text-xs text-slate-400 font-medium text-center">Aucun résultat</div>`;
+                return;
+            }
+
+            schoolList.innerHTML = filtered.map(s => `
+                <div data-value="${s}" class="school-option px-3 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-brand-50 hover:text-brand-700 cursor-pointer flex items-center gap-2 transition-colors">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-200 opacity-0 transition-opacity"></span>
+                    ${s}
+                </div>
+            `).join('');
+
+            // Re-attach listeners
+            schoolList.querySelectorAll('.school-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    selectSchool(opt.dataset.value);
+                });
+            });
+        };
+
+        const toggleDropdown = (show) => {
+            if (show) {
+                schoolDropdown.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    schoolDropdown.classList.remove('opacity-0', 'translate-y-2');
+                });
+                schoolChevron.classList.add('rotate-180');
+            } else {
+                schoolDropdown.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => schoolDropdown.classList.add('hidden'), 200);
+                schoolChevron.classList.remove('rotate-180');
+            }
+        };
+
+        const selectSchool = (val) => {
+            schoolInput.value = val;
+            schoolHidden.value = val;
+
+            // Handle "Autre" logic
+            if (val === 'Autre') {
+                otherContainer.classList.remove('hidden');
+                otherInput.focus();
+            } else {
+                otherContainer.classList.add('hidden');
+                otherInput.value = ''; // Reset
+            }
+
+            toggleDropdown(false);
+            schoolInput.classList.remove('text-slate-400');
+            schoolInput.classList.add('text-slate-800');
+        };
+
+        // Init List
+        renderSchools();
+
+        // Events
+        schoolInput.addEventListener('focus', () => toggleDropdown(true));
+        schoolInput.addEventListener('click', () => toggleDropdown(true));
+        schoolInput.addEventListener('input', (e) => {
+            renderSchools(e.target.value);
+            toggleDropdown(true);
+            schoolHidden.value = e.target.value; // Allow custom typing fallback
+        });
+
+        // Click Outside
+        document.addEventListener('click', (e) => {
+            if (!schoolInput.contains(e.target) && !schoolDropdown.contains(e.target)) {
+                toggleDropdown(false);
+            }
+        });
+
+        // Pre-fill "Other" if existing value is not in list (or we could improve this later)
+        // For now, if current value is complex and not in list, we assume it was a custom entry (Autre logic)
+        // But since we store the resolved string, we can't easily distinguish 'Autre' -> 'Custom' vs just 'Custom'.
+        // Simple fix: If value is not in SCHOOLS list and not empty, set hidden='Autre' and otherInput=Value ? 
+        // Or just let the input text be the value. 
+        // Current implementation: `schoolHidden` stores the value properly. `schoolInput` shows it.
+        // If user wants to change, they search. If they pick "Autre", custom input shows. 
+        // If they pick standard, custom input hides.
+        // This is fine. (Edge case: User keeps existing custom value -> Input shows it -> Dropdown shows it typed -> OK)
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(form);
@@ -586,13 +720,28 @@ function setupEditForm(c, uid) {
             }
         }
 
+        // Handle School Value
+        let schoolVal = fd.get('school');
+
+        // If "Autre" was selected, or if user typed "Autre" (unlikely but possible), check custom input
+        // Note: `fd.get('school')` gets the value from the hidden input.
+        if (schoolVal === 'Autre') {
+            const custom = otherInput.value.trim();
+            if (!custom) {
+                showToast("Veuillez préciser le nom de votre établissement", "error");
+                otherInput.focus();
+                return;
+            }
+            schoolVal = custom;
+        }
+
         const data = {
             first_name: fd.get('first_name'),
             last_name: fd.get('last_name'),
             phone: fd.get('phone'),
             has_permit: fd.get('has_permit') === 'on',
             mandatory_hours: fd.get('mandatory_hours') === 'on',
-            school: fd.get('school'),
+            school: schoolVal,
             password: password
         };
 

@@ -1,7 +1,8 @@
 import { DirectoryService } from './directory.service.js';
-import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm, formatIdentity } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { store } from '../../core/store.js';
+import { SCHOOLS } from '../../core/schools.js';
 
 // State
 let state = {
@@ -181,7 +182,7 @@ async function loadUsers() {
 function renderUserCard(u) {
     const currentUser = store.state.user;
     const isMe = currentUser && u.id === currentUser.id;
-    const fullName = escapeHtml(`${u.first_name || ''} ${u.last_name || ''}`);
+    const fullName = escapeHtml(formatIdentity(u.first_name, u.last_name));
     const initial = (u.first_name || '?')[0].toUpperCase();
     const isAdmin = u.is_admin;
     const isApproved = u.status === 'approved';
@@ -434,7 +435,7 @@ async function viewUserDetails(uid) {
         return;
     }
 
-    const fullName = escapeHtml(`${u.first_name || ''} ${u.last_name || ''}`);
+    const fullName = escapeHtml(formatIdentity(u.first_name, u.last_name));
     const initial = (u.first_name || '?')[0].toUpperCase();
     const isAdmin = u.is_admin;
     const hasPermit = u.has_permit;
@@ -496,7 +497,7 @@ async function viewUserDetails(uid) {
                     <div class="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Téléphone</span>
-                            <span class="font-bold text-slate-700 font-mono">${u.phone || '—'}</span>
+                            <span class="font-bold text-slate-700">${u.phone || '—'}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Statut</span>
@@ -509,9 +510,47 @@ async function viewUserDetails(uid) {
                             <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
                         </div>
                         
-                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg group/school">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">École</span>
-                            <span class="font-bold text-slate-700 truncate max-w-[200px]" title="${escapeHtml(u.school || '')}">${escapeHtml(u.school || 'Non renseigné')}</span>
+                            <div class="flex items-center gap-2">
+                                <span id="school-display-value" class="font-bold text-slate-700 truncate max-w-[180px]" title="${escapeHtml(u.school || '')}">${escapeHtml(u.school || 'Non renseigné')}</span>
+                                <button id="btn-edit-school" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition opacity-0 group-hover/school:opacity-100" title="Modifier l'école">
+                                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Hidden Edit Form -->
+                            <div id="school-edit-form" class="hidden flex-1 flex items-center gap-2 ml-4 relative z-50">
+                                <div class="relative group flex-1">
+                                    <input type="hidden" id="edit-school-hidden" value="${escapeHtml(u.school || '')}">
+                                    
+                                    <input type="text" id="edit-school-search" placeholder="Rechercher..." autocomplete="off"
+                                        class="w-full pl-3 pr-8 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-300 placeholder:text-slate-400"
+                                        value="${escapeHtml(u.school || '')}">
+                                    
+                                    <i id="edit-school-chevron" data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
+
+                                    <!-- Dropdown List -->
+                                    <div id="edit-school-dropdown" class="absolute top-full left-0 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-[60]">
+                                        <div id="edit-school-list" class="p-1 space-y-0.5">
+                                            <!-- Options injected via JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Custom "Other" Input -->
+                                <div id="school-other-container" class="hidden relative flex-[0.8] animate-fade-in group/other">
+                                    <input type="text" id="edit-school-other" placeholder="Précisez..." 
+                                        class="w-full pl-2 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all placeholder:text-slate-400">
+                                </div>
+
+                                <button id="btn-save-school" class="p-1.5 rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition flex-shrink-0" title="Enregistrer">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button id="btn-cancel-school" class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex-shrink-0" title="Annuler">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- Toggle Type -->
@@ -750,6 +789,172 @@ async function viewUserDetails(uid) {
             }
         });
     });
+
+    // SCHOOL EDIT LOGIC (PREMIUM COMBOBOX)
+    const btnEditSchool = modal.querySelector('#btn-edit-school');
+    const schoolDisplay = modal.querySelector('#school-display-value').parentElement;
+    const schoolForm = modal.querySelector('#school-edit-form');
+    const btnSaveSchool = modal.querySelector('#btn-save-school');
+    const btnCancelSchool = modal.querySelector('#btn-cancel-school');
+
+    // Combobox Elements
+    const schoolInput = modal.querySelector('#edit-school-search');
+    const schoolHidden = modal.querySelector('#edit-school-hidden');
+    const schoolDropdown = modal.querySelector('#edit-school-dropdown');
+    const schoolList = modal.querySelector('#edit-school-list');
+    const schoolChevron = modal.querySelector('#edit-school-chevron');
+
+    // Logic
+    const sortedSchools = [...SCHOOLS].sort((a, b) => a.localeCompare(b));
+
+    function renderSchools(filter = '') {
+        if (!schoolList) return;
+        const search = filter.toLowerCase();
+        const filtered = sortedSchools.filter(s => s.toLowerCase().includes(search));
+
+        if (filtered.length === 0) {
+            schoolList.innerHTML = `<div class="px-3 py-2 text-xs text-slate-400 font-medium text-center">Aucun résultat</div>`;
+            return;
+        }
+
+        schoolList.innerHTML = filtered.map(s => `
+            <div data-value="${s}" class="school-option px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-brand-50 hover:text-brand-700 cursor-pointer flex items-center gap-2 transition-colors truncate">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-200 opacity-0 transition-opacity flex-shrink-0"></span>
+                <span class="truncate" title="${s}">${s}</span>
+            </div>
+        `).join('');
+
+        // Re-attach listeners
+        schoolList.querySelectorAll('.school-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                selectSchool(opt.dataset.value);
+            });
+        });
+    }
+
+    function toggleDropdown(show) {
+        if (show) {
+            schoolDropdown.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                schoolDropdown.classList.remove('opacity-0', 'translate-y-2');
+            });
+            schoolChevron.classList.add('rotate-180');
+        } else {
+            schoolDropdown.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => schoolDropdown.classList.add('hidden'), 200);
+            schoolChevron.classList.remove('rotate-180');
+        }
+    }
+
+    function selectSchool(val) {
+        schoolInput.value = val;
+        schoolHidden.value = val;
+        toggleDropdown(false);
+
+        // Handle "Autre"
+        const otherContainer = modal.querySelector('#school-other-container');
+        const otherInput = modal.querySelector('#edit-school-other');
+
+        if (val === 'Autre') {
+            otherContainer.classList.remove('hidden');
+            otherInput.focus();
+        } else {
+            otherContainer.classList.add('hidden');
+            otherInput.value = '';
+        }
+    }
+
+    if (btnEditSchool) {
+        // Init List
+        renderSchools();
+
+        btnEditSchool.addEventListener('click', () => {
+            schoolDisplay.classList.add('hidden');
+            schoolForm.classList.remove('hidden');
+            schoolInput.focus();
+            toggleDropdown(true);
+        });
+
+        // Search Input Events
+        schoolInput.addEventListener('focus', () => toggleDropdown(true));
+
+        schoolInput.addEventListener('input', (e) => {
+            renderSchools(e.target.value);
+            toggleDropdown(true);
+            // Update hidden value immediately to allow custom values if needed, 
+            // or just to track what's typed. For now, strict selection isn't enforced but encouraged.
+            schoolHidden.value = e.target.value;
+        });
+
+        // Click Outside
+        // We need to attach this to the modal or document, but carefully to not break other things
+        const closeDropdownOnClickOutside = (e) => {
+            if (schoolForm && !schoolForm.contains(e.target)) {
+                toggleDropdown(false);
+            }
+        };
+        document.addEventListener('click', closeDropdownOnClickOutside);
+
+        // Cancel
+        btnCancelSchool.addEventListener('click', () => {
+            schoolForm.classList.add('hidden');
+            schoolDisplay.classList.remove('hidden');
+            // Reset value
+            schoolInput.value = u.school || '';
+            schoolHidden.value = u.school || '';
+        });
+
+        // Save
+        btnSaveSchool.addEventListener('click', async () => {
+            let newVal = schoolHidden.value; // Map from hidden logic
+
+            // Check if "Autre"
+            if (newVal === 'Autre') {
+                const otherVal = modal.querySelector('#edit-school-other').value.trim();
+                if (otherVal) {
+                    newVal = otherVal;
+                } else {
+                    return showToast("Veuillez préciser l'établissement", "error");
+                }
+            }
+
+            if (newVal === u.school) {
+                schoolForm.classList.add('hidden');
+                schoolDisplay.classList.remove('hidden');
+                return;
+            }
+
+            toggleLoader(true);
+            const res = await DirectoryService.updateUserProfile(uid, { school: newVal });
+            toggleLoader(false);
+
+            if (res.error) {
+                showToast("Erreur modification école", "error");
+            } else {
+                showToast("École mise à jour ✓");
+
+                // Update Local UI
+                u.school = newVal;
+                modal.querySelector('#school-display-value').textContent = newVal || 'Non renseigné';
+                modal.querySelector('#school-display-value').title = newVal || '';
+
+                schoolForm.classList.add('hidden');
+                schoolDisplay.classList.remove('hidden');
+
+                loadUsers();
+            }
+        });
+
+        // Cleanup listener when modal closes (optional but good practice)
+        const cleanup = () => {
+            document.removeEventListener('click', closeDropdownOnClickOutside);
+        };
+        modal.querySelector('#close-details-btn').addEventListener('click', cleanup);
+        // Also cleanup if clicked on modal backdrop
+        // (Existing logic removes modal, so listener might persist on document if not careful, 
+        // but since modal is removed, checking 'schoolForm.contains' will just return false/null.
+        // Ideally we should remove it.)
+    }
 }
 
 // ==========================================

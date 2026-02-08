@@ -99,7 +99,7 @@ export async function renderEvents() {
                                 <i data-lucide="calendar-check" class="w-7 h-7"></i>
                                 Missions
                             </h1>
-                            <p class="text-white/70 text-sm font-medium mt-1">Rejoignez les prochaines distributions</p>
+                            <p class="text-white/70 text-sm font-medium mt-1">Rejoignez les prochains événements !</p>
                         </div>
                         
                         <!-- Stats & Scanner -->

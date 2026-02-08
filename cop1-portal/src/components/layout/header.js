@@ -24,7 +24,7 @@ export function renderHeader(profile) {
             <div class="h-16 w-full flex items-center justify-between px-4">
                 <!-- Logo + Brand -->
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center">
                         <img src="${LOGO_URL}" class="h-5 w-auto" alt="Logo">
                     </div>
                     <div class="flex items-baseline gap-0.5">

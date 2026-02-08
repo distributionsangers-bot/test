@@ -10,7 +10,7 @@
  */
 
 import { ParticipantsService } from './participants.service.js';
-import { showToast, toggleLoader, showConfirm, escapeHtml, createAvatar } from '../../services/utils.js'; // Ensure createAvatar exists or use inline
+import { showToast, toggleLoader, showConfirm, escapeHtml, createAvatar, formatIdentity } from '../../services/utils.js'; // Ensure createAvatar exists or use inline
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 
@@ -313,7 +313,7 @@ function renderSearchResults() {
                         ${initial}
                     </div>
                     <div class="min-w-0">
-                        <h4 class="font-bold text-slate-800 text-xs md:text-sm truncate">${escapeHtml(u.first_name)} ${escapeHtml(u.last_name)}</h4>
+                        <h4 class="font-bold text-slate-800 text-xs md:text-sm truncate">${escapeHtml(formatIdentity(u.first_name, u.last_name))}</h4>
                         <p class="text-xs text-slate-400 font-medium truncate">${escapeHtml(u.email)}</p>
                     </div>
                 </div>

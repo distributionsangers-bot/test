@@ -540,7 +540,7 @@ function updateReadStatusIcons(ticketData) {
     const readDate = theirLastRead ? new Date(theirLastRead) : null;
 
     // Trouve tous les messages que J'AI envoyés et met à jour leurs icônes
-    const container = document.getElementById('chat-messages');
+    const container = document.getElementById('messages-list');
     if (!container) return;
 
     container.querySelectorAll('.msg-bubble[data-is-me="true"]').forEach(bubble => {
@@ -611,7 +611,10 @@ function createMessageHtml(msg) {
     }
 
     const isAdmin = msg.profiles?.is_admin;
-    const name = msg.profiles?.first_name || 'Utilisateur';
+    const firstName = msg.profiles?.first_name || 'Utilisateur';
+    const lastName = msg.profiles?.last_name || '';
+    const roleTitle = msg.profiles?.role_title;
+    const name = lastName ? `${firstName} ${lastName}` : firstName;
 
     return `
         <div class="group flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-scale-in mb-2">
@@ -620,16 +623,19 @@ function createMessageHtml(msg) {
                 <!-- Avatar (if not me) -->
                 ${!isMe ? `
                 <div class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-xs font-bold text-slate-600 self-end mb-1">
-                    ${name[0]}
+                    ${firstName[0]}
                 </div>` : ''}
 
                 <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
                     
                     <!-- Name (if not me) -->
-                    ${!isMe ? `<span class="text-[10px] text-slate-500 font-bold ml-1 mb-0.5 flex items-center gap-1">
-                        ${name}
-                        ${isAdmin ? `<span class="bg-brand-100 text-brand-600 text-[9px] px-1 rounded flex items-center gap-0.5"><i data-lucide="shield" class="w-2.5 h-2.5"></i> Admin</span>` : ''}
-                    </span>` : ''}
+                    ${!isMe ? `<div class="ml-1 mb-0.5">
+                        <span class="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                            ${escapeHtml(name)}
+                            ${isAdmin ? `<span class="bg-brand-100 text-brand-600 text-[9px] px-1 rounded flex items-center gap-0.5"><i data-lucide="shield" class="w-2.5 h-2.5"></i> Admin</span>` : ''}
+                        </span>
+                        ${roleTitle ? `<span class="text-[9px] text-slate-400 block">${escapeHtml(roleTitle)}</span>` : ''}
+                    </div>` : ''}
 
                     <!-- Bubble -->
                     <div class="msg-bubble relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm cursor-pointer transition-transform active:scale-[0.98]

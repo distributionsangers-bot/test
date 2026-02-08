@@ -32,7 +32,7 @@ export function renderPending() {
                 <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Inscription en cours</h1>
                 
                 <p class="text-slate-500 font-medium leading-relaxed mb-8">
-                    Votre dossier est bien reçu ! Notre équipe examine actuellement votre profil. Vous recevrez une notification dès validation.
+                    Votre dossier est bien reçu ! Notre équipe examine actuellement votre profil ! 
                 </p>
 
                 <!-- Steps -->

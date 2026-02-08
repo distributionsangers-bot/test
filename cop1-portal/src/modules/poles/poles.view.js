@@ -129,30 +129,84 @@ export async function renderPoles(container) {
             </div>
         ` : '';
 
-        return `
-            <div class="mb-10" data-direction-id="${direction.id}">
-                <!-- Direction Header -->
-                <div class="group flex items-center justify-between mb-5 pb-4 border-b-2 border-slate-200">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                            <i data-lucide="${direction.icon || 'folder'}" class="w-6 h-6"></i>
+        // Leaders HTML (detailed view similar to Pole Card)
+        const leadersHtml = directionLeaders.length > 0 ? `
+            <div class="mt-3">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 Responsables</p>
+                <div class="flex flex-wrap gap-2">
+                    ${directionLeaders.map(l => `
+                        <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 min-w-0 border border-slate-100">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 border border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">
+                                ${l.photo_url
+                ? `<img src="${l.photo_url}" class="w-full h-full object-cover" alt="${l.first_name}">`
+                : l.first_name[0].toUpperCase()
+            }
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                ${l.role_title ? `<span class="text-[10px] text-slate-400 truncate block">${escapeHtml(l.role_title)}</span>` : ''}
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="text-xl font-black text-slate-900">${escapeHtml(direction.name)}</h2>
-                            ${direction.description ? `<p class="text-sm text-slate-500 mt-0.5">${escapeHtml(direction.description)}</p>` : ''}
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        return `
+            <!-- Direction Card Container -->
+            <div class="mb-10 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8" data-direction-id="${direction.id}">
+                
+                <!-- Direction Header (Responsive Layout) -->
+                <div class="group mb-8">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                        
+                        <!-- Left: Info -->
+                        <div class="flex gap-4 max-w-2xl">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 flex-shrink-0">
+                                <i data-lucide="${direction.icon || 'folder'}" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-slate-900 tracking-tight">${escapeHtml(direction.name)}</h2>
+                                ${direction.description ? `<p class="text-sm text-slate-500 mt-1.5 leading-relaxed">${escapeHtml(direction.description)}</p>` : ''}
+                                
+                                <!-- Email Link -->
+                                ${direction.email ? `
+                                    <div class="mt-3">
+                                        <a href="mailto:${direction.email}" class="inline-flex items-center gap-2 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100/80 px-3 py-1.5 rounded-lg transition border border-brand-100">
+                                            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                                            ${escapeHtml(direction.email)}
+                                        </a>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Right: Actions & Leaders -->
+                        <div class="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto">
+                            ${adminActionsDirection ? `<div class="self-end">${adminActionsDirection}</div>` : ''}
+                            
                             ${directionLeaders.length > 0 ? `
-                                <div class="flex items-center gap-2 mt-2">
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Dirigé par:</span>
-                                    ${directionLeaders.slice(0, 2).map(l => `
-                                        <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                                            ${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}
-                                        </span>
-                                    `).join('')}
+                                <div class="bg-slate-50/50 rounded-xl p-3 border border-slate-100 w-full md:w-auto min-w-[200px]">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                        <i data-lucide="crown" class="w-3 h-3 text-brand-400"></i> Responsables
+                                    </p>
+                                    <div class="flex flex-col gap-2">
+                                        ${directionLeaders.map(l => `
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-white border-2 border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                                    ${l.photo_url ? `<img src="${l.photo_url}" class="w-full h-full object-cover">` : l.first_name[0]}
+                                                </div>
+                                                <div class="flex flex-col leading-none">
+                                                    <span class="text-xs font-bold text-slate-700">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                                    ${l.role_title ? `<span class="text-[9px] text-slate-400 mt-0.5">${escapeHtml(l.role_title)}</span>` : ''}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
-                    ${adminActionsDirection}
                 </div>
 
                 <!-- Poles Grid -->
@@ -161,11 +215,13 @@ export async function renderPoles(container) {
                         ${childPoles.map(p => renderPoleCard(p)).join('')}
                     </div>
                 ` : `
-                    <div class="bg-slate-50 rounded-xl p-8 text-center border-2 border-dashed border-slate-200">
-                        <i data-lucide="inbox" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
-                        <p class="text-sm text-slate-400">Aucun pôle dans cette direction</p>
+                    <div class="bg-slate-50/50 rounded-2xl p-8 text-center border-2 border-dashed border-slate-200">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100">
+                            <i data-lucide="inbox" class="w-5 h-5 text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-medium text-slate-500">Aucun pôle dans cette direction</p>
                         ${isViewAdmin ? `
-                            <button data-action="add-child-pole" data-parent-id="${direction.id}" class="mt-3 text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1 mx-auto">
+                            <button data-action="add-child-pole" data-parent-id="${direction.id}" class="mt-4 px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm hover:shadow transition flex items-center gap-2 mx-auto">
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Ajouter un pôle
                             </button>
                         ` : ''}

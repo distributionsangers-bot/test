@@ -91,6 +91,24 @@ export function formatDate(dateString) {
 }
 
 // ============================================================
+// 3.1 FORMATAGE IDENTITÉ (Prénom Nom)
+// ============================================================
+export function formatIdentity(firstName, lastName) {
+    const f = (firstName || '').trim();
+    const l = (lastName || '').trim();
+
+    if (!f && !l) return 'Utilisateur';
+
+    // Prénom : Première lettre Maj, reste minuscule
+    const formattedFirst = f.charAt(0).toUpperCase() + f.slice(1).toLowerCase();
+
+    // Nom : Tout en majuscule
+    const formattedLast = l.toUpperCase();
+
+    return `${formattedFirst} ${formattedLast}`.trim();
+}
+
+// ============================================================
 // 4. MODALES PERSONNALISÉES (Replacement alert/confirm/prompt)
 // ============================================================
 

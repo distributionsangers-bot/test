@@ -149,18 +149,21 @@ async function renderUserDashboard(container) {
     if (announcements && announcements.length > 0) {
         announcementsHtml = `
             <div class="mb-6">
-                <div class="flex items-center gap-2 mb-3 px-1">
-                    <i data-lucide="megaphone" class="w-4 h-4 text-purple-500"></i>
-                    <span class="text-xs font-bold text-purple-600 uppercase tracking-wider">Annonces</span>
-                </div>
+                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
+                    <i data-lucide="megaphone" class="w-5 h-5 text-purple-500"></i>
+                    Annonces
+                </h2>
                 <div class="space-y-2">
                     ${announcements.map(a => `
-                        <button data-link="/messages/${a.id}" class="w-full text-left bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-2xl border border-purple-100 hover:shadow-md transition-all group">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-800 text-sm truncate flex-1">${escapeHtml(a.subject)}</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform"></i>
+                        <button data-link="/messages/${a.id}" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-purple-400 to-indigo-500"></div>
+                            <div class="pl-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-800 text-sm truncate flex-1">${escapeHtml(a.subject)}</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                                <span class="text-[10px] text-purple-400 font-medium">${new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
                             </div>
-                            <span class="text-[10px] text-purple-400 font-medium">${new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -709,7 +712,7 @@ async function renderAdminDashboard(container) {
 async function attachAdminListeners(container) {
     // Create Event
     container.querySelector('#btn-create-event')?.addEventListener('click', () => {
-        import('../admin/planning-form.view.js').then(({ openEventModal }) => openEventModal());
+        import('../admin/event-modal.view.js').then(({ openEventModal }) => openEventModal());
     });
 }
 

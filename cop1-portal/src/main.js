@@ -8,10 +8,12 @@ import { renderMobileNav, initMobileNav, updateActiveNavLink as updateActiveMobi
 import { toggleLoader, showToast, showConfirm } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
+import { startInactivityMonitor, stopInactivityMonitor } from './services/inactivity.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
 import { renderRegister, initRegister } from './modules/auth/register.view.js';
+import { renderResetPassword, initResetPassword } from './modules/auth/reset-password.view.js';
 import { renderDashboard, initDashboard } from './modules/dashboard/dashboard.view.js';
 import { renderEvents, initEvents } from './modules/events/events.view.js';
 import { renderPlanningList, initPlanningList } from './modules/admin/planning-list.view.js';
@@ -28,6 +30,7 @@ import { renderPending, initPending, renderRejected, initRejected } from './modu
 // Configuration Router
 router.addRoute('/login', { render: renderLogin, init: initLogin });
 router.addRoute('/register', { render: renderRegister, init: initRegister });
+router.addRoute('/reset-password', { render: renderResetPassword, init: initResetPassword });
 router.addRoute('/dashboard', { render: renderDashboard, init: initDashboard });
 router.addRoute('/events', { render: renderEvents, init: initEvents });
 router.addRoute('/admin_planning', { render: renderPlanningList, init: initPlanningList });
@@ -55,8 +58,36 @@ async function init() {
         supabase.channel('global-app-changes')
             .subscribe();
 
+        // 1b. Listen for PASSWORD_RECOVERY event
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                // User clicked the password reset link in their email
+                store.state.isPasswordRecoveryMode = true;
+                // Render reset password page standalone (without app layout)
+                const { renderResetPassword, initResetPassword } = require('./modules/auth/reset-password.view.js');
+                app.innerHTML = renderResetPassword();
+                initResetPassword();
+            }
+        });
+
         // 2. Auth & Data
         const { data: { session } } = await supabase.auth.getSession();
+
+        // Check if we're in password recovery mode (from URL hash or flag)
+        const urlHash = window.location.hash;
+        const isRecoveryFromUrl = urlHash.includes('type=recovery') || urlHash.includes('type=password_recovery');
+
+        if (isRecoveryFromUrl || store.state.isPasswordRecoveryMode) {
+            // We're in password recovery mode - show reset password page standalone
+            store.state.isPasswordRecoveryMode = true;
+            const { renderResetPassword, initResetPassword } = await import('./modules/auth/reset-password.view.js');
+            app.innerHTML = renderResetPassword();
+            initResetPassword();
+            toggleLoader(false);
+            CookieConsent.init();
+            return; // Don't continue with normal flow
+        }
+
         if (session) {
             store.state.user = session.user;
 
@@ -97,12 +128,15 @@ async function init() {
                     window.history.pushState({}, '', dest);
                 }
                 renderAppLayout();
+                // Start inactivity monitor for logged-in users
+                startInactivityMonitor();
             }
 
         } else {
-            // Pas de session
+            // Pas de session - stop inactivity monitor
+            stopInactivityMonitor();
             const path = window.location.pathname;
-            if (!['/login', '/register'].includes(path) && !path.startsWith('/legal')) {
+            if (!['/login', '/register', '/reset-password'].includes(path) && !path.startsWith('/legal')) {
                 router.navigateTo('/login');
             } else {
                 router.handleLocation();

@@ -157,6 +157,17 @@ export function renderRegister() {
                         </div>
                     </div>
 
+                    <!-- 1b. Precision for "Autre" -->
+                    <div id="school-other-container" class="hidden space-y-1.5 animate-fade-in relative z-40">
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Précisez votre établissement</label>
+                        <div class="relative group">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
+                                <i data-lucide="building-2" class="w-5 h-5"></i>
+                            </div>
+                            <input id="reg-school-other" type="text" class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom de l'établissement">
+                        </div>
+                    </div>
+
                     <!-- 2. Justificatif (Proof) -->
                     <div class="space-y-2 pt-2">
                         <div class="ml-1 mb-2">
@@ -208,9 +219,21 @@ export function renderRegister() {
                     </label>
 
                     <!-- 4. Mandatory Hours Checkbox -->
-                    <label class="flex items-start gap-3 p-3 bg-orange-50/80 border border-orange-100 rounded-xl cursor-pointer hover:bg-orange-100 transition-all shadow-sm">
-                        <input type="checkbox" id="reg-mandatory" class="w-5 h-5 text-orange-500 rounded mt-0.5 border-orange-200 focus:ring-orange-500">
-                        <div><span class="text-sm font-bold text-orange-900 block">Heures Obligatoires</span><span class="text-[10px] text-orange-700">Pour validation stage/école.</span></div>
+                    <!-- Previous Checkboxes -->
+                    <label class="flex items-start gap-3 p-3 bg-orange-50/80 border border-orange-100 rounded-xl cursor-pointer hover:bg-orange-100 transition-all shadow-sm group">
+                        <input type="checkbox" id="reg-mandatory" class="w-5 h-5 text-orange-500 rounded border-orange-200 focus:ring-orange-500 transition-all">
+                        <div>
+                            <span class="text-sm font-bold text-orange-900 block">Besoin d'un justificatif d'heures ?</span>
+                            <span class="text-[10px] text-orange-700 leading-tight block">Cochez cette case si vous avez des obligations d'heures à justifier pour votre cursus.</span>
+                        </div>
+                    </label>
+
+                    <!-- 5. CGU & Privacy Consent Checkbox (New) -->
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white transition-all shadow-sm group">
+                        <input type="checkbox" id="reg-cgu" required class="w-5 h-5 text-brand-600 rounded border-slate-300 focus:ring-brand-500 transition-all mt-0.5">
+                        <div class="text-xs text-slate-600 leading-snug">
+                            Je certifie avoir lu et accepté les <button type="button" data-link="/legal/cgu" class="text-brand-600 font-bold hover:underline">CGU</button> ainsi que la <button type="button" data-link="/legal/privacy" class="text-brand-600 font-bold hover:underline">Politique de Confidentialité</button>.
+                        </div>
                     </label>
 
                     <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 mt-4 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 transform">
@@ -283,6 +306,21 @@ export function initRegister() {
     function selectSchool(val) {
         schoolInput.value = val;
         schoolHidden.value = val;
+
+        // Handle "Autre" logic
+        const otherContainer = document.getElementById('school-other-container');
+        const otherInput = document.getElementById('reg-school-other');
+
+        if (val === 'Autre') {
+            otherContainer.classList.remove('hidden');
+            otherInput.setAttribute('required', 'true');
+            otherInput.focus();
+        } else {
+            otherContainer.classList.add('hidden');
+            otherInput.removeAttribute('required');
+            otherInput.value = ''; // Reset
+        }
+
         toggleDropdown(false);
         schoolInput.classList.remove('text-slate-400');
         schoolInput.classList.add('text-slate-800');
@@ -345,17 +383,22 @@ export function initRegister() {
 
     function updateRequirement(el, isValid) {
         if (!el) return;
-        const icon = el.querySelector('i');
-        if (!icon) return;
+        // Find existing icon element (could be i or svg after Lucide processing)
+        const existingIcon = el.querySelector('i, svg');
 
         if (isValid) {
             el.classList.remove('text-slate-400');
             el.classList.add('text-green-600');
-            icon.setAttribute('data-lucide', 'check-circle');
+            // Replace with new icon if needed
+            if (existingIcon) {
+                existingIcon.outerHTML = '<i data-lucide="check-circle" class="w-3 h-3"></i>';
+            }
         } else {
             el.classList.remove('text-green-600');
             el.classList.add('text-slate-400');
-            icon.setAttribute('data-lucide', 'circle');
+            if (existingIcon) {
+                existingIcon.outerHTML = '<i data-lucide="circle" class="w-3 h-3"></i>';
+            }
         }
     }
 
@@ -468,7 +511,15 @@ export function initRegister() {
             const passConfirm = document.getElementById('reg-pass-confirm').value.trim();
             const permit = document.getElementById('reg-permit').checked;
             const mandatory = document.getElementById('reg-mandatory').checked;
-            const school = document.getElementById('reg-school').value;
+            const cguAccepted = document.getElementById('reg-cgu').checked;
+            let school = document.getElementById('reg-school').value;
+
+            // Handle "Autre" - use custom input
+            if (school === 'Autre') {
+                const schoolOther = document.getElementById('reg-school-other').value.trim();
+                if (!schoolOther) return showToast("Veuillez préciser le nom de votre établissement", "error");
+                school = schoolOther;
+            }
 
             const file = fileInput.files[0];
 
@@ -488,6 +539,7 @@ export function initRegister() {
 
             if (pass !== passConfirm) return showToast("Les mots de passe ne correspondent pas", "error");
             if (!file) return showToast("Le justificatif étudiant est obligatoire", "error");
+            if (!cguAccepted) return showToast("Vous devez accepter les CGU et la Politique de Confidentialité", "error");
 
             toggleLoader(true);
             try {
@@ -502,7 +554,7 @@ export function initRegister() {
                             phone: phone,
                             has_permit: permit,
                             mandatory_hours: mandatory,
-                            school: document.getElementById('reg-school').value
+                            school: school
                         }
                     }
                 });

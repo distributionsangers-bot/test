@@ -1,6 +1,6 @@
 import { PolesService } from './poles.service.js';
 import { store } from '../../core/store.js';
-import { toggleLoader, showToast, escapeHtml, showConfirm } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, showConfirm, formatIdentity } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { ChatService } from '../chat/chat.service.js';
 
@@ -51,7 +51,7 @@ export async function renderPoles(container) {
             }
                             </div>
                             <div class="min-w-0 flex-1">
-                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
                                 ${l.role_title ? `<span class="text-[10px] text-slate-400 truncate block">${escapeHtml(l.role_title)}</span>` : ''}
                             </div>
                         </div>
@@ -143,7 +143,7 @@ export async function renderPoles(container) {
             }
                             </div>
                             <div class="min-w-0 flex-1">
-                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
                                 ${l.role_title ? `<span class="text-[10px] text-slate-400 truncate block">${escapeHtml(l.role_title)}</span>` : ''}
                             </div>
                         </div>
@@ -197,7 +197,7 @@ export async function renderPoles(container) {
                                                     ${l.photo_url ? `<img src="${l.photo_url}" class="w-full h-full object-cover">` : l.first_name[0]}
                                                 </div>
                                                 <div class="flex flex-col leading-none">
-                                                    <span class="text-xs font-bold text-slate-700">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                                    <span class="text-xs font-bold text-slate-700">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
                                                     ${l.role_title ? `<span class="text-[9px] text-slate-400 mt-0.5">${escapeHtml(l.role_title)}</span>` : ''}
                                                 </div>
                                             </div>
@@ -295,7 +295,7 @@ export async function renderPoles(container) {
             }
                                     </div>
                                     <div>
-                                        <p class="text-white font-bold text-sm">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</p>
+                                        <p class="text-white font-bold text-sm">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</p>
                                         <p class="text-white/70 text-xs">${escapeHtml(l.role_title || "Directeur·ice d'antenne")}</p>
                                     </div>
                                 </div>
@@ -697,7 +697,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-xs font-bold text-white overflow-hidden border border-white">
                                                     ${l.photo_url ? `<img src="${l.photo_url}" class="w-full h-full object-cover">` : `<span>${l.first_name[0].toUpperCase()}</span>`}
                                                 </div>
-                                                <span class="font-bold text-sm text-slate-800">${escapeHtml(l.first_name)} ${escapeHtml(l.last_name)}</span>
+                                                <span class="font-bold text-sm text-slate-800">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
                                             </div>
                                             <button type="button" data-remove-leader="${l.id}" class="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition">
                                                 <i data-lucide="minus-circle" class="w-5 h-5"></i>
@@ -860,7 +860,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                                 ${u.photo_url ? `<img src="${u.photo_url}" class="w-full h-full object-cover">` : u.first_name[0]}
                              </div>
                              <div class="flex flex-col">
-                                <span class="text-sm font-bold text-slate-800">${escapeHtml(u.first_name)} ${escapeHtml(u.last_name)}</span>
+                                    <span class="font-bold text-sm text-slate-800">${escapeHtml(formatIdentity(u.first_name, u.last_name))}</span>
                                 <span class="text-[10px] text-slate-400">${escapeHtml(u.email)}</span>
                              </div>
                         </div>

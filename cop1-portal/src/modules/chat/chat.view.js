@@ -2,7 +2,7 @@ import { ChatService } from './chat.service.js';
 import { store } from '../../core/store.js';
 import { supabase } from '../../services/supabase.js';
 import { createIcons, icons } from 'lucide';
-import { showToast, showConfirm, escapeHtml, toggleLoader } from '../../services/utils.js';
+import { showToast, showConfirm, escapeHtml, toggleLoader, formatIdentity } from '../../services/utils.js';
 
 // =============================================================================
 // 🎨 CONSTANTS & CONFIG
@@ -254,7 +254,7 @@ function renderTicketList() {
             avatar = `<div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center ring-2 ring-white shadow-sm"><i data-lucide="megaphone" class="w-5 h-5"></i></div>`;
             otherName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Administrateur';
         } else {
-            otherName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Bénévole';
+            otherName = user ? formatIdentity(user.first_name, user.last_name) : 'Bénévole';
             const initial = otherName[0]?.toUpperCase() || '?';
             avatar = `<div class="w-12 h-12 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center ring-2 ring-white shadow-sm text-sm">${initial}</div>`;
         }
@@ -321,7 +321,7 @@ async function openTicket(id) {
             form?.classList.remove('hidden');
         }
 
-        const otherName = isAnnouncement ? 'Annonce Système' : `${ticket.profiles?.first_name || 'Bénévole'} ${ticket.profiles?.last_name || ''}`;
+        const otherName = isAnnouncement ? 'Annonce Système' : formatIdentity(ticket.profiles?.first_name, ticket.profiles?.last_name);
         const initial = otherName[0].toUpperCase();
 
         // Check if admin (based on logic or if it's me)
@@ -614,7 +614,7 @@ function createMessageHtml(msg) {
     const firstName = msg.profiles?.first_name || 'Utilisateur';
     const lastName = msg.profiles?.last_name || '';
     const roleTitle = msg.profiles?.role_title;
-    const name = lastName ? `${firstName} ${lastName}` : firstName;
+    const name = lastName ? formatIdentity(firstName, lastName) : firstName;
 
     return `
         <div class="group flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-scale-in mb-2">
@@ -1096,9 +1096,9 @@ function injectCreateModal() {
             // Only search by email if I am an admin (searching volunteers)
             // If I am a volunteer (searching admins), don't search their hidden email
             if (isAdmin) {
-                return fullName.includes(q) || email.includes(q);
+                return formatIdentity(u.first_name, u.last_name).toLowerCase().includes(q) || email.includes(q);
             } else {
-                return fullName.includes(q);
+                return formatIdentity(u.first_name, u.last_name).toLowerCase().includes(q);
             }
         });
 
@@ -1114,12 +1114,12 @@ function injectCreateModal() {
         }
 
         userListNode.innerHTML = filtered.map(u => `
-            <button type="button" class="user-option w-full text-left p-2.5 rounded-lg hover:bg-white transition-all duration-200 flex items-center gap-3 group" data-user-id="${u.id}" data-user-name="${u.first_name} ${u.last_name}" data-user-email="${u.email}">
+            <button type="button" class="user-option w-full text-left p-2.5 rounded-lg hover:bg-white transition-all duration-200 flex items-center gap-3 group" data-user-id="${u.id}" data-user-name="${formatIdentity(u.first_name, u.last_name)}" data-user-email="${u.email}">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white font-bold flex items-center justify-center flex-shrink-0 group-hover:shadow-md transition border border-slate-200">
                     ${u.first_name[0]}${u.last_name[0]}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-slate-800 text-sm">${u.first_name} ${u.last_name}</p>
+                    <p class="font-semibold text-slate-800 text-sm">${escapeHtml(formatIdentity(u.first_name, u.last_name))}</p>
                     <p class="text-xs text-slate-500 truncate">
                         ${isAdmin ? u.email : 'Administrateur'}
                     </p>

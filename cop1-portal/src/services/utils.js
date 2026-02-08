@@ -90,6 +90,20 @@ export function formatDate(dateString) {
     });
 }
 
+/**
+ * Convertit une date ISO (UTC) en format datetime-local (YYYY-MM-DDTHH:mm)
+ * en tenant compte du fuseau horaire local
+ */
+export function toLocalInputDate(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().slice(0, 16);
+}
+
 // ============================================================
 // 3.1 FORMATAGE IDENTITÉ (Prénom Nom)
 // ============================================================

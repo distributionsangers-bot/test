@@ -1,9 +1,9 @@
 import { EventsService } from './events.service.js';
 import { supabase } from '../../services/supabase.js';
 import { store } from '../../core/store.js';
-import { showToast, toggleLoader, escapeHtml, showConfirm } from '../../services/utils.js';
+import { toggleLoader, showToast, escapeHtml, formatDate, showConfirm } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
-import { PlanningService } from '../admin/planning.service.js';
+import { t } from '../../services/i18n.js';
 
 let abortController = null;
 let currentFilter = 'all'; // 'all' or 'mine'
@@ -97,9 +97,9 @@ export async function renderEvents() {
                         <div class="text-white">
                             <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
                                 <i data-lucide="calendar-check" class="w-7 h-7"></i>
-                                Missions
+                                ${t('events.title')}
                             </h1>
-                            <p class="text-white/70 text-sm font-medium mt-1">Rejoignez les prochains événements !</p>
+                            <p class="text-white/70 text-sm font-medium mt-1">${t('events.subtitle')}</p>
                         </div>
                         
                         <!-- Stats & Scanner -->
@@ -107,11 +107,11 @@ export async function renderEvents() {
                             <div class="flex gap-2">
                                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20">
                                     <div class="text-xl font-black text-white">${totalMissions}</div>
-                                    <div class="text-[9px] font-bold text-white/60 uppercase">À venir</div>
+                                    <div class="text-[9px] font-bold text-white/60 uppercase">${t('events.stats.upcoming')}</div>
                                 </div>
                                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20">
                                     <div class="text-xl font-black text-amber-300">${myMissionsCount}</div>
-                                    <div class="text-[9px] font-bold text-white/60 uppercase">Inscrit</div>
+                                    <div class="text-[9px] font-bold text-white/60 uppercase">${t('events.stats.registered')}</div>
                                 </div>
                             </div>
                             <button id="btn-scan-qr" class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white hover:bg-white/30 transition border border-white/30">
@@ -126,10 +126,10 @@ export async function renderEvents() {
                 <!-- FILTERS -->
                 <div class="flex gap-2 mb-6">
                     <button data-filter="all" class="filter-btn ${currentFilter === 'all' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition min-h-[44px] flex items-center justify-center">
-                        📅 Toutes <span class="opacity-60 ml-1">(${totalMissions})</span>
+                        📅 ${t('events.filters.all')} <span class="opacity-60 ml-1">(${totalMissions})</span>
                     </button>
                     <button data-filter="mine" class="filter-btn ${currentFilter === 'mine' ? 'active bg-slate-900 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'} px-4 py-2.5 rounded-xl text-sm font-bold transition min-h-[44px] flex items-center justify-center">
-                        ✓ Mes inscriptions <span class="opacity-60 ml-1">(${myMissionsCount})</span>
+                        ✓ ${t('events.filters.mine')} <span class="opacity-60 ml-1">(${myMissionsCount})</span>
                     </button>
                 </div>
 
@@ -163,13 +163,13 @@ function renderNextMissionBanner(shift) {
     let urgencyText = '';
     let urgencyClass = '';
     if (diffDays <= 0) {
-        urgencyText = "🔥 Aujourd'hui !";
+        urgencyText = t('events.urgency.today');
         urgencyClass = 'bg-red-500/20 border-red-500/30 text-red-200';
     } else if (diffDays === 1) {
-        urgencyText = "⏰ Demain !";
+        urgencyText = t('events.urgency.tomorrow');
         urgencyClass = 'bg-amber-500/20 border-amber-500/30 text-amber-200';
     } else if (diffDays <= 2) {
-        urgencyText = `⚡ Dans ${diffDays} jours`;
+        urgencyText = t('events.urgency.days', { days: diffDays });
         urgencyClass = 'bg-amber-500/20 border-amber-500/30 text-amber-200';
     } else {
         return '';
@@ -214,8 +214,8 @@ function renderEventGroup(group, userId, countsMap) {
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span class="text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
-                        ${isSoon ? '<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">⚡ C\'est bientôt !</span>' : ''}
-                        ${hasRegistration ? '<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">✓ Inscrit</span>' : ''}
+                        ${isSoon ? `<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">⚡ ${t('events.urgency.soon')}</span>` : ''}
+                        ${hasRegistration ? `<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">✓ ${t('events.card.registered')}</span>` : ''}
                     </div>
                     <h3 class="font-bold text-lg text-slate-900 truncate">${escapeHtml(event.title)}</h3>
                     <div class="flex items-center gap-1 text-xs text-slate-500 mt-1">
@@ -275,7 +275,7 @@ function renderShiftCard(shift, userId, countsMap, event) {
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap mb-0.5">
                         <!-- Shift Title -->
-                        <span class="font-bold text-slate-800">${escapeHtml(shift.title || 'Créneau')}</span>
+                        <span class="font-bold text-slate-800">${escapeHtml(shift.title || t('events.card.slot'))}</span>
                         
                         <!-- Badge Places -->
                         <div data-status-badge class="${isFull
@@ -285,10 +285,10 @@ function renderShiftCard(shift, userId, countsMap, event) {
                 : 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg'
         }">
                             ${isFull
-            ? '🔴 Complet'
+            ? `🔴 ${t('events.card.full')}`
             : available <= 2
-                ? `🟠 <span data-available-slots>${available}</span> places`
-                : `<span data-available-slots>${available}</span> places`
+                ? `🟠 <span data-available-slots>${available}</span> ${t('events.card.places')}`
+                : `<span data-available-slots>${available}</span> ${t('events.card.places')}`
         }
                         </div>
 
@@ -297,8 +297,8 @@ function renderShiftCard(shift, userId, countsMap, event) {
                             <div class="${reservedRemaining > 0
                 ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg'
                 : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg'
-            }" title="${reservedRemaining} places réservées restantes">
-                                <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} réservées` : '🎓 Complet'}</span>
+            }" title="${reservedRemaining} ${t('events.card.reserved')} restantes">
+                                <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} ${t('events.card.reserved')}` : `🎓 ${t('events.card.full')}`}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -329,7 +329,7 @@ function renderShiftCard(shift, userId, countsMap, event) {
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
         } min-h-[44px] flex items-center justify-center"
             >
-                ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
+                ${isRegistered ? t('events.card.unregister') : isFull ? `🔴 ${t('events.card.full')}` : t('events.card.register')}
             </button>
         </div>
     `;
@@ -341,8 +341,8 @@ function renderEmptyState() {
             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="calendar-x" class="w-8 h-8 text-slate-300"></i>
             </div>
-            <p class="text-slate-400 font-semibold">${currentFilter === 'mine' ? 'Aucune inscription' : 'Aucune mission disponible'}</p>
-            <p class="text-xs text-slate-300 mt-1">${currentFilter === 'mine' ? 'Inscrivez-vous à une mission' : 'Revenez bientôt'}</p>
+            <p class="text-slate-400 font-semibold">${currentFilter === 'mine' ? t('events.empty.noRegistration') : t('events.empty.noMission')}</p>
+            <p class="text-xs text-slate-300 mt-1">${currentFilter === 'mine' ? t('events.empty.subscribe') : t('events.empty.comeBack')}</p>
         </div>
         `;
 }
@@ -462,15 +462,15 @@ function handleShiftUpdate(shiftData) {
     const reservedBadgeSpan = shiftEl.querySelector('[data-reserved-badge-text]');
     if (reservedBadgeSpan) {
         if (reservedRemaining > 0) {
-            reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} réservées`;
+            reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} ${t('events.card.reserved')}`;
             // Assure le style correct
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1";
-            reservedBadgeSpan.parentElement.title = `${reservedRemaining} places réservées restantes`;
+            reservedBadgeSpan.parentElement.title = `${reservedRemaining} ${t('events.card.reserved')} restantes`;
         } else {
-            reservedBadgeSpan.textContent = `🎓 Complet`;
+            reservedBadgeSpan.textContent = `🎓 ${t('events.card.full')}`;
             // Style gris
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1";
-            reservedBadgeSpan.parentElement.title = "Places réservées complètes";
+            reservedBadgeSpan.parentElement.title = t('events.card.reservedFull');
         }
     }
 
@@ -490,12 +490,12 @@ function handleShiftUpdate(shiftData) {
                 // Désactiver le bouton
                 registerBtn.disabled = true;
                 registerBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 bg-slate-300 text-white cursor-not-allowed";
-                registerBtn.textContent = '🔴 Complet';
+                registerBtn.textContent = `🔴 ${t('events.card.full')}`;
             } else {
                 // Réactiver le bouton
                 registerBtn.disabled = false;
                 registerBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95";
-                registerBtn.textContent = "S'inscrire";
+                registerBtn.textContent = t('events.card.register');
             }
         }
     }
@@ -515,17 +515,13 @@ function updateMissionVisualStatus(shiftEl, available) {
 
     if (available === 0) {
         badgeEl.className = 'text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = '🔴 Complet';
+        badgeEl.innerHTML = `🔴 ${t('events.card.full')}`;
     } else if (available <= 2) {
         badgeEl.className = 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> place${available > 1 ? 's' : ''} `;
+        badgeEl.innerHTML = `🟠 <span data-available-slots>${available}</span> ${t('events.card.places')}`;
     } else {
-        badgeEl.className = 'text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg'; // Ou vert si on veut
-        // Remet le style par défaut (slate-400 dans le code original) ou emerald ?
-        // Le code original utilisait slate-400. Le vôtre utilise emerald. Gardons une cohérence.
-        // Si vous préférez Emerald :
-        // badgeEl.className = 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg';
-        badgeEl.innerHTML = `<span data-available-slots>${available}</span> places`;
+        badgeEl.className = 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg';
+        badgeEl.innerHTML = `<span data-available-slots>${available}</span> ${t('events.card.places')}`;
     }
 }
 
@@ -568,9 +564,9 @@ async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isRese
             if (hours === 0) {
                 const confirmed = await new Promise(resolve => {
                     showConfirm(
-                        "Ce créneau ne permet pas de valider d'heures (0h). En tant qu'étudiant devant valider un quota, ces heures ne compteront pas. Voulez-vous continuer ?",
+                        t('events.modal.quotaMessageZero'),
                         () => resolve(true),
-                        { type: 'warning', confirmText: "M'inscrire quand même", cancelText: "Annuler", onCancel: () => resolve(false) }
+                        { type: 'warning', confirmText: t('events.modal.registerNoHours'), cancelText: t('events.modal.cancel'), onCancel: () => resolve(false) }
                     );
                 });
                 if (!confirmed) return;
@@ -579,9 +575,9 @@ async function handleToggleRegistration(shiftId, isRegistered, hours = 0, isRese
             else if (isReserveFull) {
                 const confirmed = await new Promise(resolve => {
                     showConfirm(
-                        "Les places réservées aux étudiants sont complètes sur ce créneau. Vous pouvez vous inscrire sur une place standard, mais vos heures NE SERONT PAS COMPTABILISÉES pour votre quota. Voulez-vous continuer ?",
+                        t('events.modal.quotaMessageReserve'),
                         () => resolve(true),
-                        { type: 'warning', confirmText: "M'inscrire sans valider mes heures", cancelText: "Annuler", onCancel: () => resolve(false) }
+                        { type: 'warning', confirmText: t('events.modal.registerAnyway'), cancelText: t('events.modal.cancel'), onCancel: () => resolve(false) }
                     );
                 });
                 if (!confirmed) return;

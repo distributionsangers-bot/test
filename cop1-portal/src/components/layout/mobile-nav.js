@@ -15,19 +15,20 @@ import { router } from '../../core/router.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 import { showConfirm, showToast, escapeHtml } from '../../services/utils.js';
+import { t } from '../../services/i18n.js';
 
 const MOBILE_NAV_ITEMS = {
     admin: [
-        { id: '/dashboard', icon: 'home', label: 'Accueil' },
-        { id: '/admin_planning', icon: 'calendar', label: 'Planning' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
-        { id: 'MENU', icon: 'menu', label: 'Menu' }
+        { id: '/dashboard', icon: 'home', labelKey: 'nav.home' },
+        { id: '/admin_planning', icon: 'calendar', labelKey: 'nav.planning' },
+        { id: '/messages', icon: 'message-circle', labelKey: 'nav.messages', badge: true },
+        { id: 'MENU', icon: 'menu', labelKey: 'common.menu' }
     ],
     volunteer: [
-        { id: '/dashboard', icon: 'home', label: 'Accueil' },
-        { id: '/events', icon: 'calendar-check', label: 'Missions' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
-        { id: 'MENU', icon: 'menu', label: 'Menu' }
+        { id: '/dashboard', icon: 'home', labelKey: 'nav.home' },
+        { id: '/events', icon: 'calendar-check', labelKey: 'nav.missions' },
+        { id: '/messages', icon: 'message-circle', labelKey: 'nav.messages', badge: true },
+        { id: 'MENU', icon: 'menu', labelKey: 'common.menu' }
     ]
 };
 
@@ -89,11 +90,12 @@ function isPageInMenu(currentView) {
  */
 function renderNavItem(item, isActive, isMenu) {
     const actionAttr = isMenu ? 'data-action="open-mobile-menu"' : `data-link="${item.id}"`;
+    const label = item.labelKey ? t(item.labelKey) : 'Menu';
 
     return `
         <button 
             ${actionAttr}
-            aria-label="${item.label}"
+            aria-label="${label}"
             aria-current="${isActive ? 'page' : 'false'}"
             class="nav-item relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 transition-all duration-200 ${isActive ? 'text-brand-600' : 'text-slate-400'}"
         >
@@ -105,7 +107,7 @@ function renderNavItem(item, isActive, isMenu) {
                 ${item.badge ? '<span id="mobile-chat-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>' : ''}
             </div>
             
-            <span class="text-[10px] font-semibold transition-colors duration-200">${item.label}</span>
+            <span class="text-[10px] font-semibold transition-colors duration-200">${label}</span>
         </button>
     `;
 }
@@ -228,14 +230,14 @@ function openMobileMenu() {
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </div>
-                        <span class="text-xs font-semibold text-slate-700">Profil</span>
+                        <span class="text-xs font-semibold text-slate-700">${t('nav.profile')}</span>
                     </button>
                     
                     <button data-menu-action="navigate" data-menu-path="/poles" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
                             <i data-lucide="network" class="w-5 h-5"></i>
                         </div>
-                        <span class="text-xs font-semibold text-slate-700">Pôles</span>
+                        <span class="text-xs font-semibold text-slate-700">${t('nav.poles')}</span>
                     </button>
                     
                     ${isAdmin ? `
@@ -243,14 +245,14 @@ function openMobileMenu() {
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/25">
                                 <i data-lucide="users" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-xs font-semibold text-slate-700">Annuaire</span>
+                            <span class="text-xs font-semibold text-slate-700">${t('nav.directory')}</span>
                         </button>
                     ` : `
                         <button data-menu-action="navigate" data-menu-path="/events" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
                                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-xs font-semibold text-slate-700">Missions</span>
+                            <span class="text-xs font-semibold text-slate-700">${t('nav.missions')}</span>
                         </button>
                     `}
                 </div>
@@ -264,8 +266,7 @@ function openMobileMenu() {
                             <i data-lucide="${isAdmin ? 'user' : 'shield'}" class="w-5 h-5"></i>
                         </div>
                         <div class="flex-1 text-left">
-                            <div class="font-bold ${isAdmin ? 'text-emerald-700' : 'text-amber-700'}">${isAdmin ? 'Passer en Vue Bénévole' : 'Passer en Mode Admin'}</div>
-                            <div class="text-xs ${isAdmin ? 'text-emerald-500' : 'text-amber-500'}">Changer de vue</div>
+                            <div class="font-bold ${isAdmin ? 'text-emerald-700' : 'text-amber-700'}">${isAdmin ? t('nav.switchToVolunteer') : t('nav.switchToAdmin')}</div>
                         </div>
                         <i data-lucide="arrow-right" class="w-5 h-5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}"></i>
                     </button>
@@ -277,8 +278,7 @@ function openMobileMenu() {
                         <i data-lucide="log-out" class="w-5 h-5"></i>
                     </div>
                     <div class="flex-1 text-left">
-                        <div class="font-bold text-red-700">Se déconnecter</div>
-                        <div class="text-xs text-red-400">Quitter l'application</div>
+                        <div class="font-bold text-red-700">${t('nav.logout')}</div>
                     </div>
                     <i data-lucide="chevron-right" class="w-5 h-5 text-red-300"></i>
                 </button>
@@ -287,7 +287,7 @@ function openMobileMenu() {
             <!-- Close Button -->
             <div class="px-5 pb-2">
                 <button data-menu-action="close" class="w-full py-3.5 bg-slate-100 font-bold text-slate-500 rounded-2xl hover:bg-slate-200 active:scale-[0.98] transition-all text-sm">
-                    Fermer
+                    ${t('common.close')}
                 </button>
             </div>
         </div>
@@ -343,29 +343,26 @@ function closeMobileMenu() {
 function handleAdminToggle() {
     store.state.adminMode = !store.state.adminMode;
     localStorage.setItem('cop1_admin_mode', store.state.adminMode.toString());
-    showToast(store.state.adminMode ? 'Mode Admin activé' : 'Mode Bénévole activé', 'success');
+    showToast(store.state.adminMode ? t('nav.adminView') : t('nav.volunteerView'), 'success');
     window.location.href = '/dashboard';
 }
 
 async function handleLogout() {
-    showConfirm('Voulez-vous vous déconnecter ?', async () => {
+    showConfirm(t('modals.logoutConfirm'), async () => {
         try {
             await supabase.auth.signOut();
             store.state.user = null;
             store.state.profile = null;
-            // On garde le mode admin en mémoire ou non ? Le main.js ne l'enlève pas.
-            // Par sécurité, on peut le laisser ou l'enlever.
             localStorage.removeItem('cop1_admin_mode');
 
-            showToast('Déconnexion réussie');
+            showToast(t('success.logoutSuccess'));
 
-            // Force reload vers login pour purger l'état
             window.location.href = '/login';
         } catch (error) {
             console.error('Logout error:', error);
-            showToast('Erreur déconnexion', 'error');
+            showToast(t('errors.unexpectedError'), 'error');
         }
-    }, { type: 'danger', confirmText: 'Déconnecter' });
+    }, { type: 'danger', confirmText: t('nav.logout') });
 }
 
 export function cleanupMobileNav() {

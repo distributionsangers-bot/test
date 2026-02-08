@@ -1,0 +1,711 @@
+{
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Error",
+        "error.fillAll": "Please fill in all fields",
+        "success": "Success",
+        "yes": "Yes",
+        "no": "No",
+        "search": "Search",
+        "filter": "Filter",
+        "refresh": "Refresh",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "submit": "Submit",
+        "validate": "Validate",
+        "menu": "Menu",
+        "ok": "OK",
+        "attention": "Warning",
+        "info": "Information",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "days": "days",
+        "day": "day",
+        "hours": "hours",
+        "hour": "hour",
+        "min": "min",
+        "noResult": "No result"
+    },
+    "nav": {
+        "home": "Home",
+        "missions": "Missions",
+        "messages": "Messages",
+        "poles": "Departments",
+        "profile": "My Profile",
+        "planning": "Schedule",
+        "directory": "Directory",
+        "logout": "Logout",
+        "adminView": "Admin View",
+        "volunteerView": "Volunteer View",
+        "switchToAdmin": "Switch to Admin View",
+        "switchToVolunteer": "Switch to Volunteer View",
+        "legal": {
+            "mentions": "Legal Notice",
+            "privacy": "Privacy",
+            "cgu": "Terms"
+        }
+    },
+    "auth": {
+        "volunteerPortal": "Volunteer Portal",
+        "loginSubtitle": "Log in to access the portal",
+        "login": {
+            "title": "Login",
+            "email": "Email",
+            "password": "Password",
+            "emailPlaceholder": "example@email.com",
+            "passwordPlaceholder": "••••••••"
+        },
+        "register": {
+            "title": "Register",
+            "subtitle": "Join the COP1 community",
+            "confirmPassword": "Confirm",
+            "proof": {
+                "label": "Proof of Status",
+                "accepted": "Accepted: Student ID, School Certificate, ISIC Card, ID Card, Admission Certificate.",
+                "clickAdd": "Click to add",
+                "changeFile": "Change file",
+                "privacy": "<strong>Verification:</strong> This document is only used to verify your status. It will be <strong class=\"text-blue-500\">automatically deleted</strong> from our servers once your account is validated."
+            },
+            "mandatory": {
+                "label": "Need proof of hours?",
+                "desc": "Check this box if you need to justify hours for your curriculum."
+            },
+            "consent": "I certify that I have read and accepted the <button type=\"button\" data-link=\"/legal/cgu\" class=\"text-brand-600 font-bold hover:underline\">Terms</button> and <button type=\"button\" data-link=\"/legal/privacy\" class=\"text-brand-600 font-bold hover:underline\">Privacy Policy</button>.",
+            "submit": "Create my account",
+            "success": "Registration successful! Redirecting...",
+            "error": {
+                "passwordRequirements": "Password must meet complexity requirements",
+                "passwordMismatch": "Passwords do not match",
+                "proofRequired": "Proof of student status is mandatory",
+                "policyRequired": "You must accept the Terms and Privacy Policy",
+                "upload": "Account created but upload failed. Contact an admin."
+            }
+        },
+        "resetPassword": {
+            "title": "New Password",
+            "subtitle": "Set your new secure password",
+            "submit": "Update Password",
+            "backToLogin": "Back to Login",
+            "success": "Password updated successfully!",
+            "match": {
+                "success": "Passwords match",
+                "error": "Passwords do not match"
+            }
+        },
+        "password": {
+            "strength": {
+                "title": "Password Strength",
+                "weak": "Weak",
+                "medium": "Medium",
+                "good": "Good",
+                "strong": "Strong"
+            },
+            "requirements": {
+                "length": "8 chars min.",
+                "upper": "1 uppercase",
+                "lower": "1 lowercase",
+                "number": "1 number"
+            }
+        },
+        "forgotPassword": "Forgot?",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "createAccount": "Create Account",
+        "alreadyHaveAccount": "Already registered?",
+        "noAccount": "No account yet?",
+        "enterEmailForReset": "Please enter your email to reset password:",
+        "resetPasswordTitle": "Forgot Password",
+        "sendResetLink": "Send Link",
+        "resetEmailSent": "Reset email sent"
+    },
+    "dashboard": {
+        "greeting": {
+            "morning": "Good morning",
+            "afternoon": "Good afternoon",
+            "evening": "Good evening"
+        },
+        "stats": {
+            "hours": "Hours",
+            "accumulated": "Total",
+            "missions": "Missions",
+            "completed": "Done",
+            "next": "Next",
+            "registrations": "Registrations",
+            "volunteers": "Volunteers",
+            "pending": "Pending",
+            "newThisWeek": "New"
+        },
+        "badges": {
+            "admin": "🛡️ Admin",
+            "volunteer": "VOLUNTEER",
+            "student": "STUDENT"
+        },
+        "sections": {
+            "announcements": "Announcements",
+            "availableMission": "Available Mission",
+            "nextMission": "Next Mission",
+            "recentActivity": "Recent Activity",
+            "emergencies": "Emergencies (7 days)",
+            "quickActions": "Quick Actions"
+        },
+        "actions": {
+            "scan": "Scan",
+            "scanSubtitle": "Check-in",
+            "contact": "Contact",
+            "managePlanning": "Schedule",
+            "managePlanningSubtitle": "Manage slots",
+            "manageDirectory": "Directory",
+            "manageDirectorySubtitle": "Manage volunteers",
+            "createEvent": "Create",
+            "createEventSubtitle": "New event"
+        },
+        "empty": {
+            "noMission": "Nothing planned?",
+            "subscribeNext": "Sign up for your next mission.",
+            "seeMissions": "See missions",
+            "noActivity": "No recent activity",
+            "noUrgency": "No emergencies!"
+        },
+        "viewAll": "View all",
+        "activity": {
+            "registeredTo": "registered for",
+            "noActivity": "No recent activity"
+        },
+        "admin": {
+            "manage": "Manage",
+            "cumulated": "Total"
+        }
+    },
+    "events": {
+        "title": "Missions",
+        "subtitle": "Join upcoming events!",
+        "filters": {
+            "all": "📅 All",
+            "mine": "✓ My registrations"
+        },
+        "card": {
+            "places": "places",
+            "full": "Full",
+            "registered": "Registered",
+            "soon": "⚡ Soon!",
+            "reserved": "reserved",
+            "register": "Register",
+            "unregister": "Unregister"
+        },
+        "empty": {
+            "noMission": "No mission available",
+            "comeBack": "Come back later",
+            "noRegistration": "No registration",
+            "subscribe": "Register for a mission"
+        },
+        "urgency": {
+            "today": "🔥 Today!",
+            "tomorrow": "⏰ Tomorrow!",
+            "days": "⚡ In {{days}} days"
+        },
+        "modal": {
+            "confirmRegistration": "Confirm Registration",
+            "confirmUnregistration": "Confirm Unregistration",
+            "quotaWarning": "Warning: Hours Quota",
+            "quotaMessageZero": "This slot does not validate hours (0h). As a student with a quota, these hours will not count. Do you want to continue?",
+            "quotaMessageReserve": "Student reserved spots are full for this slot. Your hours WILL NOT COUNT towards your quota. Do you want to continue?",
+            "registerAnyway": "Register anyway",
+            "registerNoHours": "Register without validating hours",
+            "notePlaceholder": "A note for the managers? (Optional)"
+        }
+    },
+    "profile": {
+        "title": "My Profile",
+        "error": {
+            "load": "Unable to load profile."
+        },
+        "tabs": {
+            "history": "History",
+            "settings": "Settings"
+        },
+        "stats": {
+            "hours": "Hours",
+            "missions": "Missions",
+            "presence": "Presence",
+            "upcoming": "Upcoming"
+        },
+        "badges": {
+            "title": "Earned Badges",
+            "student": "Student",
+            "volunteer": "Volunteer",
+            "permit": "Permit",
+            "centenarian": "Centenarian",
+            "hours50": "50 Hours",
+            "beginner": "Beginner",
+            "veteran": "Veteran",
+            "missions10": "10+ missions",
+            "missions5": "5 Missions",
+            "reliable": "Reliable",
+            "driver": "Driver"
+        },
+        "form": {
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "phone": "Phone",
+            "hasPermit": "I have a driving license",
+            "mandatoryHours": "Mandatory hours (student)",
+            "newPassword": "New password (optional)",
+            "school": "School / Organization",
+            "searchSchool": "Search your school...",
+            "specifySchool": "Specify your organization",
+            "schoolName": "Organization name",
+            "saveChanges": "Save Changes",
+            "error": {
+                "specifySchool": "Please specify your organization name",
+                "update": "Update error"
+            },
+            "success": {
+                "update": "Profile updated successfully ✓"
+            }
+        },
+        "dangerZone": {
+            "title": "Danger Zone",
+            "deleteAccount": "Delete my account",
+            "confirmDelete": "Permanently delete your account? This action is irreversible.",
+            "confirmEmail": "To confirm, please enter your email:",
+            "errorEmail": "Incorrect email"
+        },
+        "history": {
+            "empty": "No mission yet",
+            "join": "Register for an event!",
+            "absent": "Absent",
+            "quotaExceeded": "Quota Exceeded (0h)",
+            "present": "Present",
+            "registered": "Registered",
+            "upcoming": "Upcoming",
+            "volunteerSchool": "School Volunteer (Quota reached)"
+        }
+    },
+    "status": {
+        "unknown": "Unknown",
+        "pending": {
+            "title": "Registration Pending",
+            "message": "Your registration request is waiting for validation by a manager. You will receive a notification as soon as it is processed.",
+            "tip": "In the meantime, you can close this page.",
+            "label": "Pending"
+        },
+        "approved": "Approved",
+        "rejected": {
+            "title": "Registration Refused",
+            "message": "Unfortunately, your registration was not validated. Please contact a manager for more information.",
+            "contact": "Contact a manager",
+            "label": "Refused"
+        }
+    },
+    "errors": {
+        "fillAllFields": "Please fill in all fields",
+        "invalidCredentials": "Incorrect email or password",
+        "unexpectedError": "Unexpected error"
+    },
+    "modals": {
+        "confirmation": "Confirmation",
+        "inputRequired": "Input required"
+    },
+    "admin": {
+        "planning": {
+            "editEvent": "Edit Event",
+            "createEvent": "Create Event"
+        },
+        "participants": {
+            "title": "Participants",
+            "export": {
+                "headers": {
+                    "firstName": "First Name",
+                    "lastName": "Last Name",
+                    "email": "Email",
+                    "phone": "Phone",
+                    "school": "School",
+                    "status": "Status",
+                    "present": "Present",
+                    "hours": "Counted Hours",
+                    "note": "Registration Note",
+                    "date": "Registration Date"
+                },
+                "status": {
+                    "validated": "Validated",
+                    "pending": "Pending",
+                    "rejected": "Rejected"
+                },
+                "boolean": {
+                    "yes": "Yes",
+                    "no": "No"
+                }
+            },
+            "errors": {
+                "alreadyRegistered": "Participant already registered for this shift"
+            }
+        },
+        "directory": {
+            "title": "Directory",
+            "subtitle": "Manage your volunteer team",
+            "stats": {
+                "total": "Total",
+                "pending": "Pending",
+                "admins": "Admins"
+            },
+            "searchPlaceholder": "Search by name, email, phone...",
+            "export": "Export",
+            "filters": {
+                "all": "All",
+                "pending": "Pending",
+                "admins": "Admins",
+                "drivers": "Drivers",
+                "school": "School"
+            },
+            "empty": {
+                "title": "No volunteer found",
+                "subtitle": "Modify your search filters",
+                "error": "Loading error"
+            },
+            "badges": {
+                "new": "New",
+                "admin": "Admin",
+                "pending": "Pending",
+                "approved": "Validated",
+                "rejected": "Rejected"
+            },
+            "actions": {
+                "validate": "Validate",
+                "disable": "Disable",
+                "promote": "Make Admin",
+                "demote": "Remove Admin",
+                "delete": "Delete"
+            },
+            "pagination": "Showing {start}-{end} of {total} volunteers",
+            "toasts": {
+                "exportError": "Export error",
+                "exportSuccess": "Export downloaded ✓",
+                "statusUpdated": "Account validated ✓",
+                "statusDisabled": "Account disabled",
+                "statusError": "Status update error",
+                "rolePromoted": "Admin added ✓",
+                "roleDemoted": "Admin removed",
+                "adminError": "Admin rights error",
+                "deleteSuccess": "Volunteer deleted",
+                "saveNoteError": "Note save error",
+                "noteSaved": "Note saved ✓",
+                "updateError": "Update error",
+                "typeUpdated": "Profile type updated ✓"
+            },
+            "confirm": {
+                "toggleRole": "{action} admin rights?",
+                "give": "Grant",
+                "remove": "Revoke",
+                "deleteHeader": "⚠️ Permanently delete this volunteer?",
+                "deleteBody": "This action will delete:\n• Their profile\n• Their registrations\n• Their documents",
+                "deleteButton": "Delete permanently"
+            },
+            "details": {
+                "tabs": {
+                    "info": "Information",
+                    "history": "History"
+                },
+                "labels": {
+                    "phone": "Phone",
+                    "status": "Status",
+                    "registration": "Registration",
+                    "school": "School",
+                    "type": "Profile Type",
+                    "note": "Internal Note",
+                    "license": "License",
+                    "notProvided": "Not provided"
+                },
+                "schoolPlaceholder": "Search...",
+                "schoolOtherPlaceholder": "Specify...",
+                "addNotePlaceholder": "Add a note...",
+                "saveNote": "Save note",
+                "viewProof": "View document",
+                "changeTypeConfirm": "Switch this volunteer to {newStatus}?",
+                "volunteerSimple": "Simple Volunteer",
+                "volunteerSchool": "School (Mandatory hours)",
+                "editSchool": "Edit school",
+                "clickToChange": "Click to change"
+            },
+            "history": {
+                "period": "Period",
+                "totalOnPeriod": "{total}h over the period",
+                "filter": "Filter",
+                "empty": "No activity found",
+                "emptyTip": "Try widening the period",
+                "loading": "Loading...",
+                "slot": "Slot",
+                "quotaReached": "School Volunteer (Quota reached)",
+                "horsQuota": "Off Quota"
+            }
+        }
+    },
+    "chat": {
+        "title": "Messages",
+        "subtitle": "Support & Discussions",
+        "noConversation": "No conversation selected",
+        "selectConversation": "Select a conversation to start",
+        "search": "Search...",
+        "newButton": "New",
+        "emptyList": "No conversation",
+        "startConversation": "Start a new conversation!",
+        "noResult": "No result for \"{query}\"",
+        "admin": "Administrator",
+        "volunteer": "Volunteer",
+        "newDiscussion": "New discussion",
+        "systemAnnouncement": "System Announcement",
+        "messageDeleted": "Message deleted",
+        "user": "User",
+        "edited": "(edited)",
+        "messageNotFound": "Message not found",
+        "replyTo": "Replying to",
+        "typing": "{name} is typing...",
+        "typingPlural": "{names} are typing...",
+        "someone": "Someone",
+        "yourMessage": "Your message...",
+        "conversationStart": "Start of conversation",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteMessage": "Are you sure you want to delete this message?",
+        "editLimitError": "You can only edit a message within 1 hour of sending it",
+        "loading": "Loading...",
+        "noUserFound": "No user found",
+        "selectRecipient": "Please select a recipient",
+        "sentSuccess": "Message sent successfully ✨",
+        "sendError": "Unable to send",
+        "editTitle": "Edit message",
+        "cancel": "Cancel",
+        "save": "Save",
+        "messageEdited": "Message edited",
+        "editError": "Unable to edit",
+        "markResolved": "Mark as resolved",
+        "reopen": "Reopen",
+        "hide": "Hide (For me)",
+        "deleteForever": "Delete for everyone (Error)",
+        "close": "Close",
+        "conversationHidden": "Conversation hidden",
+        "confirmDeleteForever": "⚠️ WARNING: Delete for EVERYONE?\n\nThis action is irreversible. Use only in case of error.",
+        "deleting": "Deleting...",
+        "deletedForever": "Conversation permanently deleted",
+        "deleteError": "Error during deletion",
+        "unknownError": "Unknown",
+        "deleteDefinitive": "Delete permanently",
+        "resolved": "Conversation marked as resolved",
+        "reopened": "Conversation reopened",
+        "modal": {
+            "newMessage": "✨ New Message",
+            "createDesc": "Create and send a message",
+            "messageType": "Message Type",
+            "support": "Support",
+            "supportDescVolunteer": "Request help",
+            "supportDescAdmin": "Message to Admins",
+            "announcement": "Announcement",
+            "announcementDesc": "To everyone",
+            "direct": "Direct",
+            "directDescVolunteer": "To an administrator",
+            "directDescAdmin": "Personal",
+            "recipientVolunteer": "Recipient (Volunteer)",
+            "recipientAdmin": "Recipient (Administrator)",
+            "searchVolunteer": "Search for a volunteer...",
+            "searchAdmin": "Search for an administrator...",
+            "subject": "Subject",
+            "subjectPlaceholder": "Ex: Need info, Technical issue...",
+            "message": "Message",
+            "messagePlaceholder": "Write your message here... (Markdown supported)",
+            "tip": "💡 Tip: Use **bold** or *italic* to highlight",
+            "send": "Send"
+        }
+    },
+    "poles": {
+        "title": "Teams",
+        "subtitle": "Join teams that make a difference. Discover team leaders and express your interest.",
+        "badge": "Organization & Teams",
+        "create": "Create",
+        "contact": "Contact",
+        "join": "Join",
+        "interested": "Interested",
+        "interestNotified": "🎯 Interest notified to team leaders!",
+        "interestRemoved": "Interest removed",
+        "loginToJoin": "Log in to join a team",
+        "leaders": "Team Leaders",
+        "noLeader": "No team leader",
+        "noPoleInDirection": "No team in this department",
+        "addPole": "Add a team",
+        "newPole": "New Team",
+        "newDirection": "Department",
+        "uncategorized": "Uncategorized teams",
+        "noActivePole": "No active team",
+        "polesWillAppear": "Teams will appear here once created.",
+        "antenneDirection": "Branch Direction",
+        "noAntenneDirector": "No branch director assigned",
+        "directorTitle": "Branch Director",
+        "discoverTeam": "Discover this team and its missions.",
+        "viewInterested": "View interested",
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleteConfirmHeader": "⚠️ Delete this team?",
+        "deleteConfirmBody": "This will also delete the interest history.",
+        "deleteDirectionConfirmHeader": "⚠️ Delete this Department?",
+        "deleteDirectionConfirmBody": "Child teams will become orphans.",
+        "deleteDefinitive": "Delete permanently",
+        "deleted": "Deleted",
+        "updated": "Updated",
+        "created": "Created",
+        "saved": "Saved",
+        "errorSave": "Save error",
+        "errorDelete": "Delete error",
+        "add": "Add",
+        "antenne": {
+            "title": "Branch Direction",
+            "subtitle": "Main branch configuration",
+            "nameOptional": "Name (optional)",
+            "description": "Description",
+            "placeholderName": "Ex: Branch Direction Angers",
+            "placeholderDesc": "Describe the mission of the branch direction...",
+            "noDirector": "No branch director assigned"
+        },
+        "modal": {
+            "upsertDirectionTitle": "📁 {action} Direction",
+            "upsertPoleTitle": "🏰 {action} Team",
+            "new": "New",
+            "modify": "Edit",
+            "categoryMain": "Main Category",
+            "configTeam": "Configuration and Team",
+            "parent": "Parent Direction",
+            "noParent": "— None (create as Direction) —",
+            "parentHelp": "Attach this team to an existing Direction",
+            "nameDirection": "Direction Name",
+            "namePole": "Team Name",
+            "icon": "Icon (Lucide)",
+            "color": "Color (Optional)",
+            "colors": {
+                "brand": "Blue (Brand)",
+                "emerald": "Emerald",
+                "purple": "Purple",
+                "orange": "Orange"
+            },
+            "email": "Contact Email",
+            "currentLeaders": "Current Leaders",
+            "addLeader": "✨ Add a Leader",
+            "searchPlaceholder": "Type a name or email...",
+            "searchHelp": "You can add leaders once the team is created.",
+            "roleTitle": "Role Title",
+            "roleDesc": "Define the role of {name}",
+            "roleLabel": "Role Label",
+            "rolePlaceholder": "Ex: Logistics Manager",
+            "roleSuggestions": "Suggestions: Manager • Coordinator • Animator • Referent",
+            "removeLeaderConfirm": "Remove this leader?",
+            "markDelete": "Marked for deletion",
+            "leaderAddedToast": "{name} will be added as \"{role}\""
+        },
+        "candidates": {
+            "recruitment": "Recruitment",
+            "interestedIn": "Interested in: {name}",
+            "waiting": "{count} volunteer(s) waiting",
+            "tipContact": "Click the message icon to contact directly.",
+            "empty": "No interested volunteers yet.",
+            "actions": {
+                "contact": "Contact",
+                "remove": "Remove from list",
+                "removeConfirm": "Remove this volunteer from the list?\n(This will uncheck their interest)"
+            },
+            "contactMessage": "Hello {name}, \n\nI am contacting you regarding your interest in the team {pole}.",
+            "contactSubject": "Team Application: {pole}",
+            "chatOpened": "💬 Conversation opened!"
+        }
+    },
+    "legal": {
+        "planningDesc": "Manage distribution and collection schedules.",
+        "back": "Back",
+        "allRights": "All rights reserved.",
+        "footer": "All rights reserved.",
+        "mentions": {
+            "title": "Legal Notices",
+            "subtitle": "Legal information about the association and the platform.",
+            "sections": {
+                "editor": {
+                    "title": "1. Site Publisher",
+                    "name": "COP1 Angers Association",
+                    "status": "Non-profit association (law 1901).",
+                    "address": "Headquarters: 34 rue des Noyers, 49000 Angers, France",
+                    "contact": "Contact: angers@cop1.fr"
+                },
+                "hosting": {
+                    "title": "2. Hosting & Data",
+                    "intro": "The application is technically hosted (Frontend) on the client browser.",
+                    "authHosting": "Data and authentication are hosted by:",
+                    "hostName": "Supabase Inc. (AWS based)",
+                    "hostAddress": "San Francisco, California, USA.",
+                    "compliance": "GDPR Compliant (Data Processing Addendum)."
+                },
+                "ip": {
+                    "title": "3. Intellectual Property",
+                    "text1": "The logo and name <span class=\"font-black text-brand-600\">COP1 Angers</span> are the exclusive property of the association.",
+                    "text2": "Any reproduction, distribution, or modification without authorization is strictly prohibited."
+                }
+            }
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "subtitle": "Protection and management of your personal data.",
+            "sections": {
+                "data": {
+                    "title": "1. Collected Data",
+                    "intro": "As part of your volunteer registration, we collect:",
+                    "identity": "<strong>Identity:</strong> Name, First Name.",
+                    "contact": "<strong>Contact:</strong> Email, Phone.",
+                    "profile": "<strong>Profile:</strong> Student status, preferences.",
+                    "tech": "<strong>Technical:</strong> IP Address (security)."
+                },
+                "usage": {
+                    "title": "2. Data Usage",
+                    "intro": "Your data is used exclusively to:",
+                    "planning": "Manage distribution and collection planning.",
+                    "hours": "Validate your volunteer hours (certificates).",
+                    "contact": "Contact you in case of emergency or cancellation."
+                },
+                "conservation": {
+                    "title": "3. Retention & Rights",
+                    "text": "Data from accounts inactive for more than <strong>3 years</strong> is anonymized.",
+                    "rightsTitle": "Your Rights",
+                    "rightsText": "You have the right to access, modify, and delete via your profile or upon request to administrators."
+                }
+            }
+        },
+        "cgu": {
+            "title": "Terms of Use",
+            "subtitle": "Code of conduct and commitments.",
+            "alert": {
+                "title": "Volunteer Commitment",
+                "content": "Registration for a mission is a commitment. In case of impediment, unsubscribe at least 24h in advance out of respect for the team and beneficiaries."
+            },
+            "sections": {
+                "rules": {
+                    "title": "Code of Conduct",
+                    "respect": {
+                        "title": "Respect & Courtesy",
+                        "text": "Indispensable towards beneficiaries, other volunteers, and partners."
+                    },
+                    "security": {
+                        "title": "Security",
+                        "text": "Strict compliance with instructions given by referents during missions."
+                    },
+                    "confidentiality": {
+                        "title": "Confidentiality",
+                        "text": "Formal prohibition to disclose information about beneficiaries met."
+                    },
+                    "accuracy": {
+                        "title": "Accuracy",
+                        "text": "You certify that documents provided for registration are authentic."
+                    }
+                }
+            }
+        }
+    }
+}

@@ -4,6 +4,7 @@ import { createIcons, icons } from 'lucide';
 import { APP_CONFIG } from '../../core/constants.js';
 import { router } from '../../core/router.js';
 import { store } from '../../core/store.js';
+import { t } from '../../services/i18n.js';
 
 const { LOGO_URL } = APP_CONFIG;
 
@@ -23,14 +24,14 @@ export function renderResetPassword() {
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-50 to-white shadow-sm mb-4 border border-emerald-100/50">
                         <i data-lucide="key-round" class="w-10 h-10 text-emerald-600"></i>
                     </div>
-                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Nouveau mot de passe</h1>
-                    <p class="text-slate-500 font-medium mt-2">Définissez votre nouveau mot de passe sécurisé</p>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">${t('auth.resetPassword.title')}</h1>
+                    <p class="text-slate-500 font-medium mt-2">${t('auth.resetPassword.subtitle')}</p>
                 </div>
 
                 <!-- Form -->
                 <form id="form-reset-password" class="space-y-5">
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nouveau mot de passe</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.login.password')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="lock" class="w-5 h-5"></i>
@@ -46,7 +47,7 @@ export function renderResetPassword() {
                         <!-- Password Strength Indicator -->
                         <div id="password-strength" class="hidden mt-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 space-y-2.5 animate-fade-in">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Force du mot de passe</span>
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">${t('auth.password.strength.title')}</span>
                                 <span id="password-strength-label" class="text-[10px] font-bold uppercase tracking-wide text-slate-400">—</span>
                             </div>
                             <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -55,26 +56,26 @@ export function renderResetPassword() {
                             <div class="grid grid-cols-2 gap-1.5 pt-1">
                                 <div id="req-length" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                     <i data-lucide="circle" class="w-3 h-3"></i>
-                                    <span>8 caractères min.</span>
+                                    <span>${t('auth.password.requirements.length')}</span>
                                 </div>
                                 <div id="req-upper" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                     <i data-lucide="circle" class="w-3 h-3"></i>
-                                    <span>1 majuscule</span>
+                                    <span>${t('auth.password.requirements.upper')}</span>
                                 </div>
                                 <div id="req-lower" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                     <i data-lucide="circle" class="w-3 h-3"></i>
-                                    <span>1 minuscule</span>
+                                    <span>${t('auth.password.requirements.lower')}</span>
                                 </div>
                                 <div id="req-number" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                     <i data-lucide="circle" class="w-3 h-3"></i>
-                                    <span>1 chiffre</span>
+                                    <span>${t('auth.password.requirements.number')}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Confirmer le mot de passe</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.register.confirmPassword')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="lock-keyhole" class="w-5 h-5"></i>
@@ -90,13 +91,13 @@ export function renderResetPassword() {
                     </div>
                     
                     <button type="submit" id="btn-submit" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
-                        Mettre à jour le mot de passe
+                        ${t('auth.resetPassword.submit')}
                     </button>
                     
                     <div class="pt-4 text-center">
                         <button type="button" data-link="/login" class="text-sm font-bold text-slate-500 hover:text-brand-600 transition-colors flex items-center justify-center gap-2 mx-auto">
                             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                            Retour à la connexion
+                            ${t('auth.resetPassword.backToLogin')}
                         </button>
                     </div>
                 </form>
@@ -144,11 +145,11 @@ export function initResetPassword() {
         if (confirm.length > 0) {
             matchIndicator.classList.remove('hidden');
             if (password === confirm) {
-                matchIndicator.textContent = '✓ Les mots de passe correspondent';
+                matchIndicator.textContent = `✓ ${t('auth.resetPassword.match.success')}`;
                 matchIndicator.classList.remove('text-red-500');
                 matchIndicator.classList.add('text-emerald-500');
             } else {
-                matchIndicator.textContent = '✗ Les mots de passe ne correspondent pas';
+                matchIndicator.textContent = `✗ ${t('auth.resetPassword.match.error')}`;
                 matchIndicator.classList.remove('text-emerald-500');
                 matchIndicator.classList.add('text-red-500');
             }
@@ -230,10 +231,10 @@ function updatePasswordStrength(password) {
     // Update bar and label
     const configs = [
         { width: '0%', color: 'bg-slate-300', label: '—', labelColor: 'text-slate-400' },
-        { width: '25%', color: 'bg-red-500', label: 'Faible', labelColor: 'text-red-500' },
-        { width: '50%', color: 'bg-orange-500', label: 'Moyen', labelColor: 'text-orange-500' },
-        { width: '75%', color: 'bg-yellow-500', label: 'Bon', labelColor: 'text-yellow-500' },
-        { width: '100%', color: 'bg-green-500', label: 'Fort', labelColor: 'text-green-600' }
+        { width: '25%', color: 'bg-red-500', label: t('auth.password.strength.weak'), labelColor: 'text-red-500' },
+        { width: '50%', color: 'bg-orange-500', label: t('auth.password.strength.medium'), labelColor: 'text-orange-500' },
+        { width: '75%', color: 'bg-yellow-500', label: t('auth.password.strength.good'), labelColor: 'text-yellow-500' },
+        { width: '100%', color: 'bg-green-500', label: t('auth.password.strength.strong'), labelColor: 'text-green-600' }
     ];
 
     const config = configs[score];
@@ -252,7 +253,7 @@ async function handleResetSubmit(e) {
     const confirmPassword = document.getElementById('confirm-password')?.value;
 
     if (!newPassword || !confirmPassword) {
-        return showToast("Veuillez remplir tous les champs", "error");
+        return showToast(t('common.error.fillAll'), "error");
     }
 
     // Password strength validation (same as registration)
@@ -264,11 +265,11 @@ async function handleResetSubmit(e) {
     };
     const allChecksPassed = Object.values(passwordChecks).every(Boolean);
     if (!allChecksPassed) {
-        return showToast("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre", "error");
+        return showToast(t('auth.register.error.passwordRequirements'), "error");
     }
 
     if (newPassword !== confirmPassword) {
-        return showToast("Les mots de passe ne correspondent pas", "error");
+        return showToast(t('auth.register.error.passwordMismatch'), "error");
     }
 
     toggleLoader(true);
@@ -280,9 +281,9 @@ async function handleResetSubmit(e) {
 
         if (error) {
             console.error("Password update error:", error);
-            showToast(error.message || "Erreur lors de la mise à jour", "error");
+            showToast(error.message || t('common.error'), "error");
         } else {
-            showToast("Mot de passe mis à jour avec succès !", "success");
+            showToast(t('auth.resetPassword.success'), "success");
 
             // Reset the password recovery mode flag
             store.state.isPasswordRecoveryMode = false;
@@ -294,7 +295,7 @@ async function handleResetSubmit(e) {
         }
     } catch (err) {
         console.error("Unexpected error:", err);
-        showToast("Erreur inattendue", "error");
+        showToast(t('common.error'), "error");
     } finally {
         toggleLoader(false);
     }

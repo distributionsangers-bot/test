@@ -4,6 +4,7 @@ import { toggleLoader, showToast } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { APP_CONFIG } from '../../core/constants.js';
 import { SCHOOLS } from '../../core/schools.js';
+import { t } from '../../services/i18n.js';
 
 const { LOGO_URL, BUCKET_PROOF } = APP_CONFIG;
 
@@ -24,41 +25,41 @@ export function renderRegister() {
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">
                         <img src="${LOGO_URL}" class="w-12 h-12 object-contain" alt="Logo">
                     </div>
-                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Inscription</h1>
-                    <p class="text-slate-500 font-medium">Rejoignez la communauté COP1</p>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">${t('auth.register.title')}</h1>
+                    <p class="text-slate-500 font-medium">${t('auth.register.subtitle')}</p>
                 </div>
 
                 <!-- Segmented Control -->
                 <div class="bg-slate-100/80 p-1.5 rounded-2xl mb-8 flex relative">
-                    <button data-link="/login" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition-all duration-300">Connexion</button>
-                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-brand-600 shadow-sm transition-all duration-300 cursor-default">Inscription</button>
+                    <button data-link="/login" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition-all duration-300">${t('auth.login.title')}</button>
+                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-brand-600 shadow-sm transition-all duration-300 cursor-default">${t('auth.register.title')}</button>
                 </div>
 
                 <!-- Form -->
                 <form id="form-register" class="space-y-4 pb-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Prénom</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('profile.form.firstName')}</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="user" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-fn" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Prénom">
+                                <input id="reg-fn" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="${t('profile.form.firstName')}">
                             </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nom</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('profile.form.lastName')}</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="user" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
+                                <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="${t('profile.form.lastName')}">
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.login.email')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="mail" class="w-5 h-5"></i>
@@ -68,7 +69,7 @@ export function renderRegister() {
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Téléphone</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('profile.form.phone')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="phone" class="w-5 h-5"></i>
@@ -79,7 +80,7 @@ export function renderRegister() {
 
                     <div class="space-y-4">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.login.password')}</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="lock" class="w-5 h-5"></i>
@@ -93,7 +94,7 @@ export function renderRegister() {
                             <!-- Password Strength Indicator -->
                             <div id="password-strength-container" class="hidden mt-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 space-y-2.5 animate-fade-in">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Force du mot de passe</span>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">${t('auth.password.strength.title')}</span>
                                     <span id="password-strength-label" class="text-[10px] font-bold uppercase tracking-wide text-slate-400">—</span>
                                 </div>
                                 <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -102,25 +103,25 @@ export function renderRegister() {
                                 <div class="grid grid-cols-2 gap-1.5 pt-1">
                                     <div id="req-length" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                         <i data-lucide="circle" class="w-3 h-3"></i>
-                                        <span>8 caractères min.</span>
+                                        <span>${t('auth.password.requirements.length')}</span>
                                     </div>
                                     <div id="req-upper" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                         <i data-lucide="circle" class="w-3 h-3"></i>
-                                        <span>1 majuscule</span>
+                                        <span>${t('auth.password.requirements.upper')}</span>
                                     </div>
                                     <div id="req-lower" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                         <i data-lucide="circle" class="w-3 h-3"></i>
-                                        <span>1 minuscule</span>
+                                        <span>${t('auth.password.requirements.lower')}</span>
                                     </div>
                                     <div id="req-number" class="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                         <i data-lucide="circle" class="w-3 h-3"></i>
-                                        <span>1 chiffre</span>
+                                        <span>${t('auth.password.requirements.number')}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Confirmer</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.register.confirmPassword')}</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="lock" class="w-5 h-5"></i>
@@ -135,7 +136,7 @@ export function renderRegister() {
                     
                     <!-- 1. School Selection (Premium Combobox) -->
                     <div class="space-y-1.5 relative z-50">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">École / Université / Structure</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('profile.form.school')}</label>
                         <div class="relative group">
                             <i data-lucide="graduation-cap" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-500 z-10 transition-colors group-hover:text-brand-600"></i>
                             
@@ -143,7 +144,7 @@ export function renderRegister() {
                             <input type="hidden" id="reg-school" name="school">
 
                             <!-- Display Input (Search) -->
-                            <input type="text" id="school-search" placeholder="Rechercher votre école..." autocomplete="off"
+                            <input type="text" id="school-search" placeholder="${t('profile.form.searchSchool')}" autocomplete="off"
                                 class="w-full pl-12 pr-10 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300 cursor-pointer hover:bg-white">
                             
                             <i id="school-chevron" data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
@@ -159,21 +160,21 @@ export function renderRegister() {
 
                     <!-- 1b. Precision for "Autre" -->
                     <div id="school-other-container" class="hidden space-y-1.5 animate-fade-in relative z-40">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Précisez votre établissement</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('profile.form.specifySchool')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="building-2" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-school-other" type="text" class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom de l'établissement">
+                            <input id="reg-school-other" type="text" class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="${t('profile.form.schoolName')}">
                         </div>
                     </div>
 
                     <!-- 2. Justificatif (Proof) -->
                     <div class="space-y-2 pt-2">
                         <div class="ml-1 mb-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Justificatif</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase">${t('auth.register.proof.label')}</label>
                             <p class="text-[10px] text-slate-400 leading-tight mt-1">
-                                Acceptés : Carte Étudiant, Certificat de Scolarité, Carte ISIC, Carte d'identité, Certificat d'admission.
+                                ${t('auth.register.proof.accepted')}
                             </p>
                         </div>
                         
@@ -186,8 +187,8 @@ export function renderRegister() {
                                     <i data-lucide="upload" class="w-6 h-6"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-slate-700 group-hover:text-brand-700 transition-colors">Cliquez pour ajouter</p>
-                                    <p class="text-[10px] text-slate-400 font-medium mt-1">PDF, JPG ou PNG (Max 5 Mo)</p>
+                                    <p class="text-sm font-bold text-slate-700 group-hover:text-brand-700 transition-colors">${t('auth.register.proof.clickAdd')}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-1">PDF, JPG, PNG (Max 5 Mo)</p>
                                 </div>
                             </div>
 
@@ -197,7 +198,7 @@ export function renderRegister() {
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold text-slate-900" id="file-name-display"></p>
-                                    <p class="text-[10px] text-brand-600 font-bold mt-1 hover:underline">Changer le fichier</p>
+                                    <p class="text-[10px] text-brand-600 font-bold mt-1 hover:underline">${t('auth.register.proof.changeFile')}</p>
                                 </div>
                             </div>
 
@@ -207,7 +208,7 @@ export function renderRegister() {
                         <div class="flex items-start gap-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
                             <i data-lucide="shield-check" class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"></i>
                             <p class="text-[10px] text-blue-400/80 leading-snug font-medium">
-                                <strong>Vérification :</strong> Ce document sert uniquement à vérifier votre statut. Il sera <strong class="text-blue-500">automatiquement supprimé</strong> de nos serveurs dès validation de votre compte.
+                                ${t('auth.register.proof.privacy')}
                             </p>
                         </div>
                     </div>
@@ -215,16 +216,15 @@ export function renderRegister() {
                     <!-- 3. Permit Checkbox -->
                     <label class="flex items-center gap-3 p-3 bg-white/50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white transition-all shadow-sm group">
                         <input type="checkbox" id="reg-permit" class="w-5 h-5 text-brand-600 rounded border-slate-300 focus:ring-brand-500 transition-all">
-                        <span class="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">J'ai le Permis B 🚗</span>
+                        <span class="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">${t('profile.form.hasPermit')} 🚗</span>
                     </label>
 
                     <!-- 4. Mandatory Hours Checkbox -->
-                    <!-- Previous Checkboxes -->
                     <label class="flex items-start gap-3 p-3 bg-orange-50/80 border border-orange-100 rounded-xl cursor-pointer hover:bg-orange-100 transition-all shadow-sm group">
                         <input type="checkbox" id="reg-mandatory" class="w-5 h-5 text-orange-500 rounded border-orange-200 focus:ring-orange-500 transition-all">
                         <div>
-                            <span class="text-sm font-bold text-orange-900 block">Besoin d'un justificatif d'heures ?</span>
-                            <span class="text-[10px] text-orange-700 leading-tight block">Cochez cette case si vous avez des obligations d'heures à justifier pour votre cursus.</span>
+                            <span class="text-sm font-bold text-orange-900 block">${t('auth.register.mandatory.label')}</span>
+                            <span class="text-[10px] text-orange-700 leading-tight block">${t('auth.register.mandatory.desc')}</span>
                         </div>
                     </label>
 
@@ -232,18 +232,18 @@ export function renderRegister() {
                     <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white transition-all shadow-sm group">
                         <input type="checkbox" id="reg-cgu" required class="w-5 h-5 text-brand-600 rounded border-slate-300 focus:ring-brand-500 transition-all mt-0.5">
                         <div class="text-xs text-slate-600 leading-snug">
-                            Je certifie avoir lu et accepté les <button type="button" data-link="/legal/cgu" class="text-brand-600 font-bold hover:underline">CGU</button> ainsi que la <button type="button" data-link="/legal/privacy" class="text-brand-600 font-bold hover:underline">Politique de Confidentialité</button>.
+                             ${t('auth.register.consent')}
                         </div>
                     </label>
 
                     <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 mt-4 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 transform">
-                        Créer mon compte
+                        ${t('auth.register.submit')}
                     </button>
                     
                     <div class="pt-6 text-center flex justify-center gap-4 text-[10px] text-slate-400 font-medium">
-                        <button type="button" data-link="/legal/mentions" class="hover:text-slate-600 transition-colors">Mentions</button> •
-                        <button type="button" data-link="/legal/privacy" class="hover:text-slate-600 transition-colors">Données</button> •
-                        <button type="button" data-link="/legal/cgu" class="hover:text-slate-600 transition-colors">CGU</button>
+                        <button type="button" data-link="/legal/mentions" class="hover:text-slate-600 transition-colors">${t('nav.legal.mentions')}</button> •
+                        <button type="button" data-link="/legal/privacy" class="hover:text-slate-600 transition-colors">${t('nav.legal.privacy')}</button> •
+                        <button type="button" data-link="/legal/cgu" class="hover:text-slate-600 transition-colors">${t('nav.legal.cgu')}</button>
                     </div>
                 </form>
             </div>
@@ -270,7 +270,7 @@ export function initRegister() {
         const filtered = sortedSchools.filter(s => s.toLowerCase().includes(search));
 
         if (filtered.length === 0) {
-            schoolList.innerHTML = `<div class="px-3 py-2 text-xs text-slate-400 font-medium text-center">Aucun résultat</div>`;
+            schoolList.innerHTML = `<div class="px-3 py-2 text-xs text-slate-400 font-medium text-center">${t('common.noResult')}</div>`;
             return;
         }
 
@@ -425,12 +425,13 @@ export function initRegister() {
         const score = Object.values(checks).filter(Boolean).length;
 
         // Update bar and label
+        // Update bar and label
         const configs = [
             { width: '0%', color: 'bg-slate-300', label: '—', labelColor: 'text-slate-400' },
-            { width: '25%', color: 'bg-red-500', label: 'Faible', labelColor: 'text-red-500' },
-            { width: '50%', color: 'bg-orange-500', label: 'Moyen', labelColor: 'text-orange-500' },
-            { width: '75%', color: 'bg-yellow-500', label: 'Bon', labelColor: 'text-yellow-500' },
-            { width: '100%', color: 'bg-green-500', label: 'Fort', labelColor: 'text-green-600' }
+            { width: '25%', color: 'bg-red-500', label: t('auth.password.strength.weak'), labelColor: 'text-red-500' },
+            { width: '50%', color: 'bg-orange-500', label: t('auth.password.strength.medium'), labelColor: 'text-orange-500' },
+            { width: '75%', color: 'bg-yellow-500', label: t('auth.password.strength.good'), labelColor: 'text-yellow-500' },
+            { width: '100%', color: 'bg-green-500', label: t('auth.password.strength.strong'), labelColor: 'text-green-600' }
         ];
 
         const config = configs[score];
@@ -517,13 +518,13 @@ export function initRegister() {
             // Handle "Autre" - use custom input
             if (school === 'Autre') {
                 const schoolOther = document.getElementById('reg-school-other').value.trim();
-                if (!schoolOther) return showToast("Veuillez préciser le nom de votre établissement", "error");
+                if (!schoolOther) return showToast(t('profile.form.error.specifySchool'), "error");
                 school = schoolOther;
             }
 
             const file = fileInput.files[0];
 
-            if (!fn || !ln || !email || !pass || !passConfirm || !phone) return showToast("Veuillez remplir tous les champs", "error");
+            if (!fn || !ln || !email || !pass || !passConfirm || !phone) return showToast(t('common.error.fillAll'), "error");
 
             // Password strength validation
             const passwordChecks = {
@@ -534,12 +535,12 @@ export function initRegister() {
             };
             const allChecksPassed = Object.values(passwordChecks).every(Boolean);
             if (!allChecksPassed) {
-                return showToast("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre", "error");
+                return showToast(t('auth.register.error.passwordRequirements'), "error");
             }
 
-            if (pass !== passConfirm) return showToast("Les mots de passe ne correspondent pas", "error");
-            if (!file) return showToast("Le justificatif étudiant est obligatoire", "error");
-            if (!cguAccepted) return showToast("Vous devez accepter les CGU et la Politique de Confidentialité", "error");
+            if (pass !== passConfirm) return showToast(t('auth.register.error.passwordMismatch'), "error");
+            if (!file) return showToast(t('auth.register.error.proofRequired'), "error");
+            if (!cguAccepted) return showToast(t('auth.register.error.policyRequired'), "error");
 
             toggleLoader(true);
             try {
@@ -570,11 +571,11 @@ export function initRegister() {
                     if (uploadError) {
                         console.error('Upload error:', uploadError);
                         // On ne bloque pas l'inscription mais on prévient
-                        showToast("Compte créé mais erreur d'upload. Contactez un admin.", "warning");
+                        showToast(t('auth.register.error.upload'), "warning");
                     }
                 }
 
-                showToast("Inscription réussie ! Redirection...", "success");
+                showToast(t('auth.register.success'), "success");
 
                 // C. REDIRECTION (Reload pour initier la session proprement)
                 setTimeout(() => {

@@ -1,0 +1,710 @@
+{
+    "common": {
+        "confirm": "Confirmer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "close": "Fermer",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "error.fillAll": "Veuillez remplir tous les champs",
+        "success": "Succès",
+        "yes": "Oui",
+        "no": "Non",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "refresh": "Rafraîchir",
+        "back": "Retour",
+        "next": "Suivant",
+        "previous": "Précédent",
+        "submit": "Envoyer",
+        "validate": "Valider",
+        "menu": "Menu",
+        "ok": "OK",
+        "attention": "Attention",
+        "info": "Information",
+        "today": "Aujourd'hui",
+        "tomorrow": "Demain",
+        "days": "jours",
+        "day": "jour",
+        "hours": "heures",
+        "hour": "heure",
+        "min": "min",
+        "noResult": "Aucun résultat"
+    },
+    "nav": {
+        "home": "Accueil",
+        "missions": "Missions",
+        "messages": "Messages",
+        "poles": "Pôles",
+        "profile": "Mon Profil",
+        "planning": "Planning",
+        "directory": "Annuaire",
+        "logout": "Déconnexion",
+        "adminView": "Vue Admin",
+        "volunteerView": "Vue Bénévole",
+        "switchToAdmin": "Passer en vue responsable",
+        "switchToVolunteer": "Passer en vue bénévole",
+        "legal": {
+            "mentions": "Mentions",
+            "privacy": "Données",
+            "cgu": "CGU"
+        }
+    },
+    "auth": {
+        "volunteerPortal": "Espace Bénévoles",
+        "loginSubtitle": "Connectez-vous pour accéder au portail",
+        "login": {
+            "title": "Connexion",
+            "email": "Email",
+            "password": "Mot de passe",
+            "emailPlaceholder": "exemple@email.com",
+            "passwordPlaceholder": "••••••••"
+        },
+        "register": {
+            "title": "Inscription",
+            "subtitle": "Rejoignez la communauté COP1",
+            "confirmPassword": "Confirmer",
+            "proof": {
+                "label": "Justificatif",
+                "accepted": "Acceptés : Carte Étudiant, Certificat de Scolarité, Carte ISIC, Carte d'identité, Certificat d'admission.",
+                "clickAdd": "Cliquez pour ajouter",
+                "changeFile": "Changer le fichier",
+                "privacy": "<strong>Vérification :</strong> Ce document sert uniquement à vérifier votre statut. Il sera <strong class=\"text-blue-500\">automatiquement supprimé</strong> de nos serveurs dès validation de votre compte."
+            },
+            "mandatory": {
+                "label": "Besoin d'un justificatif d'heures ?",
+                "desc": "Cochez cette case si vous avez des obligations d'heures à justifier pour votre cursus."
+            },
+            "consent": "Je certifie avoir lu et accepté les <button type=\"button\" data-link=\"/legal/cgu\" class=\"text-brand-600 font-bold hover:underline\">CGU</button> ainsi que la <button type=\"button\" data-link=\"/legal/privacy\" class=\"text-brand-600 font-bold hover:underline\">Politique de Confidentialité</button>.",
+            "submit": "Créer mon compte",
+            "success": "Inscription réussie ! Redirection...",
+            "error": {
+                "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre",
+                "passwordMismatch": "Les mots de passe ne correspondent pas",
+                "proofRequired": "Le justificatif étudiant est obligatoire",
+                "policyRequired": "Vous devez accepter les CGU et la Politique de Confidentialité",
+                "upload": "Compte créé mais erreur d'upload. Contactez un admin."
+            }
+        },
+        "resetPassword": {
+            "title": "Nouveau mot de passe",
+            "subtitle": "Définissez votre nouveau mot de passe sécurisé",
+            "submit": "Mettre à jour le mot de passe",
+            "backToLogin": "Retour à la connexion",
+            "success": "Mot de passe mis à jour avec succès !",
+            "match": {
+                "success": "Les mots de passe correspondent",
+                "error": "Les mots de passe ne correspondent pas"
+            }
+        },
+        "password": {
+            "strength": {
+                "title": "Force du mot de passe",
+                "weak": "Faible",
+                "medium": "Moyen",
+                "good": "Bon",
+                "strong": "Fort"
+            },
+            "requirements": {
+                "length": "8 caractères min.",
+                "upper": "1 majuscule",
+                "lower": "1 minuscule",
+                "number": "1 chiffre"
+            }
+        },
+        "forgotPassword": "Oublié ?",
+        "signIn": "Se connecter",
+        "signUp": "S'inscrire",
+        "createAccount": "Créer mon compte",
+        "alreadyHaveAccount": "Déjà inscrit ?",
+        "noAccount": "Pas encore de compte ?",
+        "enterEmailForReset": "Veuillez entrer votre email pour réinitialiser le mot de passe :",
+        "resetPasswordTitle": "Mot de passe oublié",
+        "sendResetLink": "Envoyer le lien",
+        "resetEmailSent": "Email de réinitialisation envoyé"
+    },
+    "dashboard": {
+        "greeting": {
+            "morning": "Bonjour",
+            "afternoon": "Bon après-midi",
+            "evening": "Bonsoir"
+        },
+        "stats": {
+            "hours": "Heures",
+            "accumulated": "Cumulées",
+            "missions": "Missions",
+            "completed": "Effectuées",
+            "next": "Prochaine",
+            "registrations": "Inscriptions",
+            "volunteers": "Bénévoles",
+            "pending": "En attente",
+            "newThisWeek": "Nouveaux"
+        },
+        "badges": {
+            "admin": "🛡️ Administrateur",
+            "volunteer": "BÉNÉVOLE",
+            "student": "SCOLAIRE"
+        },
+        "sections": {
+            "announcements": "Annonces",
+            "availableMission": "Mission Disponible",
+            "nextMission": "Prochaine Mission",
+            "recentActivity": "Activité récente",
+            "emergencies": "Urgences (7 jours)",
+            "quickActions": "Actions Rapides"
+        },
+        "actions": {
+            "scan": "Scanner",
+            "scanSubtitle": "Pointer",
+            "contact": "Contacter",
+            "managePlanning": "Planning",
+            "managePlanningSubtitle": "Gérer les créneaux",
+            "manageDirectory": "Annuaire",
+            "manageDirectorySubtitle": "Gérer les bénévoles",
+            "createEvent": "Créer",
+            "createEventSubtitle": "Nouvel événement"
+        },
+        "empty": {
+            "noMission": "Rien de prévu ?",
+            "subscribeNext": "Inscrivez-vous à votre prochaine mission.",
+            "seeMissions": "Voir les missions",
+            "noActivity": "Aucune activité récente",
+            "noUrgency": "Aucune urgence !"
+        },
+        "viewAll": "Voir tout",
+        "activity": {
+            "registeredTo": "s'est inscrit à",
+            "noActivity": "Aucune activité récente"
+        },
+        "admin": {
+            "manage": "Gérer",
+            "cumulated": "Cumulé"
+        }
+    },
+    "events": {
+        "title": "Missions",
+        "subtitle": "Rejoignez les prochains événements !",
+        "filters": {
+            "all": "📅 Toutes",
+            "mine": "✓ Mes inscriptions"
+        },
+        "card": {
+            "places": "places",
+            "full": "Complet",
+            "registered": "Inscrit",
+            "soon": "⚡ C'est bientôt !",
+            "reserved": "réservées",
+            "register": "S'inscrire",
+            "unregister": "Désister"
+        },
+        "empty": {
+            "noMission": "Aucune mission disponible",
+            "comeBack": "Revenez bientôt",
+            "noRegistration": "Aucune inscription",
+            "subscribe": "Inscrivez-vous à une mission"
+        },
+        "urgency": {
+            "today": "🔥 Aujourd'hui !",
+            "tomorrow": "⏰ Demain !",
+            "days": "⚡ Dans {{days}} jours"
+        },
+        "modal": {
+            "confirmRegistration": "Confirmer l'inscription",
+            "confirmUnregistration": "Confirmer le désistement",
+            "quotaWarning": "Attention : quota d'heures",
+            "quotaMessageZero": "Ce créneau ne permet pas de valider d'heures (0h). En tant qu'étudiant devant valider un quota, ces heures ne compteront pas. Voulez-vous continuer ?",
+            "quotaMessageReserve": "Les places réservées aux étudiants sont complètes sur ce créneau. Vos heures NE SERONT PAS COMPTABILISÉES pour votre quota. Voulez-vous continuer ?",
+            "registerAnyway": "M'inscrire quand même",
+            "registerNoHours": "M'inscrire sans valider mes heures",
+            "notePlaceholder": "Une remarque pour les responsables ? (Optionnel)"
+        }
+    },
+    "profile": {
+        "title": "Mon Profil",
+        "error": {
+            "load": "Impossible de charger le profil."
+        },
+        "tabs": {
+            "history": "Historique",
+            "settings": "Paramètres"
+        },
+        "stats": {
+            "hours": "Heures",
+            "missions": "Missions",
+            "presence": "Présence",
+            "upcoming": "À venir"
+        },
+        "badges": {
+            "title": "Badges obtenus",
+            "student": "Scolaire",
+            "volunteer": "Bénévole",
+            "permit": "Permis",
+            "centenarian": "Centenaire",
+            "hours50": "50 heures",
+            "beginner": "Débutant",
+            "veteran": "Vétéran",
+            "missions10": "10+ missions",
+            "missions5": "5 missions",
+            "reliable": "Fiabilité max",
+            "driver": "Conducteur"
+        },
+        "form": {
+            "firstName": "Prénom",
+            "lastName": "Nom",
+            "phone": "Téléphone",
+            "hasPermit": "J'ai le permis de conduire",
+            "mandatoryHours": "Heures obligatoires (scolaire)",
+            "newPassword": "Nouveau mot de passe (optionnel)",
+            "school": "École / Établissement",
+            "searchSchool": "Rechercher votre école...",
+            "specifySchool": "Précisez votre établissement",
+            "schoolName": "Nom de l'établissement",
+            "saveChanges": "Enregistrer les modifications",
+            "error": {
+                "specifySchool": "Veuillez préciser le nom de votre établissement",
+                "update": "Erreur mise à jour"
+            },
+            "success": {
+                "update": "Profil mis à jour avec succès ✓"
+            }
+        },
+        "dangerZone": {
+            "title": "Zone dangereuse",
+            "deleteAccount": "Supprimer mon compte",
+            "confirmDelete": "Supprimer définitivement votre compte ? Cette action est irréversible.",
+            "confirmEmail": "Pour confirmer, veuillez saisir votre email :",
+            "errorEmail": "Email incorrect"
+        },
+        "history": {
+            "empty": "Aucune mission pour le moment",
+            "join": "Inscrivez-vous à un événement !",
+            "absent": "Non pointé",
+            "quotaExceeded": "Hors Quota (0h)",
+            "present": "Présent",
+            "registered": "Inscrit",
+            "upcoming": "À venir",
+            "volunteerSchool": "Bénévole École (Quota atteint)"
+        }
+    },
+    "status": {
+        "unknown": "Inconnu",
+        "pending": {
+            "title": "Inscription en cours de validation",
+            "message": "Votre demande d'inscription est en attente de validation par un responsable. Vous recevrez une notification dès qu'elle sera traitée.",
+            "tip": "En attendant, vous pouvez fermer cette page.",
+            "label": "En attente"
+        },
+        "approved": "Validé",
+        "rejected": {
+            "title": "Inscription refusée",
+            "message": "Malheureusement, votre inscription n'a pas été validée. Veuillez contacter un responsable pour plus d'informations.",
+            "contact": "Contacter un responsable",
+            "label": "Refusé"
+        }
+    },
+    "errors": {
+        "fillAllFields": "Veuillez remplir tous les champs",
+        "invalidCredentials": "Email ou mot de passe incorrect",
+        "unexpectedError": "Erreur inattendue"
+    },
+    "modals": {
+        "confirmation": "Confirmation",
+        "inputRequired": "Saisie requise"
+    },
+    "admin": {
+        "planning": {
+            "editEvent": "Modifier l'événement",
+            "createEvent": "Créer un événement"
+        },
+        "participants": {
+            "title": "Participants",
+            "export": {
+                "headers": {
+                    "firstName": "Prénom",
+                    "lastName": "Nom",
+                    "email": "Email",
+                    "phone": "Téléphone",
+                    "school": "École",
+                    "status": "Statut",
+                    "present": "Présent",
+                    "hours": "Heures Comptabilisées",
+                    "note": "Note Inscription",
+                    "date": "Date inscription"
+                },
+                "status": {
+                    "validated": "Validé",
+                    "pending": "En attente",
+                    "rejected": "Refusé"
+                },
+                "boolean": {
+                    "yes": "Oui",
+                    "no": "Non"
+                }
+            },
+            "errors": {
+                "alreadyRegistered": "Participant déjà inscrit à ce créneau"
+            }
+        },
+        "directory": {
+            "title": "Annuaire",
+            "subtitle": "Gérez votre équipe de bénévoles",
+            "stats": {
+                "total": "Total",
+                "pending": "En attente",
+                "admins": "Admins"
+            },
+            "searchPlaceholder": "Rechercher par nom, email, téléphone...",
+            "export": "Exporter",
+            "filters": {
+                "all": "Tous",
+                "pending": "En attente",
+                "admins": "Admins",
+                "drivers": "Conducteurs",
+                "school": "Scolaire"
+            },
+            "empty": {
+                "title": "Aucun bénévole trouvé",
+                "subtitle": "Modifiez vos filtres de recherche",
+                "error": "Erreur de chargement"
+            },
+            "badges": {
+                "new": "Nouveau",
+                "admin": "Admin",
+                "pending": "En attente",
+                "approved": "Validé",
+                "rejected": "Refusé"
+            },
+            "actions": {
+                "validate": "Valider",
+                "disable": "Désactiver",
+                "promote": "Passer Admin",
+                "demote": "Retirer Admin",
+                "delete": "Supprimer"
+            },
+            "pagination": "Affichage {start}-{end} sur {total} bénévoles",
+            "toasts": {
+                "exportError": "Erreur lors de l'export",
+                "exportSuccess": "Export téléchargé ✓",
+                "statusUpdated": "Compte validé ✓",
+                "statusDisabled": "Compte désactivé",
+                "statusError": "Erreur modification statut",
+                "rolePromoted": "Admin ajouté ✓",
+                "roleDemoted": "Admin retiré",
+                "adminError": "Erreur droits admin",
+                "deleteSuccess": "Bénévole supprimé",
+                "saveNoteError": "Erreur sauvegarde note",
+                "noteSaved": "Note enregistrée ✓",
+                "updateError": "Erreur modification",
+                "typeUpdated": "Type de profil mis à jour ✓"
+            },
+            "confirm": {
+                "toggleRole": "{action} les droits administrateur ?",
+                "give": "Donner",
+                "remove": "Retirer",
+                "deleteHeader": "⚠️ Supprimer définitivement ce bénévole ?",
+                "deleteBody": "Cette action supprimera :\n• Son profil\n• Ses inscriptions\n• Ses justificatifs",
+                "deleteButton": "Supprimer définitivement"
+            },
+            "details": {
+                "tabs": {
+                    "info": "Informations",
+                    "history": "Historique"
+                },
+                "labels": {
+                    "phone": "Téléphone",
+                    "status": "Statut",
+                    "registration": "Inscription",
+                    "school": "École",
+                    "type": "Type Profil",
+                    "note": "Note interne",
+                    "license": "Permis",
+                    "notProvided": "Non renseigné"
+                },
+                "schoolPlaceholder": "Rechercher...",
+                "schoolOtherPlaceholder": "Précisez...",
+                "addNotePlaceholder": "Ajouter une note...",
+                "saveNote": "Enregistrer la note",
+                "viewProof": "Voir le justificatif",
+                "changeTypeConfirm": "Passer ce bénévole en {newStatus} ?",
+                "volunteerSimple": "Bénévole Simple",
+                "volunteerSchool": "Scolaire (heures obligatoires)",
+                "editSchool": "Modifier l'école",
+                "clickToChange": "Cliquez pour changer"
+            },
+            "history": {
+                "period": "Période",
+                "totalOnPeriod": "{total}h sur la période",
+                "filter": "Filtrer",
+                "empty": "Aucune activité trouvée",
+                "emptyTip": "Essayez d'élargir la période",
+                "loading": "Chargement...",
+                "slot": "Créneau",
+                "quotaReached": "Bénévole École (Quota atteint)",
+                "horsQuota": "Hors Quota"
+            }
+        }
+    },
+    "chat": {
+        "title": "Messages",
+        "subtitle": "Support & Discussions",
+        "noConversation": "Aucune conversation sélectionnée",
+        "selectConversation": "Sélectionnez une conversation pour commencer",
+        "search": "Rechercher...",
+        "newButton": "Nouveau",
+        "emptyList": "Aucune conversation",
+        "startConversation": "Commencez un nouvel échange !",
+        "noResult": "Aucun résultat pour \"{query}\"",
+        "admin": "Administrateur",
+        "volunteer": "Bénévole",
+        "newDiscussion": "Nouvelle discussion",
+        "systemAnnouncement": "Annonce Système",
+        "messageDeleted": "Message supprimé",
+        "user": "Utilisateur",
+        "edited": "(modifié)",
+        "messageNotFound": "Message non trouvé",
+        "replyTo": "Réponse à",
+        "typing": "{name} écrit...",
+        "typingPlural": "{names} écrivent...",
+        "someone": "Quelqu'un",
+        "yourMessage": "Votre message...",
+        "conversationStart": "Début de la conversation",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce message ?",
+        "editLimitError": "Vous ne pouvez modifier un message que dans l'heure suivant son envoi",
+        "loading": "Chargement...",
+        "noUserFound": "Aucun utilisateur trouvé",
+        "selectRecipient": "Veuillez sélectionner un destinataire",
+        "sentSuccess": "Message envoyé avec succès ✨",
+        "sendError": "Impossible d'envoyer",
+        "editTitle": "Modifier le message",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "messageEdited": "Message modifié",
+        "editError": "Impossible de modifier",
+        "markResolved": "Marquer comme résolu",
+        "reopen": "Réouvrir",
+        "hide": "Masquer (Pour moi)",
+        "deleteForever": "Supprimer pour tous (Erreur)",
+        "close": "Fermer",
+        "conversationHidden": "Conversation masquée",
+        "confirmDeleteForever": "⚠️ ATTENTION : Supprimer pour TOUT LE MONDE ?\n\nCette action est irréversible. Utilisez-la seulement en cas d'erreur.",
+        "deleting": "Suppression...",
+        "deletedForever": "Conversation supprimée définitivement",
+        "deleteError": "Erreur lors de la suppression",
+        "unknownError": "Inconnue",
+        "deleteDefinitive": "Supprimer définitivement",
+        "resolved": "Conversation marquée comme résolue",
+        "reopened": "Conversation réouverte",
+        "modal": {
+            "newMessage": "✨ Nouveau Message",
+            "createDesc": "Créer et envoyer un message",
+            "messageType": "Type de message",
+            "support": "Support",
+            "supportDescVolunteer": "Demande d'aide",
+            "supportDescAdmin": "Message aux Admins",
+            "announcement": "Annonce",
+            "announcementDesc": "À tous",
+            "direct": "Direct",
+            "directDescVolunteer": "À un administrateur",
+            "directDescAdmin": "Personnel",
+            "recipientVolunteer": "Destinataire (Bénévole)",
+            "recipientAdmin": "Destinataire (Administrateur)",
+            "searchVolunteer": "Rechercher un bénévole...",
+            "searchAdmin": "Rechercher un administrateur...",
+            "subject": "Sujet",
+            "subjectPlaceholder": "Ex: Besoin d'info, Problème technique...",
+            "message": "Message",
+            "messagePlaceholder": "Écrivez votre message ici... (Markdown supporté)",
+            "tip": "💡 Conseil: Utilisez **gras** ou *italique* pour mettre en évidence",
+            "send": "Envoyer"
+        }
+    },
+    "poles": {
+        "title": "Les Pôles",
+        "subtitle": "Rejoignez les équipes qui font bouger les choses. Découvrez les responsables et signifiez votre intérêt.",
+        "badge": "Organisation & Pôles",
+        "create": "Créer",
+        "contact": "Contacter",
+        "join": "Rejoindre",
+        "interested": "Intéressé(e)",
+        "interestNotified": "🎯 Intérêt signalé aux responsables !",
+        "interestRemoved": "Intérêt retiré",
+        "loginToJoin": "Connectez-vous pour rejoindre un pôle",
+        "leaders": "Responsables",
+        "noLeader": "Aucun responsable",
+        "noPoleInDirection": "Aucun pôle dans cette direction",
+        "addPole": "Ajouter un pôle",
+        "newPole": "Nouveau Pôle",
+        "newDirection": "Direction",
+        "uncategorized": "Pôles non classés",
+        "noActivePole": "Aucun pôle actif",
+        "polesWillAppear": "Les pôles apparaîtront ici une fois créés.",
+        "antenneDirection": "Direction d'Antenne",
+        "noAntenneDirector": "Aucun directeur d'antenne assigné",
+        "directorTitle": "Directeur·ice d'antenne",
+        "discoverTeam": "Découvrez cette équipe et ses missions.",
+        "viewInterested": "Voir les intéressés",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "deleteConfirmHeader": "⚠️ Supprimer ce pôle ?",
+        "deleteConfirmBody": "Cela supprimera aussi l'historique des intérêts.",
+        "deleteDirectionConfirmHeader": "⚠️ Supprimer cette Direction ?",
+        "deleteDirectionConfirmBody": "Les pôles enfants deviendront orphelins.",
+        "deleteDefinitive": "Supprimer définitivement",
+        "deleted": "Supprimé",
+        "updated": "Mis à jour",
+        "created": "Créé",
+        "saved": "Enregistré",
+        "errorSave": "Erreur sauvegarde",
+        "errorDelete": "Erreur suppression",
+        "add": "Ajouter",
+        "antenne": {
+            "title": "Direction d'Antenne",
+            "subtitle": "Configuration de la direction principale",
+            "nameOptional": "Nom (optionnel)",
+            "description": "Description",
+            "placeholderName": "Ex: Direction d'Antenne Angers",
+            "placeholderDesc": "Décrivez la mission de la direction d'antenne..."
+        },
+        "modal": {
+            "upsertDirectionTitle": "📁 {action} la Direction",
+            "upsertPoleTitle": "🏰 {action} le Pôle",
+            "new": "Nouveau",
+            "modify": "Modifier",
+            "categoryMain": "Catégorie principale",
+            "configTeam": "Configuration et équipe",
+            "parent": "Direction parente",
+            "noParent": "— Aucune (créer comme Direction) —",
+            "parentHelp": "Rattachez ce pôle à une Direction existante",
+            "nameDirection": "Nom de la Direction",
+            "namePole": "Nom du Pôle",
+            "icon": "Icône (Lucide)",
+            "color": "Couleur (Optionnel)",
+            "colors": {
+                "brand": "Bleu (Brand)",
+                "emerald": "Émeraude",
+                "purple": "Violet",
+                "orange": "Orange"
+            },
+            "email": "Email de contact",
+            "currentLeaders": "Responsables actuels",
+            "addLeader": "✨ Ajouter un responsable",
+            "searchPlaceholder": "Tapez un nom ou email...",
+            "searchHelp": "Vous pourrez ajouter des responsables une fois le pôle créé.",
+            "roleTitle": "Titre du poste",
+            "roleDesc": "Définissez le rôle de {name}",
+            "roleLabel": "Intitulé du poste",
+            "rolePlaceholder": "Ex: Responsable Logistique",
+            "roleSuggestions": "Suggestions : Responsable • Coordinateur • Animateur • Référent",
+            "removeLeaderConfirm": "Retirer ce responsable ?",
+            "markDelete": "Marqué pour suppression",
+            "leaderAddedToast": "{name} sera ajouté(e) au poste \"{role}\""
+        },
+        "candidates": {
+            "recruitment": "Recrutement",
+            "interestedIn": "Intéressés par : {name}",
+            "waiting": "{count} bénévole(s) en attente",
+            "tipContact": "Cliquez sur l'icône message pour contacter directement.",
+            "empty": "Aucun bénévole intéressé pour le moment.",
+            "actions": {
+                "contact": "Contacter",
+                "remove": "Retirer de la liste",
+                "removeConfirm": "Retirer ce bénévole de la liste ?\n(Cela décochera son intérêt)"
+            },
+            "contactMessage": "Bonjour {name}, \n\nJe te contacte suite à ton intérêt pour le pôle {pole}.",
+            "contactSubject": "Candidature Pôle: {pole}",
+            "chatOpened": "💬 Conversation ouverte!"
+        }
+    },
+    "legal": {
+        "planningDesc": "Gérer le planning des distributions et collectes.",
+        "back": "Retour",
+        "allRights": "Tous droits réservés.",
+        "footer": "Tous droits réservés.",
+        "mentions": {
+            "title": "Mentions Légales",
+            "subtitle": "Informations juridiques concernant l'association et la plateforme.",
+            "sections": {
+                "editor": {
+                    "title": "1. Éditeur du site",
+                    "name": "Association COP1 Angers",
+                    "status": "Association loi 1901 à but non lucratif.",
+                    "address": "Siège social : 34 rue des Noyers, 49000 Angers, France",
+                    "contact": "Contact : angers@cop1.fr"
+                },
+                "hosting": {
+                    "title": "2. Hébergement & Données",
+                    "intro": "L'application est hébergée techniquement (Frontend) sur le navigateur client.",
+                    "authHosting": "Les données et l'authentification sont hébergées par :",
+                    "hostName": "Supabase Inc. (basé sur AWS)",
+                    "hostAddress": "San Francisco, California, USA.",
+                    "compliance": "Conforme RGPD (Data Processing Addendum)."
+                },
+                "ip": {
+                    "title": "3. Propriété intellectuelle",
+                    "text1": "Le logo et le nom <span class=\"font-black text-brand-600\">COP1 Angers</span> sont la propriété exclusive de l'association.",
+                    "text2": "Toute reproduction, distribution ou modification sans autorisation est strictement interdite."
+                }
+            }
+        },
+        "privacy": {
+            "title": "Politique de Confidentialité",
+            "subtitle": "Protection et gestion de vos données personnelles.",
+            "sections": {
+                "data": {
+                    "title": "1. Données collectées",
+                    "intro": "Dans le cadre de votre inscription bénévole, nous collectons :",
+                    "identity": "<strong>Identité :</strong> Nom, Prénom.",
+                    "contact": "<strong>Contact :</strong> Email, Téléphone.",
+                    "profile": "<strong>Profil :</strong> Statut étudiant, préférences.",
+                    "tech": "<strong>Technique :</strong> Adresse IP (sécurité)."
+                },
+                "usage": {
+                    "title": "2. Utilisation des données",
+                    "intro": "Vos données sont utilisées exclusivement pour :",
+                    "planning": "Gérer le planning des distributions et collectes.",
+                    "hours": "Valider vos heures de bénévolat (attestations).",
+                    "contact": "Vous contacter en cas d'urgence ou d'annulation."
+                },
+                "conservation": {
+                    "title": "3. Conservation & Droits",
+                    "text": "Les données des comptes inactifs depuis plus de <strong>3 ans</strong> sont anonymisées.",
+                    "rightsTitle": "Vos droits",
+                    "rightsText": "Vous disposez d'un droit d'accès, de modification et de suppression via votre profil ou sur demande aux administrateurs."
+                }
+            }
+        },
+        "cgu": {
+            "title": "Conditions d'Utilisation",
+            "subtitle": "Règles de bonne conduite et engagements.",
+            "alert": {
+                "title": "Engagement Bénévole",
+                "content": "Toute inscription à une mission est un engagement. En cas d'empêchement, désinscrivez-vous au moins 24h à l'avance par respect pour l'équipe et les bénéficiaires."
+            },
+            "sections": {
+                "rules": {
+                    "title": "Règles de bonne conduite",
+                    "respect": {
+                        "title": "Respect & Courtoisie",
+                        "text": "Indispensable envers les bénéficiaires, les autres bénévoles et les partenaires."
+                    },
+                    "security": {
+                        "title": "Sécurité",
+                        "text": "Respect strict des consignes données par les référents lors des missions."
+                    },
+                    "confidentiality": {
+                        "title": "Confidentialité",
+                        "text": "Interdiction formelle de divulguer des informations sur les bénéficiaires rencontrés."
+                    },
+                    "accuracy": {
+                        "title": "Exactitude",
+                        "text": "Vous certifiez que les documents fournis pour votre inscription sont authentiques."
+                    }
+                }
+            }
+        }
+    }
+}

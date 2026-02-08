@@ -2,6 +2,7 @@
 import { APP_CONFIG } from '../../core/constants.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
+import { t } from '../../services/i18n.js';
 
 const { LOGO_URL } = APP_CONFIG;
 
@@ -29,36 +30,18 @@ export function renderPending() {
                     </div>
                 </div>
 
-                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Inscription en cours</h1>
+                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">${t('status.pending.title')}</h1>
                 
                 <p class="text-slate-500 font-medium leading-relaxed mb-8">
-                    Votre dossier est bien reçu ! Notre équipe examine actuellement votre profil ! 
+                    ${t('status.pending.message')}
                 </p>
-
-                <!-- Steps -->
-                <div class="bg-slate-50 rounded-2xl p-4 mb-8 text-left space-y-3 border border-slate-100/50">
-                    <div class="flex items-center gap-3 opacity-50">
-                        <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
-                        <span class="text-sm font-bold text-slate-800">Compte créé</span>
-                    </div>
-                    <div class="flex items-center gap-3 opacity-50">
-                        <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
-                        <span class="text-sm font-bold text-slate-800">Justificatif envoyé</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center animate-pulse">
-                            <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i>
-                        </div>
-                        <span class="text-sm font-bold text-amber-600">Validation administrateur</span>
-                    </div>
-                </div>
 
                 <div class="space-y-3">
                     <button data-action="logout" class="w-full py-4 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-[0.98]">
-                        Me déconnecter
+                        ${t('nav.logout')}
                     </button>
                     <div class="text-[10px] text-slate-400 font-medium">
-                        Une question ? <a href="mailto:angers@cop1.fr" class="text-brand-600 hover:underline">Contacter le support</a>
+                        ${t('status.pending.tip')}
                     </div>
                 </div>
             </div>
@@ -98,20 +81,20 @@ export function renderRejected() {
                     <i data-lucide="shield-alert" class="w-10 h-10 text-red-500"></i>
                 </div>
 
-                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Inscription non validée</h1>
+                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">${t('status.rejected.title')}</h1>
                 
                 <p class="text-slate-500 font-medium leading-relaxed mb-8">
-                    Nous sommes désolés, mais votre inscription n'a pas pu être validée pour le moment. Cela peut être dû à un justificatif non conforme ou à des critères d'éligibilité.
+                    ${t('status.rejected.message')}
                 </p>
 
                 <div class="space-y-4">
                     <a href="mailto:angers@cop1.fr" class="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-red-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all transform">
                         <i data-lucide="mail" class="w-5 h-5"></i>
-                        Contacter l'équipe
+                        ${t('status.rejected.contact')}
                     </a>
                     
                     <button data-action="logout" class="w-full py-4 bg-transparent text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors">
-                        Se déconnecter
+                        ${t('nav.logout')}
                     </button>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 
 import { createIcons, icons } from 'lucide';
+import { t } from './i18n.js';
 
 // ============================================================
 // 1. GESTION DU LOADER (Identique à l'original)
@@ -81,7 +82,9 @@ export function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleString('fr-FR', {
+    // Use stored language or default to 'fr-FR' if not set (though i18n sets lang usually)
+    const lang = localStorage.getItem('cop1_language') === 'en' ? 'en-US' : 'fr-FR';
+    return date.toLocaleString(lang, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -132,21 +135,15 @@ export function formatIdentity(firstName, lastName) {
  * @param {function} onConfirm - Callback si confirmé
  * @param {object} options - Options (title, confirmText, cancelText, type: 'info'|'danger', onCancel)
  */
-/**
- * Lance une modale de confirmation Premium
- * @param {string} message - Message affiché
- * @param {function} onConfirm - Callback si confirmé
- * @param {object} options - Options (title, confirmText, cancelText, type: 'info'|'danger', onCancel)
- */
 export function showConfirm(message, onConfirm, options = {}) {
     const modalId = 'custom-confirm-modal';
     const existing = document.getElementById(modalId);
     if (existing) existing.remove();
 
     const {
-        title = 'Confirmation',
-        confirmText = 'Confirmer',
-        cancelText = 'Annuler',
+        title = t('modals.confirmation'),
+        confirmText = t('common.confirm'),
+        cancelText = t('common.cancel'),
         type = 'info' // 'info' (bleu) ou 'danger' (rouge)
     } = options;
 
@@ -233,9 +230,9 @@ export function showPrompt(message, onConfirm, options = {}) {
     if (existing) existing.remove();
 
     const {
-        title = 'Saisie requise',
-        confirmText = 'Valider',
-        cancelText = 'Annuler',
+        title = t('modals.inputRequired'),
+        confirmText = t('common.validate'),
+        cancelText = t('common.cancel'),
         placeholder = '',
         defaultValue = '',
         inputType = 'text'

@@ -15,25 +15,26 @@ import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
 import { store, storeActions } from '../../core/store.js';
 import { showConfirm, showToast, formatIdentity } from '../../services/utils.js';
+import { t } from '../../services/i18n.js';
 
 /**
  * Configuration des menus de navigation
  */
 const NAV_ITEMS = {
     admin: [
-        { id: '/dashboard', icon: 'layout-grid', label: 'Accueil', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
-        { id: '/admin_planning', icon: 'calendar-days', label: 'Planning', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
-        { id: '/admin_users', icon: 'users', label: 'Annuaire', color: 'from-amber-500 to-orange-600', iconBgLight: 'bg-amber-50', iconText: 'text-amber-600' },
-        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
-        { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
+        { id: '/dashboard', icon: 'layout-grid', labelKey: 'nav.home', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
+        { id: '/admin_planning', icon: 'calendar-days', labelKey: 'nav.planning', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
+        { id: '/messages', icon: 'message-circle', labelKey: 'nav.messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
+        { id: '/admin_users', icon: 'users', labelKey: 'nav.directory', color: 'from-amber-500 to-orange-600', iconBgLight: 'bg-amber-50', iconText: 'text-amber-600' },
+        { id: '/poles', icon: 'network', labelKey: 'nav.poles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
+        { id: '/profile', icon: 'user', labelKey: 'nav.profile', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
     ],
     volunteer: [
-        { id: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
-        { id: '/events', icon: 'calendar-check', label: 'Missions', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
-        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
-        { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
+        { id: '/dashboard', icon: 'home', labelKey: 'nav.home', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
+        { id: '/events', icon: 'calendar-check', labelKey: 'nav.missions', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
+        { id: '/messages', icon: 'message-circle', labelKey: 'nav.messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
+        { id: '/poles', icon: 'network', labelKey: 'nav.poles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
+        { id: '/profile', icon: 'user', labelKey: 'nav.profile', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
     ]
 };
 
@@ -55,6 +56,7 @@ export function renderSidebar(profile, currentView, adminMode) {
     // Generate nav items HTML
     const navItemsHtml = navItems.map(item => {
         const isActive = isItemActive(item.id, currentView);
+        const label = t(item.labelKey);
 
         const activeClass = isActive
             ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-brand-500/25`
@@ -71,7 +73,7 @@ export function renderSidebar(profile, currentView, adminMode) {
         return `
             <button 
                 data-link="${item.id}" 
-                aria-label="${item.label}" 
+                aria-label="${label}" 
                 aria-current="${isActive ? 'page' : 'false'}"
                 class="nav-link group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${activeClass}"
             >
@@ -79,7 +81,7 @@ export function renderSidebar(profile, currentView, adminMode) {
                     <i data-lucide="${item.icon}" class="w-[18px] h-[18px] ${iconTextClass}"></i>
                     ${item.badge ? `<span id="sidebar-chat-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>` : ''}
                 </div>
-                <span class="flex-1 ${isActive ? 'font-semibold' : ''}">${item.label}</span>
+                <span class="flex-1 ${isActive ? 'font-semibold' : ''}">${label}</span>
                 ${isActive ? '<div class="w-1.5 h-1.5 rounded-full bg-white/80"></div>' : ''}
             </button>
         `;
@@ -90,7 +92,7 @@ export function renderSidebar(profile, currentView, adminMode) {
         <div class="px-4 py-3">
             <button 
                 data-action="toggle-admin"
-                aria-label="${adminMode ? 'Passer en vue bénévole' : 'Passer en vue responsable'}"
+                aria-label="${adminMode ? t('nav.switchToVolunteer') : t('nav.switchToAdmin')}"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${adminMode
             ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
             : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -100,7 +102,7 @@ export function renderSidebar(profile, currentView, adminMode) {
                     <div class="w-8 h-8 rounded-lg ${adminMode ? 'bg-amber-100' : 'bg-emerald-100'} flex items-center justify-center">
                         <i data-lucide="${adminMode ? 'user' : 'shield'}" class="w-4 h-4"></i>
                     </div>
-                    <span>${adminMode ? 'Vue Bénévole' : 'Vue Admin'}</span>
+                    <span>${adminMode ? t('nav.volunteerView') : t('nav.adminView')}</span>
                 </div>
                 <i data-lucide="arrow-right-left" class="w-4 h-4 opacity-50"></i>
             </button>
@@ -151,13 +153,13 @@ export function renderSidebar(profile, currentView, adminMode) {
             <div class="p-4 flex-shrink-0 border-t border-slate-100/50">
             <button
                 data-action="logout"
-                aria-label="Se déconnecter"
+                aria-label="${t('nav.logout')}"
                 class="group flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full p-3 rounded-xl transition-all duration-200"
             >
                 <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-red-100 flex items-center justify-center transition-colors">
                     <i data-lucide="log-out" class="w-4 h-4 group-hover:text-red-500 transition-colors"></i>
                 </div>
-                <span>Déconnexion</span>
+                <span>${t('nav.logout')}</span>
             </button>
         </div>
     </aside>
@@ -281,18 +283,18 @@ export function initSidebar() {
  * Gère la déconnexion
  */
 async function handleLogout() {
-    showConfirm('Voulez-vous vous déconnecter ?', async () => {
+    showConfirm(t('modals.logoutConfirm'), async () => {
         try {
             await AuthService.logout();
             store.state.user = null;
             store.state.profile = null;
-            showToast('Déconnexion réussie');
+            showToast(t('success.logoutSuccess'));
             window.location.href = '/login';
         } catch (error) {
             console.error('❌ Erreur déconnexion:', error);
             window.location.reload();
         }
-    }, { type: 'danger', confirmText: 'Déconnecter' });
+    }, { type: 'danger', confirmText: t('nav.logout') });
 }
 
 /**

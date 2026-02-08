@@ -1,5 +1,6 @@
 import { DirectoryService } from './directory.service.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm, formatIdentity } from '../../services/utils.js';
+import { t } from '../../services/i18n.js';
 import { createIcons, icons } from 'lucide';
 import { store } from '../../core/store.js';
 import { SCHOOLS } from '../../core/schools.js';
@@ -46,23 +47,23 @@ export async function renderDirectory(container) {
                 
                 <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div class="text-white">
-                        <h1 class="text-3xl font-black tracking-tight mb-2">Annuaire</h1>
-                        <p class="text-white/70 font-medium">Gérez votre équipe de bénévoles</p>
+                        <h1 class="text-3xl font-black tracking-tight mb-2">${t('admin.directory.title')}</h1>
+                        <p class="text-white/70 font-medium">${t('admin.directory.subtitle')}</p>
                     </div>
                     
                     <!-- Stats Cards -->
                     <div class="flex gap-3">
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center border border-white/20">
                             <div class="text-2xl font-black text-white">${state.stats.total}</div>
-                            <div class="text-[10px] font-bold text-white/60 uppercase">Total</div>
+                            <div class="text-[10px] font-bold text-white/60 uppercase">${t('admin.directory.stats.total')}</div>
                         </div>
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center border border-white/20">
                             <div class="text-2xl font-black text-amber-300">${state.stats.pending}</div>
-                            <div class="text-[10px] font-bold text-white/60 uppercase">En attente</div>
+                            <div class="text-[10px] font-bold text-white/60 uppercase">${t('admin.directory.stats.pending')}</div>
                         </div>
                         <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center border border-white/20">
                             <div class="text-2xl font-black text-rose-300">${state.stats.admins}</div>
-                            <div class="text-[10px] font-bold text-white/60 uppercase">Admins</div>
+                            <div class="text-[10px] font-bold text-white/60 uppercase">${t('admin.directory.stats.admins')}</div>
                         </div>
                     </div>
                 </div>
@@ -74,33 +75,33 @@ export async function renderDirectory(container) {
                     <!-- Search -->
                     <div class="relative flex-1">
                         <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-slate-400"></i>
-                        <input type="text" id="directory-search" placeholder="Rechercher par nom, email, téléphone..." 
+                        <input type="text" id="directory-search" placeholder="${t('admin.directory.searchPlaceholder')}" 
                             class="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-xl outline-none font-semibold text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition border border-slate-100">
                     </div>
                     
                     <!-- Export Button -->
                     <button id="btn-export-csv" class="px-5 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition flex items-center gap-2 text-sm">
                         <i data-lucide="download" class="w-4 h-4"></i>
-                        Exporter
+                        ${t('admin.directory.export')}
                     </button>
                 </div>
 
                 <!-- Filter Pills -->
                 <div class="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1">
                     <button data-filter="all" class="filter-btn active px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white shadow-md whitespace-nowrap">
-                        Tous <span class="opacity-60">(${state.stats.total})</span>
+                        ${t('admin.directory.filters.all')} <span class="opacity-60">(${state.stats.total})</span>
                     </button>
                     <button data-filter="pending" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 whitespace-nowrap">
-                        ⏳ En attente <span class="opacity-60">(${state.stats.pending})</span>
+                        ⏳ ${t('admin.directory.filters.pending')} <span class="opacity-60">(${state.stats.pending})</span>
                     </button>
                     <button data-filter="admin" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 whitespace-nowrap">
-                        🛡️ Admins <span class="opacity-60">(${state.stats.admins})</span>
+                        🛡️ ${t('admin.directory.filters.admins')} <span class="opacity-60">(${state.stats.admins})</span>
                     </button>
                     <button data-filter="permit" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 whitespace-nowrap">
-                        🚗 Conducteurs <span class="opacity-60">(${state.stats.withPermit})</span>
+                        🚗 ${t('admin.directory.filters.drivers')} <span class="opacity-60">(${state.stats.withPermit})</span>
                     </button>
                     <button data-filter="mandatory" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-100 hover:bg-slate-50 whitespace-nowrap">
-                        🎓 Scolaire
+                        🎓 ${t('admin.directory.filters.school')}
                     </button>
                 </div>
             </div>
@@ -149,7 +150,7 @@ async function loadUsers() {
                 <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="alert-circle" class="w-8 h-8 text-red-400"></i>
                 </div>
-                <p class="text-red-500 font-bold">Erreur de chargement</p>
+                <p class="text-red-500 font-bold">${t('admin.directory.empty.error')}</p>
             </div>
         `;
         createIcons({ icons, root: listContainer });
@@ -165,8 +166,8 @@ async function loadUsers() {
                 <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="users" class="w-8 h-8 text-slate-300"></i>
                 </div>
-                <p class="text-slate-400 font-semibold">Aucun bénévole trouvé</p>
-                <p class="text-xs text-slate-300 mt-1">Modifiez vos filtres de recherche</p>
+                <p class="text-slate-400 font-semibold">${t('admin.directory.empty.title')}</p>
+                <p class="text-xs text-slate-300 mt-1">${t('admin.directory.empty.subtitle')}</p>
             </div>
         `;
         createIcons({ icons, root: listContainer });
@@ -204,22 +205,22 @@ function renderUserCard(u) {
     // Status config
     let statusBadge = '';
     if (isPending) {
-        statusBadge = `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">⏳ En attente</span>`;
+        statusBadge = `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">⏳ ${t('admin.directory.badges.pending')}</span>`;
     } else if (isApproved) {
-        statusBadge = `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">✓ Validé</span>`;
+        statusBadge = `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">✓ ${t('admin.directory.badges.approved')}</span>`;
     } else {
-        statusBadge = `<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg border border-red-200">✗ Refusé</span>`;
+        statusBadge = `<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg border border-red-200">✗ ${t('admin.directory.badges.rejected')}</span>`;
     }
 
     const roleBadge = isAdmin
-        ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">🛡️ Admin</span>`
+        ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">🛡️ ${t('admin.directory.badges.admin')}</span>`
         : '';
 
     const badges = [];
     if (hasPermit) badges.push(`<span class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">🚗</span>`);
     if (isMandatory) badges.push(`<span class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">🎓</span>`);
     if (u.school) badges.push(`<span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg truncate max-w-[150px] inline-block align-bottom" title="${escapeHtml(u.school)}">🏫 ${escapeHtml(u.school)}</span>`);
-    if (isNew) badges.push(`<span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">✨ Nouveau</span>`);
+    if (isNew) badges.push(`<span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">✨ ${t('admin.directory.badges.new')}</span>`);
 
     return `
         <div class="user-row bg-white p-5 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-slate-200 transition-all cursor-pointer group" data-user-id="${u.id}">
@@ -249,20 +250,20 @@ function renderUserCard(u) {
                     ${!isMe ? `
                         <button data-action="toggle-status" data-id="${u.id}" data-status="${u.status}" 
                             class="p-2.5 rounded-xl transition ${isApproved ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" 
-                            title="${isApproved ? 'Désactiver' : 'Valider'}">
+                            title="${isApproved ? t('admin.directory.actions.disable') : t('admin.directory.actions.validate')}">
                             <i data-lucide="${isApproved ? 'check-circle' : 'circle'}" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                         <button data-action="toggle-role" data-id="${u.id}" data-is-admin="${isAdmin}" 
                             class="p-2.5 rounded-xl transition ${isAdmin ? 'text-rose-600 bg-rose-50 hover:bg-rose-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" 
-                            title="${isAdmin ? 'Retirer Admin' : 'Passer Admin'}">
+                            title="${isAdmin ? t('admin.directory.actions.demote') : t('admin.directory.actions.promote')}">
                             <i data-lucide="shield" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                         <button data-action="delete" data-id="${u.id}" 
                             class="p-2.5 rounded-xl text-slate-400 bg-slate-50 hover:text-red-500 hover:bg-red-50 transition" 
-                            title="Supprimer">
+                            title="${t('admin.directory.actions.delete')}">
                             <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
                         </button>
-                    ` : `<span class="text-xs text-slate-300 font-medium italic px-3">Vous</span>`}
+                    ` : `<span class="text-xs text-slate-300 font-medium italic px-3">${t('chat.me')}</span>`}
                 </div>
             </div>
         </div>
@@ -282,7 +283,7 @@ function renderPagination(container, totalPages) {
     container.innerHTML = `
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl border border-slate-100 p-4">
             <div class="text-xs font-semibold text-slate-400">
-                Affichage <span class="text-slate-700">${start}-${end}</span> sur <span class="text-slate-700">${state.total}</span> bénévoles
+                ${t('admin.directory.pagination', { start, end, total: state.total })}
             </div>
             <div class="flex items-center gap-2">
                 <button id="btn-prev" ${state.page === 1 ? 'disabled' : ''} class="p-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
@@ -339,7 +340,7 @@ function setupEventListeners(container) {
         toggleLoader(false);
 
         if (error || !csv) {
-            showToast("Erreur lors de l'export", "error");
+            showToast(t('admin.directory.toasts.exportError'), "error");
             return;
         }
 
@@ -351,7 +352,7 @@ function setupEventListeners(container) {
         a.download = `benevoles_${state.filter}_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast("Export téléchargé ✓");
+        showToast(t('admin.directory.toasts.exportSuccess'));
     });
 
     // User List Actions (delegation)
@@ -380,43 +381,43 @@ function setupEventListeners(container) {
             const res = await DirectoryService.updateUserStatus(id, newStatus);
             toggleLoader(false);
 
-            if (res.error) showToast("Erreur modification statut", "error");
+            if (res.error) showToast(t('admin.directory.toasts.statusError'), "error");
             else {
-                showToast(newStatus === 'approved' ? "Compte validé ✓" : "Compte désactivé");
+                showToast(newStatus === 'approved' ? t('admin.directory.toasts.statusUpdated') : t('admin.directory.toasts.statusDisabled'));
                 loadUsers();
             }
         } else if (action === 'toggle-role') {
             const isAdmin = btn.dataset.isAdmin === 'true';
             const newAdmin = !isAdmin;
 
-            showConfirm(`${newAdmin ? 'Donner' : 'Retirer'} les droits administrateur ?`, async () => {
+            showConfirm(t('admin.directory.confirm.toggleRole', { action: newAdmin ? t('admin.directory.confirm.give') : t('admin.directory.confirm.remove') }), async () => {
                 toggleLoader(true);
                 const res = await DirectoryService.updateUserRole(id, newAdmin);
                 toggleLoader(false);
 
-                if (res.error) showToast("Erreur droits admin", "error");
+                if (res.error) showToast(t('admin.directory.toasts.adminError'), "error");
                 else {
-                    showToast(newAdmin ? "Admin ajouté ✓" : "Admin retiré");
+                    showToast(newAdmin ? t('admin.directory.toasts.rolePromoted') : t('admin.directory.toasts.roleDemoted'));
                     loadUsers();
                 }
             }, { type: 'danger' });
         } else if (action === 'delete') {
-            showConfirm("⚠️ Supprimer définitivement ce bénévole ?\n\nCette action supprimera :\n• Son profil\n• Ses inscriptions\n• Ses justificatifs", async () => {
+            showConfirm(t('admin.directory.confirm.deleteHeader') + "\n\n" + t('admin.directory.confirm.deleteBody'), async () => {
                 toggleLoader(true);
                 const res = await DirectoryService.deleteUserProfile(id);
                 toggleLoader(false);
 
                 if (res.error) {
                     console.error("Delete error:", res.error);
-                    showToast("Erreur suppression: " + (res.error.message || 'Erreur'), "error");
+                    showToast(t('poles.errorDelete') + ": " + (res.error.message || t('errors.unexpectedError')), "error");
                 } else {
-                    showToast("Bénévole supprimé");
+                    showToast(t('admin.directory.toasts.deleteSuccess'));
                     loadUsers();
                     // Refresh stats
                     const statsRes = await DirectoryService.getDirectoryStats();
                     state.stats = statsRes.data;
                 }
-            }, { type: 'danger', confirmText: 'Supprimer définitivement' });
+            }, { type: 'danger', confirmText: t('admin.directory.confirm.deleteButton') });
         }
     });
 }
@@ -466,10 +467,10 @@ async function viewUserDetails(uid) {
             <!-- TABS -->
             <div class="flex border-b border-slate-100 bg-white sticky top-0 z-10">
                 <button id="tab-info" class="flex-1 py-4 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition hover:bg-slate-50">
-                    Informations
+                    ${t('admin.directory.details.tabs.info')}
                 </button>
                 <button id="tab-history" class="flex-1 py-4 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600 hover:bg-slate-50 transition">
-                    Historique
+                    ${t('admin.directory.details.tabs.history')}
                 </button>
             </div>
 
@@ -482,39 +483,39 @@ async function viewUserDetails(uid) {
                     <div class="grid grid-cols-3 gap-3">
                         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
                             <div class="text-2xl font-black text-emerald-600">${hours}h</div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${t('admin.directory.stats.total')}</div>
                         </div>
                         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
                             <div class="text-2xl font-black text-slate-700">${hasPermit ? '✓' : '—'}</div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permis</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${t('admin.directory.details.labels.license')}</div>
                         </div>
                         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
                             <div class="text-2xl font-black text-slate-700">${isMandatory ? '🎓' : '💚'}</div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${t('admin.directory.details.labels.type')}</div>
                         </div>
                     </div>
 
                     <div class="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Téléphone</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">${t('admin.directory.details.labels.phone')}</span>
                             <span class="font-bold text-slate-700">${u.phone || '—'}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Statut</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">${t('admin.directory.details.labels.status')}</span>
                             <span class="font-bold px-2 py-0.5 rounded text-xs ${u.status === 'approved' ? 'text-emerald-700 bg-emerald-50' : u.status === 'pending' ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50'}">
-                                ${u.status === 'approved' ? 'Validé' : u.status === 'pending' ? 'En attente' : 'Refusé'}
+                                ${u.status === 'approved' ? t('admin.directory.badges.approved') : u.status === 'pending' ? t('admin.directory.badges.pending') : t('admin.directory.badges.rejected')}
                             </span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Inscription</span>
-                            <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">${t('admin.directory.details.labels.registration')}</span>
+                            <span class="font-bold text-slate-700">${new Date(u.created_at).toLocaleDateString(t('common.dateLocale'))}</span>
                         </div>
                         
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg group/school">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">École</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">${t('admin.directory.details.labels.school')}</span>
                             <div class="flex items-center gap-2">
-                                <span id="school-display-value" class="font-bold text-slate-700 truncate max-w-[180px]" title="${escapeHtml(u.school || '')}">${escapeHtml(u.school || 'Non renseigné')}</span>
-                                <button id="btn-edit-school" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition opacity-0 group-hover/school:opacity-100" title="Modifier l'école">
+                                <span id="school-display-value" class="font-bold text-slate-700 truncate max-w-[180px]" title="${escapeHtml(u.school || '')}">${escapeHtml(u.school || t('admin.directory.details.labels.notProvided'))}</span>
+                                <button id="btn-edit-school" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition opacity-0 group-hover/school:opacity-100" title="${t('admin.directory.details.editSchool')}">
                                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
@@ -538,16 +539,16 @@ async function viewUserDetails(uid) {
                                     </div>
                                 </div>
                                 
-                                <!-- Custom "Other" Input -->
+                            <!-- Custom "Other" Input -->
                                 <div id="school-other-container" class="hidden relative flex-[0.8] animate-fade-in group/other">
-                                    <input type="text" id="edit-school-other" placeholder="Précisez..." 
+                                    <input type="text" id="edit-school-other" placeholder="${t('admin.directory.details.schoolOtherPlaceholder')}" 
                                         class="w-full pl-2 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all placeholder:text-slate-400">
                                 </div>
 
-                                <button id="btn-save-school" class="p-1.5 rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition flex-shrink-0" title="Enregistrer">
+                                <button id="btn-save-school" class="p-1.5 rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition flex-shrink-0" title="${t('chat.save')}">
                                     <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                 </button>
-                                <button id="btn-cancel-school" class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex-shrink-0" title="Annuler">
+                                <button id="btn-cancel-school" class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex-shrink-0" title="${t('chat.cancel')}">
                                     <i data-lucide="x" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
@@ -555,9 +556,9 @@ async function viewUserDetails(uid) {
                         
                         <!-- Toggle Type -->
                         <div class="flex justify-between items-center py-2 px-2 hover:bg-slate-50 transition rounded-lg">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type Profil</span>
-                            <button id="btn-toggle-type" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm border ${isMandatory ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' : 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100'}" title="Cliquez pour changer">
-                                ${isMandatory ? '🎓 Scolaire' : '💚 Bénévole'}
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">${t('admin.directory.details.labels.type')}</span>
+                            <button id="btn-toggle-type" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm border ${isMandatory ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' : 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100'}" title="${t('admin.directory.details.clickToChange')}">
+                                ${isMandatory ? '🎓 ' + t('admin.directory.details.volunteerSchool') : '💚 ' + t('admin.directory.details.volunteerSimple')}
                                 <i data-lucide="refresh-cw" class="w-3 h-3"></i>
                             </button>
                         </div>
@@ -566,18 +567,18 @@ async function viewUserDetails(uid) {
                     ${u.status === 'pending' ? `
                     <button id="btn-view-proof" class="group w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-blue-500/25 transition active:scale-[0.98] flex items-center justify-center gap-2">
                         <i data-lucide="file-text" class="w-5 h-5 group-hover:scale-110 transition"></i>
-                        Voir le justificatif
+                        ${t('admin.directory.details.viewProof')}
                     </button>
                     ` : ''}
 
                     <!-- Admin Note -->
                     <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200/50">
                         <label class="text-[10px] font-bold text-amber-700 uppercase mb-2 flex items-center gap-1.5 tracking-wide">
-                            <i data-lucide="sticky-note" class="w-3 h-3"></i> Note interne
+                            <i data-lucide="sticky-note" class="w-3 h-3"></i> ${t('admin.directory.details.labels.note')}
                         </label>
-                        <textarea id="admin-note-input" class="w-full bg-white/50 focus:bg-white p-3 rounded-xl text-sm outline-none border border-amber-200 focus:border-amber-400 text-slate-700 resize-none transition placeholder:text-amber-300" rows="3" placeholder="Ajouter une note...">${u.admin_note || ''}</textarea>
+                        <textarea id="admin-note-input" class="w-full bg-white/50 focus:bg-white p-3 rounded-xl text-sm outline-none border border-amber-200 focus:border-amber-400 text-slate-700 resize-none transition placeholder:text-amber-300" rows="3" placeholder="${t('admin.directory.details.addNotePlaceholder')}">${u.admin_note || ''}</textarea>
                         <button id="btn-save-note" class="mt-2 w-full py-2.5 bg-amber-400 text-amber-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition shadow-sm">
-                            Enregistrer la note
+                            ${t('admin.directory.details.saveNote')}
                         </button>
                     </div>
                 </div>
@@ -589,16 +590,16 @@ async function viewUserDetails(uid) {
                     <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2">
-                                <i data-lucide="calendar-range" class="w-4 h-4 text-brand-500"></i> Période
+                                <i data-lucide="calendar-range" class="w-4 h-4 text-brand-500"></i> ${t('admin.directory.history.period')}
                             </h3>
-                            <span id="history-total-hours" class="text-xs font-bold text-white bg-emerald-500 px-2 py-1 rounded-lg shadow-sm shadow-emerald-500/20">0h sur la période</span>
+                            <span id="history-total-hours" class="text-xs font-bold text-white bg-emerald-500 px-2 py-1 rounded-lg shadow-sm shadow-emerald-500/20">${t('admin.directory.history.totalOnPeriod', { total: 0 })}</span>
                         </div>
                         <div class="flex gap-2">
                             <input type="date" id="hist-start" class="w-1/2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none">
                             <input type="date" id="hist-end" class="w-1/2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none">
                         </div>
                         <button id="btn-filter-history" class="w-full py-2 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition active:scale-[0.98]">
-                            Filtrer
+                            ${t('admin.directory.history.filter')}
                         </button>
                     </div>
 
@@ -606,7 +607,7 @@ async function viewUserDetails(uid) {
                     <div id="history-list" class="space-y-3">
                         <div class="text-center py-8 text-slate-400">
                             <div class="animate-spin w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full mx-auto mb-2"></div>
-                            <p class="text-xs">Chargement...</p>
+                            <p class="text-xs">${t('admin.directory.history.loading')}</p>
                         </div>
                     </div>
                 </div>
@@ -668,25 +669,25 @@ async function viewUserDetails(uid) {
         listContainer.innerHTML = `
             <div class="text-center py-8 text-slate-400">
                 <div class="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p class="text-xs">Chargement...</p>
+                <p class="text-xs">${t('admin.directory.history.loading')}</p>
             </div>
         `;
 
         const { data, totalHours, error } = await DirectoryService.getUserHistory(uid, start, end);
 
         if (error) {
-            listContainer.innerHTML = `<div class="text-center text-red-500 text-sm py-4">Erreur chargement historique</div>`;
+            listContainer.innerHTML = `<div class="text-center text-red-500 text-sm py-4">${t('admin.directory.empty.error')}</div>`;
             return;
         }
 
-        totalSpan.textContent = `${totalHours}h sur la période`;
+        totalSpan.textContent = t('admin.directory.history.totalOnPeriod', { total: totalHours });
 
         if (!data || data.length === 0) {
             listContainer.innerHTML = `
                 <div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
                     <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                    <p class="text-sm font-semibold">Aucune activité trouvée</p>
-                    <p class="text-xs mt-1">Essayez d'élargir la période</p>
+                    <p class="text-sm font-semibold">${t('admin.directory.history.empty')}</p>
+                    <p class="text-xs mt-1">${t('admin.directory.history.emptyTip')}</p>
                 </div>
             `;
             createIcons({ icons, root: listContainer });
@@ -723,7 +724,7 @@ async function viewUserDetails(uid) {
                             <h4 class="font-bold text-slate-800 text-sm">${escapeHtml(event.eventName)}</h4>
                             <p class="text-xs text-slate-500">
                                 ${event.location ? escapeHtml(event.location) + ' • ' : ''}
-                                ${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                ${date.toLocaleDateString(t('common.dateLocale'), { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                         </div>
                     </div>
@@ -740,12 +741,12 @@ async function viewUserDetails(uid) {
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-bold text-slate-700">${shift.startTime} - ${shift.endTime}</p>
-                                    <p class="text-[10px] text-slate-400">${isHorsQuota ? 'Bénévole École (Quota atteint)' : 'Créneau'}</p>
+                                    <p class="text-[10px] text-slate-400">${isHorsQuota ? t('admin.directory.history.quotaReached') : t('admin.directory.history.slot')}</p>
                                 </div>
                                 ${isHorsQuota ? `
                                     <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 flex items-center gap-1">
                                         <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                        Hors Quota (${shift.hours}h)
+                                        ${t('admin.directory.history.horsQuota')} (${shift.hours}h)
                                     </span>
                                 ` : `
                                     <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">+${shift.hours}h</span>
@@ -767,21 +768,21 @@ async function viewUserDetails(uid) {
         toggleLoader(true);
         const res = await DirectoryService.updateAdminNote(uid, note);
         toggleLoader(false);
-        if (res.error) showToast("Erreur sauvegarde note", "error");
-        else showToast("Note enregistrée ✓");
+        if (res.error) showToast(t('admin.directory.toasts.saveNoteError'), "error");
+        else showToast(t('admin.directory.toasts.noteSaved'));
     });
 
     modal.querySelector('#btn-view-proof')?.addEventListener('click', () => openProof(uid));
 
     modal.querySelector('#btn-toggle-type')?.addEventListener('click', () => {
         const newStatus = !isMandatory;
-        showConfirm(`Passer ce bénévole en ${newStatus ? 'Scolaire (heures obligatoires)' : 'Bénévole Simple'} ?`, async () => {
+        showConfirm(t('admin.directory.details.changeTypeConfirm', { newStatus: newStatus ? t('admin.directory.details.volunteerSchool') : t('admin.directory.details.volunteerSimple') }), async () => {
             toggleLoader(true);
             const res = await DirectoryService.updateUserProfile(uid, { mandatory_hours: newStatus });
             toggleLoader(false);
-            if (res.error) showToast("Erreur modification", "error");
+            if (res.error) showToast(t('admin.directory.toasts.updateError'), "error");
             else {
-                showToast("Type de profil mis à jour ✓");
+                showToast(t('admin.directory.toasts.typeUpdated'));
                 // Refresh modal
                 modal.remove();
                 viewUserDetails(uid); // Re-open with new data

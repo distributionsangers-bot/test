@@ -2,6 +2,7 @@ import { AuthService } from '../../services/auth.js';
 import { toggleLoader, showToast, showPrompt } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { APP_CONFIG } from '../../core/constants.js';
+import { t } from '../../services/i18n.js';
 
 const { LOGO_URL } = APP_CONFIG;
 
@@ -21,34 +22,34 @@ export function renderLogin() {
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">
                         <img src="${LOGO_URL}" class="w-12 h-12 object-contain" alt="Logo">
                     </div>
-                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Espace Bénévoles</h1>
-                    <p class="text-slate-500 font-medium">Connectez-vous pour accéder au portail</p>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">${t('auth.volunteerPortal')}</h1>
+                    <p class="text-slate-500 font-medium">${t('auth.loginSubtitle')}</p>
                 </div>
                 
                 <!-- Segmented Control -->
                 <div class="bg-slate-100/80 p-1.5 rounded-2xl mb-8 flex relative">
-                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-brand-600 shadow-sm transition-all duration-300 cursor-default">Connexion</button>
-                    <button data-link="/register" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition-all duration-300">Inscription</button>
+                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-brand-600 shadow-sm transition-all duration-300 cursor-default">${t('auth.login')}</button>
+                    <button data-link="/register" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition-all duration-300">${t('auth.register')}</button>
                 </div>
 
                 <!-- Form -->
                 <form id="form-login" class="space-y-5">
                     <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">${t('auth.login.email')}</label>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="mail" class="w-5 h-5"></i>
                             </div>
                             <input id="login-email" type="email" autocomplete="username" required 
                                 class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" 
-                                placeholder="exemple@email.com">
+                                placeholder="${t('auth.login.emailPlaceholder')}">
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between items-center ml-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Mot de passe</label>
-                            <button type="button" id="btn-forgot-password" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 hover:underline">Oublié ?</button>
+                            <label class="text-xs font-bold text-slate-500 uppercase">${t('auth.login.password')}</label>
+                            <button type="button" id="btn-forgot-password" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 hover:underline">${t('auth.forgotPassword')}</button>
                         </div>
                         <div class="relative group">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
@@ -56,7 +57,7 @@ export function renderLogin() {
                             </div>
                             <input id="login-password" type="password" autocomplete="current-password" required 
                                 class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" 
-                                placeholder="••••••••">
+                                placeholder="${t('auth.login.passwordPlaceholder')}">
                             <button type="button" id="toggle-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </button>
@@ -64,13 +65,13 @@ export function renderLogin() {
                     </div>
                     
                     <button type="submit" class="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 transform">
-                        Se connecter
+                        ${t('auth.signIn')}
                     </button>
                     
                     <div class="pt-6 text-center flex justify-center gap-4 text-[10px] text-slate-400 font-medium">
-                        <button type="button" data-link="/legal/mentions" class="hover:text-slate-600 transition-colors">Mentions</button> •
-                        <button type="button" data-link="/legal/privacy" class="hover:text-slate-600 transition-colors">Données</button> •
-                        <button type="button" data-link="/legal/cgu" class="hover:text-slate-600 transition-colors">CGU</button>
+                        <button type="button" data-link="/legal/mentions" class="hover:text-slate-600 transition-colors">${t('auth.legal.mentions')}</button> •
+                        <button type="button" data-link="/legal/privacy" class="hover:text-slate-600 transition-colors">${t('auth.legal.privacy')}</button> •
+                        <button type="button" data-link="/legal/cgu" class="hover:text-slate-600 transition-colors">${t('auth.legal.terms')}</button>
                     </div>
                 </form>
             </div>
@@ -102,11 +103,8 @@ export function initLogin() {
             passInput.setAttribute('type', type);
 
             // Update Icon
-            const icon = toggleBtn.querySelector('svg') || toggleBtn.querySelector('i'); // Lucide replaces with svg, check both
+            const icon = toggleBtn.querySelector('svg') || toggleBtn.querySelector('i');
             if (icon) {
-                // Re-render icon logic or simple attribute switch if Lucide supports it
-                // Since Lucide replaces the node, we might need to recreate it. 
-                // Easier: Just change innerHTML because 'eye-off' is a different icon
                 toggleBtn.innerHTML = `<i data-lucide="${type === 'password' ? 'eye' : 'eye-off'}" class="w-5 h-5"></i>`;
                 createIcons({ icons, nameAttr: 'data-lucide', attrs: { class: "w-5 h-5" } });
             }
@@ -135,7 +133,7 @@ async function handleLoginSubmit(e) {
     const email = emailInput.value.trim();
     const password = passInput.value.trim();
 
-    if (!email || !password) return showToast("Veuillez remplir tous les champs", "error");
+    if (!email || !password) return showToast(t('errors.fillAllFields'), "error");
 
     toggleLoader(true);
     try {
@@ -143,23 +141,23 @@ async function handleLoginSubmit(e) {
         if (error) {
             let msg = error.message;
             if (msg && msg.includes('Invalid login credentials')) {
-                msg = "Email ou mot de passe incorrect";
+                msg = t('errors.invalidCredentials');
             }
             showToast(msg, "error");
         } else {
-            showToast("Connexion réussie", "success");
+            showToast(t('success.loginSuccess'), "success");
             document.dispatchEvent(new CustomEvent('auth:login-success'));
         }
     } catch (err) {
         console.error(err);
-        showToast("Erreur inattendue", "error");
+        showToast(t('errors.unexpectedError'), "error");
     } finally {
         toggleLoader(false);
     }
 }
 
 async function handleForgotPassword() {
-    showPrompt("Veuillez entrer votre email pour réinitialiser le mot de passe :", async (email) => {
+    showPrompt(t('auth.enterEmailForReset'), async (email) => {
         if (!email) return;
 
         toggleLoader(true);
@@ -169,16 +167,16 @@ async function handleForgotPassword() {
         if (error) {
             let msg = error.message;
             if (msg && msg.includes('Invalid login credentials')) {
-                msg = "Email ou mot de passe incorrect";
+                msg = t('errors.invalidCredentials');
             }
             showToast(msg, "error");
         } else {
-            showToast('Email de réinitialisation envoyé', 'success');
+            showToast(t('auth.resetEmailSent'), 'success');
         }
     }, {
-        title: 'Mot de passe oublié',
-        placeholder: 'Email',
+        title: t('auth.resetPasswordTitle'),
+        placeholder: t('auth.login.email'),
         inputType: 'email',
-        confirmText: 'Envoyer'
+        confirmText: t('auth.sendResetLink')
     });
 }

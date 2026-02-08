@@ -373,7 +373,7 @@ export const DirectoryService = {
 
     /**
      * Exporte la liste des utilisateurs au format CSV
-     * NOUVEAU - Fonctionnalité utile pour admin
+     * Amélioré : BOM pour Excel, séparateur point-virgule, champs complets
      * @param {string} filter - Filtre à appliquer
      * @returns {Promise<{csv, error}>}
      */
@@ -384,24 +384,52 @@ export const DirectoryService = {
 
             if (error) throw error;
 
-            // Génère le CSV
-            const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Statut', 'Permis', 'Heures Obligatoires', 'École', 'Date inscription'];
+            // Génère le CSV avec séparateur point-virgule (standard Excel FR)
+            const headers = [
+                'Prénom',
+                'Nom',
+                'Email',
+                'Téléphone',
+                'Statut',
+                'Permis',
+                'Heures Obligatoires',
+                'Total Heures',
+                'École',
+                'Date inscription',
+                'Note Admin'
+            ];
+
             const rows = users.map(u => [
                 u.first_name,
                 u.last_name,
                 u.email,
-                u.phone || 'N/A',
-                u.status,
+                u.phone || '',
+                u.status === 'approved' ? 'Validé' : u.status === 'pending' ? 'En attente' : 'Refusé',
                 u.has_permit ? 'Oui' : 'Non',
                 u.mandatory_hours ? 'Oui' : 'Non',
-                u.school || 'N/A',
-                new Date(u.created_at).toLocaleDateString('fr-FR')
+                (u.total_hours || 0).toString().replace('.', ','), // Format nombre Excel FR
+                u.school || '',
+                new Date(u.created_at).toLocaleDateString('fr-FR'),
+                u.admin_note || ''
             ]);
 
-            const csv = [
-                headers.join(','),
-                ...rows.map(row => row.join(','))
+            // Construction du CSV
+            const separator = ';';
+            const csvContent = [
+                headers.join(separator),
+                ...rows.map(row => row.map(cell => {
+                    // Échapper les points-virgules et les sauts de ligne dans les données
+                    const cellStr = String(cell ?? '');
+                    if (cellStr.includes(separator) || cellStr.includes('\n')) {
+                        return `"${cellStr.replace(/"/g, '""')}"`;
+                    }
+                    return cellStr;
+                }).join(separator))
             ].join('\n');
+
+            // Ajouter le BOM pour que Excel reconnaisse l'UTF-8
+            const bom = '\uFEFF';
+            const csv = bom + csvContent;
 
             return { csv, error: null };
         } catch (error) {

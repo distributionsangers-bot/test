@@ -9,6 +9,7 @@ import { toggleLoader, showToast, showConfirm } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
 import { startInactivityMonitor, stopInactivityMonitor } from './services/inactivity.js';
+import { initI18n } from './services/i18n.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
@@ -49,6 +50,9 @@ const app = document.getElementById('app');
 
 async function init() {
     toggleLoader(true);
+
+    // Initialize internationalization
+    initI18n();
 
     // CORRECTION ICI : On active les écouteurs globaux (navigation) dès le début
     attachGlobalListeners();

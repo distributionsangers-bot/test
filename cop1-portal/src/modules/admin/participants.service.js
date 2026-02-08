@@ -14,6 +14,7 @@
  */
 
 import { supabase } from '../../services/supabase.js';
+import { t } from '../../locales/i18n.js';
 
 export const ParticipantsService = {
     /**
@@ -154,7 +155,7 @@ export const ParticipantsService = {
                 .maybeSingle();
 
             if (existing) {
-                return { data: null, error: { message: 'Participant déjà inscrit à ce créneau' } };
+                return { data: null, error: { message: t('admin.participants.errors.alreadyRegistered') } };
             }
 
             // 2. Vérifie la capacité
@@ -241,7 +242,7 @@ export const ParticipantsService = {
 
     /**
      * Exporte la liste des participants au format CSV
-     * NOUVEAU - Fonctionnalité utile pour admin
+     * Amélioré : BOM, Point-virgule, Champs complets (École, Note, Heures valides)
      * @param {number} shiftId - ID du créneau
      * @returns {Promise<{data, error}>}
      */
@@ -252,20 +253,53 @@ export const ParticipantsService = {
             if (error) throw error;
 
             // Génère le CSV
-            const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Présent', 'Date inscription'];
-            const rows = registrations.map(reg => [
-                reg.profiles.first_name,
-                reg.profiles.last_name,
-                reg.profiles.email,
-                reg.profiles.phone || 'N/A',
-                reg.attended ? 'Oui' : 'Non',
-                new Date(reg.created_at).toLocaleDateString('fr-FR')
-            ]);
+            const headers = [
+                t('admin.participants.export.headers.firstName'),
+                t('admin.participants.export.headers.lastName'),
+                t('admin.participants.export.headers.email'),
+                t('admin.participants.export.headers.phone'),
+                t('admin.participants.export.headers.school'),
+                t('admin.participants.export.headers.status'), // Validé/En attente...
+                t('admin.participants.export.headers.present'),
+                t('admin.participants.export.headers.hours'),
+                t('admin.participants.export.headers.note'),
+                t('admin.participants.export.headers.date')
+            ];
 
-            const csv = [
-                headers.join(','),
-                ...rows.map(row => row.join(','))
+            const rows = registrations.map(reg => {
+                const profile = reg.profiles;
+                const statusLabel = profile.status === 'approved' ? t('admin.participants.export.status.validated') : profile.status === 'pending' ? t('admin.participants.export.status.pending') : t('admin.participants.export.status.rejected');
+
+                return [
+                    profile.first_name,
+                    profile.last_name,
+                    profile.email,
+                    profile.phone || '',
+                    profile.school || '', // Champ école ajouté
+                    statusLabel,
+                    reg.attended ? t('admin.participants.export.boolean.yes') : t('admin.participants.export.boolean.no'),
+                    reg.attended ? (reg.hours_counted || 0).toString().replace('.', ',') : '',
+                    reg.note || '', // Note laissée lors de l'inscription
+                    new Date(reg.created_at).toLocaleDateString(t('common.dateLocale'))
+                ];
+            });
+
+            // Construction du CSV avec séparateur ;
+            const separator = ';';
+            const csvContent = [
+                headers.join(separator),
+                ...rows.map(row => row.map(cell => {
+                    const cellStr = String(cell ?? '');
+                    if (cellStr.includes(separator) || cellStr.includes('\n')) {
+                        return `"${cellStr.replace(/"/g, '""')}"`;
+                    }
+                    return cellStr;
+                }).join(separator))
             ].join('\n');
+
+            // BOM pour UTF-8 Excel
+            const bom = '\uFEFF';
+            const csv = bom + csvContent;
 
             return { data: csv, error: null };
         } catch (error) {

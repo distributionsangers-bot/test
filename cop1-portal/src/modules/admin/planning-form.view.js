@@ -4,7 +4,6 @@ import { toggleLoader, showToast, escapeHtml, showConfirm, showPrompt } from '..
 import { store } from '../../core/store.js';
 import { createIcons, icons } from 'lucide';
 import { initPlanningList } from './planning-list.view.js'; // Pour le refresh
-import { t } from '../../services/i18n.js';
 
 // --- RENDER MODAL ---
 
@@ -42,7 +41,7 @@ export async function openEventModal(eventToEdit = null) {
         <div class="bg-white w-full max-w-2xl h-[90vh] rounded-[2rem] overflow-hidden flex flex-col shadow-2xl animate-slide-up">
             <!-- Header -->
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="text-xl font-extrabold text-slate-900">${isEdit ? t('admin.planning.editEvent') : t('admin.planning.createEvent')}</h3>
+                <h3 class="text-xl font-extrabold text-slate-900">${isEdit ? 'Modifier l\'événement' : 'Créer un événement'}</h3>
                 <button type="button" id="btn-close-modal" class="bg-white p-2 rounded-full border border-slate-200 text-slate-500 hover:text-red-500 transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>

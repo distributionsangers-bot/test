@@ -3,7 +3,6 @@ import { store } from '../../core/store.js';
 import { toggleLoader, showToast, escapeHtml, showConfirm, formatIdentity } from '../../services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { ChatService } from '../chat/chat.service.js';
-import { t } from '../../services/i18n.js';
 
 export async function renderPoles(container) {
     if (!container) return;
@@ -20,19 +19,19 @@ export async function renderPoles(container) {
     const isViewAdmin = store.state.adminMode && store.state.profile?.is_admin;
 
     // Helper: Render a single pole card
-    const renderPoleCard = (team) => {
-        const intr = myInterests.includes(team.id);
-        const teamLeaders = leaders ? leaders.filter(l => l.pole_id === team.id) : [];
+    const renderPoleCard = (t) => {
+        const intr = myInterests.includes(t.id);
+        const teamLeaders = leaders ? leaders.filter(l => l.pole_id === t.id) : [];
 
         const adminActions = isViewAdmin ? `
             <div class="absolute top-3 right-3 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button data-action="view-candidates" data-id="${team.id}" data-name="${escapeHtml(team.name)}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-slate-100 transition shadow-sm" title="${t('poles.viewInterested')}">
+                <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-slate-100 transition shadow-sm" title="Voir les intéressés">
                     <i data-lucide="users" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="edit-pole" data-id="${team.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-100 transition shadow-sm" title="${t('poles.edit')}">
+                <button data-action="edit-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-100 transition shadow-sm" title="Modifier">
                     <i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="delete-pole" data-id="${team.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-100 transition shadow-sm" title="${t('poles.delete')}">
+                <button data-action="delete-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-100 transition shadow-sm" title="Supprimer">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
             </div>
@@ -41,7 +40,7 @@ export async function renderPoles(container) {
         // Leaders HTML (all leaders with responsive layout)
         const leadersHtml = teamLeaders.length > 0 ? `
             <div class="mt-auto pt-3 border-t border-slate-100">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 ${t('poles.leaders')}</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 Responsables</p>
                 <div class="flex flex-wrap gap-2">
                     ${teamLeaders.map(l => `
                         <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 min-w-0">
@@ -62,31 +61,31 @@ export async function renderPoles(container) {
         ` : '';
 
         return `
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full group relative" data-pole-id="${team.id}">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full group relative" data-pole-id="${t.id}">
                 ${adminActions}
                 
                 <!-- Header -->
                 <div class="p-4 bg-gradient-to-br from-brand-50/50 to-indigo-50/30 border-b border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-white/80 border border-white/50 flex items-center justify-center text-brand-600 shadow-sm">
-                            <i data-lucide="${team.icon || 'users'}" class="w-5 h-5"></i>
+                            <i data-lucide="${t.icon || 'users'}" class="w-5 h-5"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-900 line-clamp-2">${escapeHtml(team.name)}</h4>
+                        <h4 class="font-bold text-sm text-slate-900 line-clamp-2">${escapeHtml(t.name)}</h4>
                     </div>
                 </div>
 
                 <!-- Content -->
                 <div class="p-4 flex flex-col flex-1">
                     <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">
-                        ${escapeHtml(team.description || t('poles.discoverTeam'))}
+                        ${escapeHtml(t.description || 'Découvrez cette équipe et ses missions.')}
                     </p>
 
                     <!-- Contact Link -->
-                    ${team.email ? `
+                    ${t.email ? `
                         <div class="mb-3">
-                            <a href="mailto:${team.email}" class="inline-flex items-start gap-1.5 text-[11px] font-semibold text-brand-600 hover:text-brand-700 bg-brand-50/50 hover:bg-brand-50 px-2 py-1 rounded-md transition">
+                            <a href="mailto:${t.email}" class="inline-flex items-start gap-1.5 text-[11px] font-semibold text-brand-600 hover:text-brand-700 bg-brand-50/50 hover:bg-brand-50 px-2 py-1 rounded-md transition">
                                 <i data-lucide="mail" class="w-3 h-3 flex-shrink-0 mt-0.5"></i>
-                                <span class="break-all">${team.email}</span>
+                                <span class="break-all">${t.email}</span>
                             </a>
                         </div>
                     ` : ''}
@@ -97,13 +96,13 @@ export async function renderPoles(container) {
                 <!-- Footer Button (Only for non-admin) -->
                 ${!isViewAdmin ? `
                     <div class="p-3 border-t border-slate-100 bg-slate-50/30">
-                        <button data-action="toggle-interest" data-id="${team.id}" data-interested="${intr}" class="w-full py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${intr
+                        <button data-action="toggle-interest" data-id="${t.id}" data-interested="${intr}" class="w-full py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${intr
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
                     : 'bg-slate-900 text-white shadow-md shadow-slate-900/20 hover:bg-slate-800 active:scale-[0.98]'
                 }">
                             ${intr
-                    ? `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> ${t('poles.interested')}`
-                    : `<span>${t('poles.join')}</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`
+                    ? `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Intéressé(e)`
+                    : `<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`
                 }
                         </button>
                     </div>
@@ -118,13 +117,13 @@ export async function renderPoles(container) {
 
         const adminActionsDirection = isViewAdmin ? `
             <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button data-action="add-child-pole" data-parent-id="${direction.id}" class="p-2 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition" title="${t('poles.addPole')}">
+                <button data-action="add-child-pole" data-parent-id="${direction.id}" class="p-2 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition" title="Ajouter un pôle">
                     <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
                 </button>
-                <button data-action="edit-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-200 transition" title="${t('poles.edit')}">
+                <button data-action="edit-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-200 transition" title="Modifier">
                     <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
                 </button>
-                <button data-action="delete-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition" title="${t('poles.delete')}">
+                <button data-action="delete-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition" title="Supprimer">
                     <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
                 </button>
             </div>
@@ -133,7 +132,7 @@ export async function renderPoles(container) {
         // Leaders HTML (detailed view similar to Pole Card)
         const leadersHtml = directionLeaders.length > 0 ? `
             <div class="mt-3">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 ${t('poles.leaders')}</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 Responsables</p>
                 <div class="flex flex-wrap gap-2">
                     ${directionLeaders.map(l => `
                         <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 min-w-0 border border-slate-100">
@@ -189,7 +188,7 @@ export async function renderPoles(container) {
                             ${directionLeaders.length > 0 ? `
                                 <div class="bg-slate-50/50 rounded-xl p-3 border border-slate-100 w-full md:w-auto min-w-[200px]">
                                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                        <i data-lucide="crown" class="w-3 h-3 text-brand-400"></i> ${t('poles.leaders')}
+                                        <i data-lucide="crown" class="w-3 h-3 text-brand-400"></i> Responsables
                                     </p>
                                     <div class="flex flex-col gap-2">
                                         ${directionLeaders.map(l => `
@@ -220,10 +219,10 @@ export async function renderPoles(container) {
                         <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100">
                             <i data-lucide="inbox" class="w-5 h-5 text-slate-300"></i>
                         </div>
-                        <p class="text-sm font-medium text-slate-500">${t('poles.noPoleInDirection')}</p>
+                        <p class="text-sm font-medium text-slate-500">Aucun pôle dans cette direction</p>
                         ${isViewAdmin ? `
                             <button data-action="add-child-pole" data-parent-id="${direction.id}" class="mt-4 px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm hover:shadow transition flex items-center gap-2 mx-auto">
-                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> ${t('poles.addPole')}
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Ajouter un pôle
                             </button>
                         ` : ''}
                     </div>
@@ -246,12 +245,12 @@ export async function renderPoles(container) {
         const adminActions = isViewAdmin ? `
             <div class="flex gap-2">
                 ${antenneEntry ? `
-                    <button data-action="edit-pole" data-id="${antenneEntry.id}" class="p-2 rounded-lg bg-white/20 text-white/80 hover:text-white hover:bg-white/30 transition" title="${t('poles.edit')}">
+                    <button data-action="edit-pole" data-id="${antenneEntry.id}" class="p-2 rounded-lg bg-white/20 text-white/80 hover:text-white hover:bg-white/30 transition" title="Modifier">
                         <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 ` : `
                     <button id="btn-create-antenne" class="px-4 py-2 rounded-lg bg-white/20 text-white font-bold hover:bg-white/30 transition flex items-center gap-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i> ${t('poles.add')}
+                        <i data-lucide="plus" class="w-4 h-4"></i> Ajouter
                     </button>
                 `}
             </div>
@@ -272,7 +271,7 @@ export async function renderPoles(container) {
                                 <i data-lucide="crown" class="w-6 h-6 text-white"></i>
                             </div>
                             <div>
-                                <h2 class="text-xl font-black text-white">${t('poles.antenneDirection')}</h2>
+                                <h2 class="text-xl font-black text-white">Direction d'Antenne</h2>
                                 ${antenneEntry?.description ? `<p class="text-white/80 text-sm">${escapeHtml(antenneEntry.description)}</p>` : ''}
                                 ${antenneEntry?.email ? `
                                     <a href="mailto:${antenneEntry.email}" class="inline-flex items-center gap-1.5 text-white/90 hover:text-white text-xs mt-1.5 bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">
@@ -318,8 +317,8 @@ export async function renderPoles(container) {
                     <div class="w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                         <i data-lucide="users-round" class="w-10 h-10 text-slate-300"></i>
                     </div>
-                    <h3 class="text-2xl font-black text-slate-700">${t('poles.noActivePole')}</h3>
-                    <p class="text-slate-400 text-sm mt-2">${t('poles.polesWillAppear')}</p>
+                    <h3 class="text-2xl font-black text-slate-700">Aucun pôle actif</h3>
+                    <p class="text-slate-400 text-sm mt-2">Les pôles apparaîtront ici une fois créés.</p>
                 </div>
             `;
         }
@@ -342,7 +341,7 @@ export async function renderPoles(container) {
                         <div class="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500">
                             <i data-lucide="help-circle" class="w-5 h-5"></i>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-600">${t('poles.uncategorized')}</h2>
+                        <h2 class="text-lg font-bold text-slate-600">Pôles non classés</h2>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         ${orphanPoles.map(p => renderPoleCard(p)).join('')}
@@ -358,23 +357,23 @@ export async function renderPoles(container) {
         <div class="mb-10 animate-slide-up">
             <div class="flex flex-col gap-3 mb-4">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider w-fit border border-brand-200/50">
-                    <i data-lucide="network" class="w-4 h-4"></i> ${t('poles.badge')}
+                    <i data-lucide="network" class="w-4 h-4"></i> Organisation & Pôles
                 </div>
             </div>
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">${t('poles.title')}</h1>
-                    <p class="text-slate-500 mt-3 text-lg max-w-2xl leading-relaxed">${t('poles.subtitle')}</p>
+                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">Les Pôles</h1>
+                    <p class="text-slate-500 mt-3 text-lg max-w-2xl leading-relaxed">Rejoignez les équipes qui font bouger les choses. Découvrez les responsables et signifiez votre intérêt.</p>
                 </div>
                 ${isViewAdmin ? `
                     <div class="flex gap-3 flex-shrink-0">
                         <button id="btn-create-direction" class="h-fit bg-white text-brand-600 px-5 py-3 rounded-xl font-bold border-2 border-brand-200 hover:border-brand-400 hover:bg-brand-50 transition flex items-center gap-2">
                             <i data-lucide="folder-plus" class="w-5 h-5"></i>
-                            ${t('poles.newDirection')}
+                            Direction
                         </button>
                         <button id="btn-create-pole" class="h-fit bg-brand-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:shadow-xl active:scale-95 transition flex items-center gap-2">
                             <i data-lucide="plus" class="w-5 h-5"></i>
-                            ${t('poles.newPole')}
+                            Nouveau Pôle
                         </button>
                     </div>
                 ` : ''}
@@ -409,7 +408,7 @@ export async function renderPoles(container) {
             const isInterested = btn.dataset.interested === 'true';
 
             if (!store.state.user?.id) {
-                showToast(t('poles.loginToJoin'), 'error');
+                showToast('Connectez-vous pour rejoindre un pôle', 'error');
                 return;
             }
 
@@ -421,16 +420,16 @@ export async function renderPoles(container) {
             if (newInterestState) {
                 btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
                 btn.classList.add('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
-                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${t('poles.interested')}`;
+                btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> Intéressé(e)';
             } else {
                 btn.classList.remove('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
                 btn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
-                btn.innerHTML = `<span>${t('poles.join')}</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>`;
+                btn.innerHTML = '<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>';
             }
             createIcons({ icons, root: btn.parentElement });
 
             // Show immediate feedback
-            showToast(newInterestState ? t('poles.interestNotified') : t('poles.interestRemoved'));
+            showToast(newInterestState ? '🎯 Intérêt signalé aux responsables !' : 'Intérêt retiré');
 
             // Call API in background (fire and forget)
             PolesService.toggleInterest(store.state.user.id, id, isInterested)
@@ -442,13 +441,14 @@ export async function renderPoles(container) {
                     if (revertState) {
                         btn.classList.remove('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
                         btn.classList.add('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
-                        btn.innerHTML = `<span>${t('poles.join')}</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>`;
+                        btn.innerHTML = '<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>';
                     } else {
                         btn.classList.remove('bg-slate-900', 'text-white', 'shadow-lg', 'shadow-slate-900/20');
                         btn.classList.add('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-200');
-                        btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> ${t('poles.interested')}`;
+                        btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> Intéressé(e)';
                     }
                     createIcons({ icons, root: btn.parentElement });
+                    showToast('Erreur lors de la mise à jour', 'error');
                 });
         }
     });
@@ -465,20 +465,20 @@ function initAdminListeners(container, teams, leaders, directions) {
         if (action === 'delete-pole') {
             const isDirection = directions?.find(d => d.id === id);
             const confirmMsg = isDirection
-                ? t('poles.deleteDirectionConfirmHeader') + "\n" + t('poles.deleteDirectionConfirmBody')
-                : t('poles.deleteConfirmHeader') + "\n" + t('poles.deleteConfirmBody');
+                ? "⚠️ Supprimer cette Direction ?\nLes pôles enfants deviendront orphelins."
+                : "⚠️ Supprimer ce pôle ?\nCela supprimera aussi l'historique des intérêts.";
 
             showConfirm(confirmMsg, async () => {
                 toggleLoader(true);
                 try {
                     await PolesService.deleteTeam(id);
-                    showToast(isDirection ? t('poles.deleted') : t('poles.deleted'));
+                    showToast(isDirection ? "Direction supprimée" : "Pôle supprimé");
                     await renderPoles(container);
                 } catch (err) {
-                    showToast(t('poles.errorDelete'), "error");
+                    showToast("Erreur suppression", "error");
                     toggleLoader(false);
                 }
-            }, { type: 'danger', confirmText: t('poles.deleteDefinitive') });
+            }, { type: 'danger', confirmText: 'Supprimer définitivement' });
 
         } else if (action === 'view-candidates') {
             const name = btn.dataset.name;
@@ -519,8 +519,8 @@ async function openAntenneModal() {
             <!-- Header -->
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-br from-indigo-50/80 to-purple-50/50">
                 <div>
-                    <h3 class="font-black text-2xl text-slate-900 tracking-tight">👑 ${t('poles.antenne.title')}</h3>
-                    <p class="text-sm text-slate-500 font-medium mt-0.5">${t('poles.antenne.subtitle')}</p>
+                    <h3 class="font-black text-2xl text-slate-900 tracking-tight">👑 Direction d'Antenne</h3>
+                    <p class="text-sm text-slate-500 font-medium mt-0.5">Configuration de la direction principale</p>
                 </div>
                 <button class="w-11 h-11 bg-white rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-sm border border-slate-100 flex items-center justify-center transition duration-300 btn-close">
                     <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
@@ -531,12 +531,12 @@ async function openAntenneModal() {
             <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
                 <form id="form-create-antenne" class="space-y-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.antenne.nameOptional')}</label>
-                        <input name="name" value="${t('poles.antenne.title')}" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:font-medium" placeholder="${t('poles.antenne.placeholderName')}">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nom (optionnel)</label>
+                        <input name="name" value="Direction d'Antenne" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:font-medium" placeholder="Ex: Direction d'Antenne Angers">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.antenne.description')}</label>
-                        <textarea name="desc" rows="3" class="w-full p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:text-slate-400" placeholder="${t('poles.antenne.placeholderDesc')}"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
+                        <textarea name="desc" rows="3" class="w-full p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:text-slate-400" placeholder="Décrivez la mission de la direction d'antenne..."></textarea>
                     </div>
                     <input type="hidden" name="team_type" value="antenne">
                     <input type="hidden" name="icon" value="crown">
@@ -545,8 +545,8 @@ async function openAntenneModal() {
 
             <!-- Footer -->
             <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-                <button class="btn-close px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition">${t('common.cancel')}</button>
-                <button form="form-create-antenne" type="submit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:from-indigo-700 hover:to-purple-700 active:scale-95 transition">${t('poles.create')}</button>
+                <button class="btn-close px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition">Annuler</button>
+                <button form="form-create-antenne" type="submit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:from-indigo-700 hover:to-purple-700 active:scale-95 transition">Créer</button>
             </div>
         </div>
     `;
@@ -572,13 +572,13 @@ async function openAntenneModal() {
         toggleLoader(true);
         try {
             await PolesService.createTeam(data);
-            showToast(t('poles.created'));
+            showToast("Direction d'Antenne créée !");
             closeModal();
             const container = document.getElementById('view-container');
             if (container) await renderPoles(container);
             else window.location.reload();
         } catch (err) {
-            showToast(t('poles.errorSave'), "error");
+            showToast("Erreur lors de la création", "error");
             console.error(err);
         } finally {
             toggleLoader(false);
@@ -609,10 +609,10 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
 
     // Title based on context
     const modalTitle = isCreatingDirection
-        ? (isEdit ? t('poles.modal.upsertDirectionTitle', { action: t('poles.modal.modify') }) : t('poles.modal.upsertDirectionTitle', { action: t('poles.modal.new') }))
-        : (isEdit ? t('poles.modal.upsertPoleTitle', { action: t('poles.modal.modify') }) : t('poles.modal.upsertPoleTitle', { action: t('poles.modal.new') }));
+        ? (isEdit ? '📁 Modifier la Direction' : '📁 Nouvelle Direction')
+        : (isEdit ? '🏰 Modifier le Pôle' : '✨ Nouveau Pôle');
 
-    const modalSubtitle = isCreatingDirection ? t('poles.modal.categoryMain') : t('poles.modal.configTeam');
+    const modalSubtitle = isCreatingDirection ? 'Catégorie principale' : 'Configuration et équipe';
 
     m.innerHTML = `
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl animate-scale-in overflow-hidden flex flex-col max-h-[90vh]" data-modal="upsert-pole">
@@ -634,14 +634,14 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                     <!-- Parent Direction (only for Pôles, not Directions) -->
                     ${!isCreatingDirection && directions.length > 0 ? `
                         <div class="bg-brand-50/30 p-4 rounded-xl border border-brand-100">
-                            <label class="block text-xs font-bold text-brand-700 uppercase mb-2">📁 ${t('poles.modal.parent')}</label>
+                            <label class="block text-xs font-bold text-brand-700 uppercase mb-2">📁 Direction parente</label>
                             <select name="parent_id" class="w-full p-3 bg-white rounded-lg font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-brand-200">
-                                <option value="">${t('poles.modal.noParent')}</option>
+                                <option value="">— Aucune (créer comme Direction) —</option>
                                 ${directions.map(d => `
                                     <option value="${d.id}" ${d.id === selectedParentId ? 'selected' : ''}>${escapeHtml(d.name)}</option>
                                 `).join('')}
                             </select>
-                            <p class="text-[11px] text-brand-600 mt-2">${t('poles.modal.parentHelp')}</p>
+                            <p class="text-[11px] text-brand-600 mt-2">Rattachez ce pôle à une Direction existante</p>
                         </div>
                     ` : `
                         <input type="hidden" name="parent_id" value="">
@@ -650,34 +650,34 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                     <!-- Basic Info -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
-                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${isCreatingDirection ? t('poles.modal.nameDirection') : t('poles.modal.namePole')}</label>
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${isCreatingDirection ? 'Nom de la Direction' : 'Nom du Pôle'}</label>
                              <input name="name" value="${isEdit ? escapeHtml(team.name) : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:font-medium" placeholder="${isCreatingDirection ? 'Ex: Direction des opérations' : 'Ex: Logistique'}" required>
                         </div>
                         <div>
-                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.modal.icon')}</label>
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Icône (Lucide)</label>
                              <div class="relative">
                                 <i data-lucide="box" class="absolute left-3.5 top-3.5 w-5 h-5 text-slate-400"></i>
                                 <input name="icon" value="${isEdit ? escapeHtml(team.icon || (isCreatingDirection ? 'folder' : 'users')) : (isCreatingDirection ? 'folder' : 'users')}" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-bold text-slate-600 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100">
                              </div>
                         </div>
                         <div>
-                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.modal.color')}</label>
+                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Couleur (Optionnel)</label>
                              <select name="color" class="w-full p-3.5 bg-slate-50 rounded-xl font-bold text-slate-600 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100">
-                                <option value="brand" ${team?.color === 'brand' ? 'selected' : ''}>${t('poles.modal.colors.brand')}</option>
-                                <option value="emerald" ${team?.color === 'emerald' ? 'selected' : ''}>${t('poles.modal.colors.emerald')}</option>
-                                <option value="purple" ${team?.color === 'purple' ? 'selected' : ''}>${t('poles.modal.colors.purple')}</option>
-                                <option value="orange" ${team?.color === 'orange' ? 'selected' : ''}>${t('poles.modal.colors.orange')}</option>
+                                <option value="brand" ${team?.color === 'brand' ? 'selected' : ''}>Bleu (Brand)</option>
+                                <option value="emerald" ${team?.color === 'emerald' ? 'selected' : ''}>Émeraude</option>
+                                <option value="purple" ${team?.color === 'purple' ? 'selected' : ''}>Violet</option>
+                                <option value="orange" ${team?.color === 'orange' ? 'selected' : ''}>Orange</option>
                              </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.antenne.description')}</label>
-                        <textarea name="desc" rows="3" class="w-full p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:text-slate-400" placeholder="${isCreatingDirection ? t('poles.antenne.placeholderDesc') : 'Décrivez la mission de ce pôle...'}">${isEdit ? escapeHtml(team.description || '') : ''}</textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
+                        <textarea name="desc" rows="3" class="w-full p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100 placeholder:text-slate-400" placeholder="${isCreatingDirection ? 'Décrivez cette direction...' : 'Décrivez la mission de ce pôle...'}">${isEdit ? escapeHtml(team.description || '') : ''}</textarea>
                     </div>
 
                     <div>
-                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">${t('poles.modal.email')}</label>
+                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Email de contact</label>
                          <div class="relative">
                             <i data-lucide="mail" class="absolute left-3.5 top-3.5 w-5 h-5 text-slate-400"></i>
                             <input name="email" type="email" value="${isEdit ? escapeHtml(team.email || '') : ''}" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 border border-slate-100" placeholder="pole@asso.fr">
@@ -687,7 +687,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                     <!-- Responsables Section (Only Edit Mode) -->
                     ${isEdit ? `
                         <div class="pt-4 border-t border-slate-100">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-3">${t('poles.modal.currentLeaders')}</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Responsables actuels</label>
                             
                             <div id="leaders-list" class="space-y-3 mb-4">
                                 ${currentLeaders.map(l => `
@@ -705,32 +705,32 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                                         </div>
                                         <div class="relative">
                                             <i data-lucide="briefcase" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                                            <input type="text" data-leader-title="${l.id}" value="${escapeHtml(l.role_title || 'Responsable')}" placeholder="${t('poles.modal.rolePlaceholder')}" class="w-full pl-10 pr-3 py-2 text-xs bg-slate-50 rounded-lg border border-slate-100 focus:ring-2 focus:ring-brand-500 outline-none" data-original-value="${escapeHtml(l.role_title || 'Responsable')}">
+                                            <input type="text" data-leader-title="${l.id}" value="${escapeHtml(l.role_title || 'Responsable')}" placeholder="Ex: Responsable Logistique" class="w-full pl-10 pr-3 py-2 text-xs bg-slate-50 rounded-lg border border-slate-100 focus:ring-2 focus:ring-brand-500 outline-none" data-original-value="${escapeHtml(l.role_title || 'Responsable')}">
                                         </div>
                                     </div>
                                 `).join('')}
-                                ${currentLeaders.length === 0 ? `<p class="text-xs text-slate-400 italic">${t('poles.noLeader')}</p>` : ''}
+                                ${currentLeaders.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun responsable.</p>' : ''}
                             </div>
 
                             <!-- Search to Add (Premium Visible) -->
                             <div class="relative">
-                                <label class="block text-xs font-black text-brand-700 uppercase tracking-wider mb-3">${t('poles.modal.addLeader')}</label>
+                                <label class="block text-xs font-black text-brand-700 uppercase tracking-wider mb-3">✨ Ajouter un responsable</label>
                                 <div class="relative">
                                     <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-500 pointer-events-none"></i>
-                                    <input id="leader-search" placeholder="${t('poles.modal.searchPlaceholder')}" class="w-full pl-11 p-3.5 bg-brand-100/30 border-2 border-brand-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none transition placeholder:text-brand-600">
+                                    <input id="leader-search" placeholder="Tapez un nom ou email..." class="w-full pl-11 p-3.5 bg-brand-100/30 border-2 border-brand-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none transition placeholder:text-brand-600">
                                 </div>
                                 <div id="search-results" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 shadow-2xl rounded-xl mt-2 z-50 max-h-64 overflow-y-auto"></div>
                             </div>
                         </div>
-                    ` : `<div class="bg-blue-50 p-3 rounded-xl text-xs text-blue-700 flex gap-2"><i data-lucide="info" class="w-4 h-4"></i> ${t('poles.modal.searchHelp')}</div>`}
+                    ` : '<div class="bg-blue-50 p-3 rounded-xl text-xs text-blue-700 flex gap-2"><i data-lucide="info" class="w-4 h-4"></i> Vous pourrez ajouter des responsables une fois le pôle créé.</div>'}
 
                 </form>
             </div>
 
             <!--Footer -->
     <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-        <button class="btn-close px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition">${t('common.cancel')}</button>
-        <button form="form-upsert-pole" type="submit" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-95 transition">${t('common.save')}</button>
+        <button class="btn-close px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition">Annuler</button>
+        <button form="form-upsert-pole" type="submit" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-95 transition">Enregistrer</button>
     </div>
         </div>
     `;
@@ -796,7 +796,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
             if (container) renderPoles(container);
             else window.location.reload();
         } catch (err) {
-            showToast(t('poles.errorSave'), "error");
+            showToast("Erreur sauvegarde", "error");
             console.error(err);
         } finally {
             toggleLoader(false);
@@ -823,7 +823,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                 e.preventDefault();
                 const uid = btn.dataset.removeLeader;
 
-                showConfirm(t('poles.modal.removeLeaderConfirm'), () => {
+                showConfirm("Retirer ce responsable ?", () => {
                     // Add to removal list
                     leaderChanges.toRemove.push({ userId: uid });
 
@@ -833,8 +833,8 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                         leaderCard.style.opacity = '0.5';
                         leaderCard.style.textDecoration = 'line-through';
                     }
-                    showToast(t('poles.modal.markDelete'));
-                }, { type: 'danger', confirmText: t('poles.candidates.actions.remove') });
+                    showToast("Responsable marqué pour suppression");
+                }, { type: 'danger', confirmText: 'Retirer' });
             };
         });
 
@@ -890,7 +890,7 @@ async function openUpsertPoleModal(team = null, directions = [], preselectedPare
                                 poleId: team.id,
                                 roleTitle: roleTitle
                             });
-                            showToast(t('poles.modal.leaderAddedToast', { name: user.first_name, role: roleTitle }));
+                            showToast(`${user.first_name} sera ajouté(e) au poste "${roleTitle}"`);
                             searchInput.value = ''; // Clear search
                             resultsBox.classList.add('hidden');
                         });
@@ -919,26 +919,26 @@ function openLeaderRoleModal(user, onConfirm) {
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-100 text-brand-600 mb-3">
                     <i data-lucide="briefcase" class="w-6 h-6"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900">${t('poles.modal.roleTitle')}</h3>
-                <p class="text-sm text-slate-500 mt-2">${t('poles.modal.roleDesc', { name: `<strong class="text-slate-700">${escapeHtml(userName)}</strong>` })}</p>
+                <h3 class="text-xl font-black text-slate-900">Titre du poste</h3>
+                <p class="text-sm text-slate-500 mt-2">Définissez le rôle de <strong class="text-slate-700">${escapeHtml(userName)}</strong></p>
             </div>
 
             <!--Form -->
             <form id="form-role-title" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">${t('poles.modal.roleLabel')}</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Intitulé du poste</label>
                     <div class="relative">
                         <i data-lucide="briefcase" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="text" name="role_title" placeholder="${t('poles.modal.rolePlaceholder')}" value="Responsable" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white border border-slate-100 transition" required>
+                        <input type="text" name="role_title" placeholder="Ex: Responsable Logistique" value="Responsable" class="w-full pl-11 p-3.5 bg-slate-50 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white border border-slate-100 transition" required>
                     </div>
-                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">${t('poles.modal.roleSuggestions')}</p>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">Suggestions : Responsable • Coordinateur • Animateur • Référent • Animateur Senior</p>
                 </div>
             </form>
 
             <!--Actions -->
     <div class="flex gap-3 mt-7">
-        <button id="btn-cancel-role" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition duration-300">${t('common.cancel')}</button>
-        <button form="form-role-title" type="submit" class="flex-1 px-4 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition duration-300 active:scale-95">${t('poles.add')}</button>
+        <button id="btn-cancel-role" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition duration-300">Annuler</button>
+        <button form="form-role-title" type="submit" class="flex-1 px-4 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition duration-300 active:scale-95">Ajouter</button>
     </div>
         </div>
     `;
@@ -999,10 +999,10 @@ async function openCandidatesModal(teamId, teamName) {
                  </div>
 
                  <div class="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    <button data-action="contact-candidate" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="${t('poles.contact')}">
+                    <button data-action="contact-candidate" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="Contacter">
                         <i data-lucide="message-circle" class="w-5 h-5"></i>
                     </button>
-                    <button data-action="remove-interest" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition" title="${t('poles.candidates.actions.remove')}">
+                    <button data-action="remove-interest" data-user-id="${p.id}" class="p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition" title="Retirer de la liste">
                         <i data-lucide="trash-2" class="w-5 h-5"></i>
                     </button>
                  </div>
@@ -1010,7 +1010,7 @@ async function openCandidatesModal(teamId, teamName) {
     }).join('') : `
     <div class="flex flex-col items-center justify-center py-16 text-slate-400" >
             <i data-lucide="inbox" class="w-12 h-12 mb-3 text-slate-200"></i>
-            <p>${t('poles.candidates.empty')}</p>
+            <p>Aucun bénévole intéressé pour le moment.</p>
         </div>
     `;
 
@@ -1020,10 +1020,10 @@ async function openCandidatesModal(teamId, teamName) {
             <div class="bg-gradient-to-br from-brand-50/80 to-indigo-50/50 p-6 border-b border-slate-100 flex justify-between items-start">
                 <div class="min-w-0 pr-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider border border-brand-200/30 mb-2">
-                        <i data-lucide="users" class="w-3.5 h-3.5"></i> ${t('poles.candidates.recruitment')}
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i> Recrutement
                     </div>
-                    <h3 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight truncate">${t('poles.candidates.interestedIn', { name: escapeHtml(teamName) })}</h3>
-                    <p class="text-slate-500 text-sm mt-1 font-medium truncate">${t('poles.candidates.waiting', { count: candidates.length })}</p>
+                    <h3 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight truncate">Intéressés par: ${escapeHtml(teamName)}</h3>
+                    <p class="text-slate-500 text-sm mt-1 font-medium truncate">${candidates.length} bénévole${candidates.length > 1 ? 's' : ''} en attente</p>
                 </div>
                 <button class="bg-white/80 backdrop-blur-sm p-2.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-white transition duration-300 btn-close shadow-sm border border-slate-100/50 flex-shrink-0">
                     <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
@@ -1035,7 +1035,7 @@ async function openCandidatesModal(teamId, teamName) {
             </div>
             
             <div class="bg-slate-50 p-4 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
-                <i data-lucide="lightbulb" class="w-4 h-4 inline mr-1 text-amber-500"></i> ${t('poles.candidates.tipContact')}
+                <i data-lucide="lightbulb" class="w-4 h-4 inline mr-1 text-amber-500"></i> Cliquez sur l'icône message pour contacter directement.
             </div>
         </div>
     `;
@@ -1052,7 +1052,7 @@ async function openCandidatesModal(teamId, teamName) {
             const action = btn.dataset.action;
 
             if (action === 'remove-interest') {
-                showConfirm(t('poles.candidates.actions.removeConfirm'), async () => {
+                showConfirm("Retirer ce bénévole de la liste ?\n(Cela décochera son intérêt)", async () => {
                     const row = document.getElementById(`candidate-row-${uid}`);
                     if (row) {
                         row.style.opacity = '0.5';
@@ -1062,14 +1062,14 @@ async function openCandidatesModal(teamId, teamName) {
                     toggleLoader(true);
                     try {
                         await PolesService.removeCandidateInterest(uid, teamId);
-                        showToast(t('poles.interestRemoved'));
+                        showToast("Intérêt retiré");
                         // Remove locally
                         if (row) {
                             row.classList.add('transition-all', 'duration-500', 'translate-x-full', 'opacity-0');
                             setTimeout(() => row.remove(), 500);
                         }
                     } catch (e) {
-                        showToast(t('poles.errorDelete'), "error");
+                        showToast("Erreur lors de la suppression", "error");
                         if (row) {
                             row.style.opacity = '1';
                             row.style.pointerEvents = 'auto';
@@ -1077,7 +1077,7 @@ async function openCandidatesModal(teamId, teamName) {
                     } finally {
                         toggleLoader(false);
                     }
-                }, { type: 'danger', confirmText: t('poles.candidates.actions.remove'), title: t('modals.confirmation') });
+                }, { type: 'danger', confirmText: 'Retirer', title: 'Confirmation' });
             }
 
             if (action === 'contact-candidate') {
@@ -1085,13 +1085,10 @@ async function openCandidatesModal(teamId, teamName) {
                 try {
                     const profileData = candidates.find(c => c.user_id === uid)?.profiles;
                     const fullName = `${profileData?.first_name} ${profileData?.last_name} `;
-                    const messageContent = t('poles.candidates.contactMessage', {
-                        name: profileData?.first_name,
-                        pole: teamName
-                    });
+                    const messageContent = `Bonjour ${profileData?.first_name}, \n\nJe te contacte suite à ton intérêt pour le pôle ${teamName}.`;
 
                     // Create or get existing conversation
-                    const res = await ChatService.createTicketByUser(uid, t('poles.candidates.contactSubject', { pole: teamName }), messageContent);
+                    const res = await ChatService.createTicketByUser(uid, `Candidature Pôle: ${teamName} `, messageContent);
 
                     // Close modal and navigate to messages
                     m.remove();
@@ -1115,11 +1112,11 @@ async function openCandidatesModal(teamId, teamName) {
                         setTimeout(() => location.reload(), 100);
                     }
 
-                    showToast(t('poles.candidates.chatOpened'));
+                    showToast('💬 Conversation ouverte!');
                 } catch (err) {
                     console.error('Contact candidate error:', err);
                     toggleLoader(false);
-                    showToast(t('errors.unexpectedError'), "error");
+                    showToast("Erreur lors de l'ouverture du tchat", "error");
                 }
             }
         };

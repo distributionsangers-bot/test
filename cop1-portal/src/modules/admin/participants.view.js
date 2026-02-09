@@ -170,8 +170,8 @@ function renderParticipantRow(r) {
                 Hors Quota (0h)
             </div>
         `;
-    } else if (isValidated && isSchool) {
-        // Validated School
+    } else if (isPresent && isValidated && isSchool) {
+        // Validated School (Present + Hours Count)
         warningHtml = `
             <div class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 mt-1">
                 <i data-lucide="check-circle-2" class="w-3 h-3"></i>

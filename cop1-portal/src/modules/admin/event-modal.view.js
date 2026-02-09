@@ -318,67 +318,66 @@ function renderShiftCard(shift, index) {
     const uid = `shift-${index}-${Date.now()}`;
 
     return `
-        <div class="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all relative z-${50 - index}"> <!-- Z-index stacking for dropdowns -->
-            <div class="flex flex-col md:flex-row justify-between items-start gap-3 md:gap-4">
-                <div class="flex-1 space-y-3 w-full">
-                    <!-- Horaires + Titre Mobile Stacked -->
-                    <div class="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
-                        <!-- Horaires -->
-                        <div class="flex items-center gap-2">
-                            <label class="md:hidden text-xs font-bold text-slate-500 whitespace-nowrap w-20">Horaires :</label>
-                            <input type="time" value="${startTime}" class="shift-start flex-1 md:flex-none p-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none w-full md:w-24" data-idx="${index}">
-                            <span class="text-slate-400 font-bold">à</span>
-                            <input type="time" value="${endTime}" class="shift-end flex-1 md:flex-none p-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none w-full md:w-24" data-idx="${index}">
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all relative z-${50 - index}"> <!-- Z-index stacking for dropdowns -->
+            <div class="flex flex-col gap-4">
+                <!-- Row 1: Horaires + Titre -->
+                <div class="flex flex-col gap-3">
+                    <!-- Horaires -->
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-bold text-slate-500 whitespace-nowrap w-16 flex-shrink-0">Horaires</label>
+                        <input type="time" value="${startTime}" class="shift-start flex-1 p-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none" data-idx="${index}">
+                        <span class="text-slate-400 font-bold px-1">à</span>
+                        <input type="time" value="${endTime}" class="shift-end flex-1 p-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none" data-idx="${index}">
+                    </div>
+
+                    <!-- Titre -->
+                    <div>
+                        <input type="text" value="${title}" placeholder="Nom du créneau (ex: Matin)" class="shift-title w-full p-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none placeholder:font-normal placeholder:text-slate-400" data-idx="${index}">
+                    </div>
+                </div>
+            
+                <!-- Row 2: Responsable & Capacité -->
+                <div class="flex flex-col gap-3">
+                    <!-- Responsable (Custom Dropdown) -->
+                    <div class="relative group referent-dropdown-container" data-idx="${index}">
+                        <input type="hidden" class="shift-referent-value" value="${escapeHtml(referent)}" data-idx="${index}">
+                        
+                        <div class="relative">
+                            <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 z-10 pointer-events-none"></i>
+                            <input type="text" value="${escapeHtml(referent)}" placeholder="Responsable (optionnel)" autocomplete="off"
+                                class="shift-referent-search w-full pl-10 pr-10 py-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none placeholder:font-normal placeholder:text-slate-400 transition-all cursor-pointer text-slate-800" data-idx="${index}">
+                            <i data-lucide="chevron-down" class="shift-referent-chevron absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
                         </div>
 
-                        <!-- Titre -->
-                        <div class="flex-1 w-full">
-                            <input type="text" value="${title}" placeholder="Nom du créneau (ex: Matin)" class="shift-title w-full p-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none" data-idx="${index}">
+                        <!-- Dropdown List -->
+                        <div class="shift-referent-list-container absolute top-full left-0 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl max-h-48 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-50">
+                            <div class="shift-referent-list p-2 space-y-1">
+                                <!-- Options injected via JS -->
+                            </div>
                         </div>
                     </div>
-                
-                    <!-- Responsable & Capacité Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                        <!-- Responsable (Custom Dropdown) -->
-                        <div class="relative group referent-dropdown-container" data-idx="${index}">
-                            <input type="hidden" class="shift-referent-value" value="${escapeHtml(referent)}" data-idx="${index}">
-                            
-                            <div class="relative">
-                                <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none"></i>
-                                <input type="text" value="${escapeHtml(referent)}" placeholder="Responsable (optionnel)" autocomplete="off"
-                                    class="shift-referent-search w-full pl-9 pr-8 py-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none placeholder:font-normal placeholder:text-slate-400 transition-all cursor-pointer text-slate-800" data-idx="${index}">
-                                <i data-lucide="chevron-down" class="shift-referent-chevron absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
-                            </div>
 
-                            <!-- Dropdown List -->
-                            <div class="shift-referent-list-container absolute top-full left-0 w-full mt-1 bg-white border border-slate-100 rounded-lg shadow-xl max-h-48 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-50">
-                                <div class="shift-referent-list p-1 space-y-0.5">
-                                    <!-- Options injected via JS -->
-                                </div>
-                            </div>
+                    <!-- Capacités -->
+                    <div class="flex gap-3">
+                        <!-- Capacité -->
+                        <div class="flex-1 flex gap-2 items-center">
+                            <label class="text-sm font-bold text-slate-500 whitespace-nowrap">Max:</label>
+                            <input type="number" value="${capacity}" min="1" class="shift-capacity p-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none w-full" data-idx="${index}">
                         </div>
 
-                        <div class="flex gap-3">
-                            <!-- Capacité -->
-                            <div class="flex-1 flex gap-2 items-center">
-                                <label class="text-xs font-bold text-slate-500 whitespace-nowrap">Max:</label>
-                                <input type="number" value="${capacity}" min="1" class="shift-capacity p-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none w-full" data-idx="${index}">
-                            </div>
-
-                            <!-- Places réservées -->
-                            <div class="flex-1 flex gap-2 items-center">
-                                <label class="text-xs font-bold text-slate-500 whitespace-nowrap">Réservé:</label>
-                                <input type="number" value="${reserved}" min="0" class="shift-reserved p-2 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 focus:border-brand-400 outline-none w-full" data-idx="${index}">
-                                ${reserved > 0 ? `<span class="text-xs font-bold text-amber-600">⚠️</span>` : ''}
-                            </div>
+                        <!-- Places réservées -->
+                        <div class="flex-1 flex gap-2 items-center">
+                            <label class="text-sm font-bold text-slate-500 whitespace-nowrap">Réservé:</label>
+                            <input type="number" value="${reserved}" min="0" class="shift-reserved p-3 bg-slate-50 rounded-xl text-base font-bold border border-slate-200 focus:border-brand-400 outline-none w-full" data-idx="${index}">
+                            ${reserved > 0 ? `<span class="text-sm font-bold text-amber-600 flex-shrink-0">⚠️</span>` : ''}
                         </div>
                     </div>
                 </div>
 
                 <!-- Delete Action -->
-                <button class="btn-delete-shift w-full md:w-10 h-10 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition flex items-center justify-center flex-shrink-0" data-idx="${index}" title="Supprimer ce créneau">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    <span class="md:hidden ml-2 font-bold text-sm">Supprimer le créneau</span>
+                <button class="btn-delete-shift w-full py-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2 font-bold text-sm" data-idx="${index}" title="Supprimer ce créneau">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    <span>Supprimer le créneau</span>
                 </button>
             </div>
         </div>

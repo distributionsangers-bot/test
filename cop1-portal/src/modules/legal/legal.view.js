@@ -2,128 +2,127 @@ import { escapeHtml } from '../../services/utils.js';
 import { router } from '../../core/router.js';
 import { store } from '../../core/store.js';
 import { createIcons, icons } from 'lucide';
-import { t } from '../../locales/i18n.js';
 
-const getLegalContent = () => ({
+const LEGAL_CONTENT = {
     mentions: {
-        title: t('legal.mentions.title'),
-        subtitle: t('legal.mentions.subtitle'),
+        title: "Mentions Légales",
+        subtitle: "Informations juridiques concernant l'association et la plateforme.",
         icon: "scale",
         gradient: "from-blue-600 via-blue-500 to-indigo-600",
         sections: [
             {
-                title: t('legal.mentions.sections.editor.title'),
+                title: "1. Éditeur du site",
                 icon: "building-2",
                 content: `
-                    <p class="font-bold text-slate-800 text-base">${t('legal.mentions.sections.editor.name')}</p>
-                    <p>${t('legal.mentions.sections.editor.status')}</p>
-                    <p>${t('legal.mentions.sections.editor.address')}</p>
-                    <p>${t('legal.mentions.sections.editor.contact')}</p>
+                    <p class="font-bold text-slate-800 text-base">Association COP1 Angers</p>
+                    <p>Association loi 1901 à but non lucratif.</p>
+                    <p>Siège social : 34 rue des Noyers, 49000 Angers, France</p>
+                    <p>Contact : angers@cop1.fr</p>
                 `
             },
             {
-                title: t('legal.mentions.sections.hosting.title'),
+                title: "2. Hébergement & Données",
                 icon: "server",
                 content: `
-                    <p>${t('legal.mentions.sections.hosting.intro')}</p>
-                    <p class="mt-3 font-medium text-slate-900">${t('legal.mentions.sections.hosting.authHosting')}</p>
+                    <p>L'application est hébergée techniquement (Frontend) sur le navigateur client.</p>
+                    <p class="mt-3 font-medium text-slate-900">Les données et l'authentification sont hébergées par :</p>
                     <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-2">
-                        <p class="font-bold text-slate-800">${t('legal.mentions.sections.hosting.hostName')}</p>
-                        <p>${t('legal.mentions.sections.hosting.hostAddress')}</p>
+                        <p class="font-bold text-slate-800">Supabase Inc. (basé sur AWS)</p>
+                        <p>San Francisco, California, USA.</p>
                     </div>
                     <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                        <i data-lucide="shield-check" class="w-3 h-3"></i> ${t('legal.mentions.sections.hosting.compliance')}
+                        <i data-lucide="shield-check" class="w-3 h-3"></i> Conforme RGPD (Data Processing Addendum).
                     </p>
                 `
             },
             {
-                title: t('legal.mentions.sections.ip.title'),
+                title: "3. Propriété intellectuelle",
                 icon: "copyright",
                 content: `
-                    <p>${t('legal.mentions.sections.ip.text1')}</p>
-                    <p class="mt-2">${t('legal.mentions.sections.ip.text2')}</p>
+                    <p>Le logo et le nom <span class="font-black text-brand-600">COP1 Angers</span> sont la propriété exclusive de l'association.</p>
+                    <p class="mt-2">Toute reproduction, distribution ou modification sans autorisation est strictement interdite.</p>
                 `
             }
         ]
     },
     privacy: {
-        title: t('legal.privacy.title'),
-        subtitle: t('legal.privacy.subtitle'),
+        title: "Politique de Confidentialité",
+        subtitle: "Protection et gestion de vos données personnelles.",
         icon: "shield-check",
         gradient: "from-emerald-500 via-emerald-600 to-teal-700",
         sections: [
             {
-                title: t('legal.privacy.sections.data.title'),
+                title: "1. Données collectées",
                 icon: "database",
                 content: `
-                    <p class="mb-2">${t('legal.privacy.sections.data.intro')}</p>
+                    <p class="mb-2">Dans le cadre de votre inscription bénévole, nous collectons :</p>
                     <ul class="space-y-2">
                         <li class="flex items-start gap-2">
                             <i data-lucide="user" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.data.identity')}</span>
+                            <span><strong>Identité :</strong> Nom, Prénom.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i data-lucide="mail" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.data.contact')}</span>
+                            <span><strong>Contact :</strong> Email, Téléphone.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.data.profile')}</span>
+                            <span><strong>Profil :</strong> Statut étudiant, préférences.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i data-lucide="globe" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.data.tech')}</span>
+                            <span><strong>Technique :</strong> Adresse IP (sécurité).</span>
                         </li>
                     </ul>
                 `
             },
             {
-                title: t('legal.privacy.sections.usage.title'),
+                title: "2. Utilisation des données",
                 icon: "file-text",
                 content: `
-                    <p class="mb-2">${t('legal.privacy.sections.usage.intro')}</p>
+                    <p class="mb-2">Vos données sont utilisées exclusivement pour :</p>
                     <ul class="space-y-2">
                         <li class="flex items-start gap-2">
                             <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.usage.planning')}</span>
+                            <span>Gérer le planning des distributions et collectes.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i data-lucide="award" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.usage.hours')}</span>
+                            <span>Valider vos heures de bénévolat (attestations).</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i data-lucide="phone-call" class="w-4 h-4 text-emerald-500 mt-1 shrink-0"></i>
-                            <span>${t('legal.privacy.sections.usage.contact')}</span>
+                            <span>Vous contacter en cas d'urgence ou d'annulation.</span>
                         </li>
                     </ul>
                 `
             },
             {
-                title: t('legal.privacy.sections.conservation.title'),
+                title: "3. Conservation & Droits",
                 icon: "clock",
                 content: `
-                    <p>${t('legal.privacy.sections.conservation.text')}</p>
+                    <p>Les données des comptes inactifs depuis plus de <strong>3 ans</strong> sont anonymisées.</p>
                     <div class="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-emerald-900 text-sm">
-                        <p class="font-medium mb-1">${t('legal.privacy.sections.conservation.rightsTitle')}</p>
-                        <p>${t('legal.privacy.sections.conservation.rightsText')}</p>
+                        <p class="font-medium mb-1">Vos droits</p>
+                        <p>Vous disposez d'un droit d'accès, de modification et de suppression via votre profil ou sur demande aux administrateurs.</p>
                     </div>
                 `
             }
         ]
     },
     cgu: {
-        title: t('legal.cgu.title'),
-        subtitle: t('legal.cgu.subtitle'),
+        title: "Conditions d'Utilisation",
+        subtitle: "Règles de bonne conduite et engagements.",
         icon: "scroll-text",
         gradient: "from-amber-500 via-orange-500 to-orange-600",
         alert: {
-            title: t('legal.cgu.alert.title'),
+            title: "Engagement Bénévole",
             icon: "heart-handshake",
-            content: t('legal.cgu.alert.content')
+            content: "Toute inscription à une mission est un engagement. En cas d'empêchement, désinscrivez-vous au moins 24h à l'avance par respect pour l'équipe et les bénéficiaires."
         },
         sections: [
             {
-                title: t('legal.cgu.sections.rules.title'),
+                title: "Règles de bonne conduite",
                 icon: "heart-handshake",
                 content: `
                     <ul class="space-y-4">
@@ -132,8 +131,8 @@ const getLegalContent = () => ({
                                 <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
                             </div>
                             <div>
-                                <strong class="text-slate-900">${t('legal.cgu.sections.rules.respect.title')}</strong>
-                                <p class="text-sm">${t('legal.cgu.sections.rules.respect.text')}</p>
+                                <strong class="text-slate-900">Respect & Courtoisie</strong>
+                                <p class="text-sm">Indispensable envers les bénéficiaires, les autres bénévoles et les partenaires.</p>
                             </div>
                         </li>
                         <li class="flex gap-3">
@@ -141,8 +140,8 @@ const getLegalContent = () => ({
                                 <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
                             </div>
                             <div>
-                                <strong class="text-slate-900">${t('legal.cgu.sections.rules.security.title')}</strong>
-                                <p class="text-sm">${t('legal.cgu.sections.rules.security.text')}</p>
+                                <strong class="text-slate-900">Sécurité</strong>
+                                <p class="text-sm">Respect strict des consignes données par les référents lors des missions.</p>
                             </div>
                         </li>
                         <li class="flex gap-3">
@@ -150,8 +149,8 @@ const getLegalContent = () => ({
                                 <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
                             </div>
                             <div>
-                                <strong class="text-slate-900">${t('legal.cgu.sections.rules.confidentiality.title')}</strong>
-                                <p class="text-sm">${t('legal.cgu.sections.rules.confidentiality.text')}</p>
+                                <strong class="text-slate-900">Confidentialité</strong>
+                                <p class="text-sm">Interdiction formelle de divulguer des informations sur les bénéficiaires rencontrés.</p>
                             </div>
                         </li>
                         <li class="flex gap-3">
@@ -159,8 +158,8 @@ const getLegalContent = () => ({
                                 <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
                             </div>
                             <div>
-                                <strong class="text-slate-900">${t('legal.cgu.sections.rules.accuracy.title')}</strong>
-                                <p class="text-sm">${t('legal.cgu.sections.rules.accuracy.text')}</p>
+                                <strong class="text-slate-900">Exactitude</strong>
+                                <p class="text-sm">Vous certifiez que les documents fournis pour votre inscription sont authentiques.</p>
                             </div>
                         </li>
                     </ul>
@@ -168,16 +167,15 @@ const getLegalContent = () => ({
             }
         ]
     }
-});
+};
 
 /**
  * Renders the legal pages with a premium UI
  */
 export async function renderLegal(container, params) {
     if (!container) return;
-    const content = getLegalContent();
     const type = params.type || 'mentions';
-    const data = content[type] || content.mentions;
+    const data = LEGAL_CONTENT[type] || LEGAL_CONTENT.mentions;
 
     // Determine back button destination
     const backAction = store.state.user ? 'profile' : 'login';
@@ -210,7 +208,7 @@ export async function renderLegal(container, params) {
                     class="absolute top-6 left-6 flex items-center gap-2 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition-all text-sm font-semibold backdrop-blur-md border border-white/10"
                 >
                     <i data-lucide="arrow-left" class="w-4 h-4 pointer-events-none"></i>
-                    <span class="pointer-events-none">${t('legal.back')}</span>
+                    <span class="pointer-events-none">Retour</span>
                 </button>
 
                 <div class="max-w-4xl mx-auto text-center text-white mt-10 animate-fade-in relative z-10">
@@ -242,7 +240,7 @@ export async function renderLegal(container, params) {
                 
                 <!-- Footer Note -->
                 <div class="text-center pt-8 pb-4 opacity-50 text-xs text-slate-400">
-                    &copy; ${new Date().getFullYear()} COP1 Angers. ${t('legal.footer')}
+                    &copy; ${new Date().getFullYear()} COP1 Angers. Tous droits réservés.
                 </div>
             </div>
         </div>

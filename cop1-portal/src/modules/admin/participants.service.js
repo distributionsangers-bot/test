@@ -14,7 +14,6 @@
  */
 
 import { supabase } from '../../services/supabase.js';
-import { t } from '../../locales/i18n.js';
 
 export const ParticipantsService = {
     /**
@@ -155,7 +154,7 @@ export const ParticipantsService = {
                 .maybeSingle();
 
             if (existing) {
-                return { data: null, error: { message: t('admin.participants.errors.alreadyRegistered') } };
+                return { data: null, error: { message: 'Participant déjà inscrit à ce créneau' } };
             }
 
             // 2. Vérifie la capacité
@@ -254,21 +253,21 @@ export const ParticipantsService = {
 
             // Génère le CSV
             const headers = [
-                t('admin.participants.export.headers.firstName'),
-                t('admin.participants.export.headers.lastName'),
-                t('admin.participants.export.headers.email'),
-                t('admin.participants.export.headers.phone'),
-                t('admin.participants.export.headers.school'),
-                t('admin.participants.export.headers.status'), // Validé/En attente...
-                t('admin.participants.export.headers.present'),
-                t('admin.participants.export.headers.hours'),
-                t('admin.participants.export.headers.note'),
-                t('admin.participants.export.headers.date')
+                'Prénom',
+                'Nom',
+                'Email',
+                'Téléphone',
+                'École',
+                'Statut', // Validé/En attente...
+                'Présent',
+                'Heures Comptabilisées',
+                'Note Inscription',
+                'Date inscription'
             ];
 
             const rows = registrations.map(reg => {
                 const profile = reg.profiles;
-                const statusLabel = profile.status === 'approved' ? t('admin.participants.export.status.validated') : profile.status === 'pending' ? t('admin.participants.export.status.pending') : t('admin.participants.export.status.rejected');
+                const statusLabel = profile.status === 'approved' ? 'Validé' : profile.status === 'pending' ? 'En attente' : 'Refusé';
 
                 return [
                     profile.first_name,
@@ -277,10 +276,10 @@ export const ParticipantsService = {
                     profile.phone || '',
                     profile.school || '', // Champ école ajouté
                     statusLabel,
-                    reg.attended ? t('admin.participants.export.boolean.yes') : t('admin.participants.export.boolean.no'),
+                    reg.attended ? 'Oui' : 'Non',
                     reg.attended ? (reg.hours_counted || 0).toString().replace('.', ',') : '',
                     reg.note || '', // Note laissée lors de l'inscription
-                    new Date(reg.created_at).toLocaleDateString(t('common.dateLocale'))
+                    new Date(reg.created_at).toLocaleDateString('fr-FR')
                 ];
             });
 
@@ -401,6 +400,133 @@ export const ParticipantsService = {
         } catch (error) {
             console.error('❌ Erreur forçage validation:', error);
             return { success: false, error };
+        }
+    },
+
+    /**
+     * Exporte un événement complet au format CSV "Planning"
+     * Structure : Créneaux en colonnes, inscrits en lignes
+     * @param {number} eventId - ID de l'événement
+     * @returns {Promise<{data: string, filename: string, error}>}
+     */
+    async exportEventPlanningCSV(eventId) {
+        try {
+            // 1. Récupère l'événement avec ses créneaux
+            const { data: event, error: eventError } = await supabase
+                .from('events')
+                .select('*, shifts(*)')
+                .eq('id', eventId)
+                .single();
+
+            if (eventError) throw eventError;
+
+            // Trier les créneaux par heure de début
+            const shifts = (event.shifts || []).sort((a, b) =>
+                (a.start_time || '').localeCompare(b.start_time || '')
+            );
+
+            // 2. Récupère les inscriptions pour chaque créneau
+            const allRegistrations = [];
+
+            for (const shift of shifts) {
+                const { data: regs } = await supabase
+                    .from('registrations')
+                    .select(`
+                        *,
+                        profiles (
+                            first_name,
+                            last_name,
+                            phone
+                        )
+                    `)
+                    .eq('shift_id', shift.id)
+                    .order('created_at', { ascending: true });
+
+                // Ajouter chaque inscription avec les infos du créneau
+                (regs || []).forEach((reg, index) => {
+                    allRegistrations.push({
+                        event,
+                        shift,
+                        reg,
+                        index: index + 1
+                    });
+                });
+            }
+
+            // 3. Construction du CSV format "à plat"
+            const separator = ';';
+            const rows = [];
+
+            // En-têtes
+            rows.push([
+                'Événement',
+                'Date',
+                'Lieu',
+                'Créneau',
+                'Horaire',
+                'Référent',
+                'N° Inscrit',
+                'Prénom + Nom',
+                'Téléphone',
+                'Remarques'
+            ]);
+
+            // Format date
+            const dateObj = new Date(event.date);
+            const dateStr = dateObj.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Lignes de données
+            allRegistrations.forEach(({ shift, reg, index }) => {
+                const timeRange = `${(shift.start_time || '').slice(0, 5)} - ${(shift.end_time || '').slice(0, 5)}`;
+                const fullName = reg.profiles
+                    ? `${reg.profiles.first_name || ''} ${reg.profiles.last_name || ''}`.trim()
+                    : '';
+                const phone = reg.profiles?.phone || '';
+
+                rows.push([
+                    event.title || '',
+                    dateStr,
+                    event.location || '',
+                    shift.title || '',
+                    timeRange,
+                    shift.referent_name || '',
+                    index,
+                    fullName,
+                    phone,
+                    reg.note || ''
+                ]);
+            });
+
+            // 4. Génère le CSV
+            const csvContent = rows.map(row =>
+                row.map(cell => {
+                    const cellStr = String(cell ?? '');
+                    // Escape quotes and wrap in quotes if contains separator or newline
+                    if (cellStr.includes(separator) || cellStr.includes('\n') || cellStr.includes('"')) {
+                        return `"${cellStr.replace(/"/g, '""')}"`;
+                    }
+                    return cellStr;
+                }).join(separator)
+            ).join('\n');
+
+            // BOM pour UTF-8 Excel
+            const bom = '\uFEFF';
+            const csv = bom + csvContent;
+
+            // Nom du fichier
+            const safeTitle = (event.title || 'evenement').replace(/[^a-zA-Z0-9àâäéèêëïîôùûüç\s-]/gi, '').substring(0, 30);
+            const dateFile = event.date || new Date().toISOString().split('T')[0];
+            const filename = `export_${safeTitle}_${dateFile}.csv`.replace(/\s+/g, '_');
+
+            return { data: csv, filename, error: null };
+        } catch (error) {
+            console.error('❌ Erreur export événement CSV:', error);
+            return { data: null, filename: null, error };
         }
     }
 };

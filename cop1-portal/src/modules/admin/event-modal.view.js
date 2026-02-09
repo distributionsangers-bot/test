@@ -49,7 +49,7 @@ export async function openEventModal(eventToEdit = null) {
 
     const modal = document.createElement('div');
     modal.id = modalId;
-    modal.className = 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in';
+    modal.className = 'fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto';
 
     document.body.appendChild(modal);
 
@@ -85,7 +85,7 @@ async function loadAdmins() {
 
 function renderModalStructure() {
     return `
-        <div class="bg-white rounded-2xl sm:rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-scale-in mx-2 sm:m-4 md:m-0">
+        <div class="bg-white rounded-2xl sm:rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden animate-scale-in my-auto">
             <!-- Header -->
             <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 flex justify-between items-center flex-shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
@@ -106,15 +106,14 @@ function renderModalStructure() {
             </div>
 
             <!-- Tabs -->
-            <div class="flex border-b border-slate-100 bg-slate-50/50 px-3 sm:px-6 py-2 gap-2 overflow-x-auto no-scrollbar">
-                <button data-tab="event" class="tab-btn px-3 sm:px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg whitespace-nowrap flex-shrink-0">
-                    <i data-lucide="info" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Informations</span>
-                    <span class="sm:hidden">Infos</span>
+            <div class="flex border-b border-slate-100 bg-slate-50/50 px-3 sm:px-6 py-2 gap-2 overflow-x-auto no-scrollbar flex-shrink-0">
+                <button data-tab="event" class="tab-btn min-w-fit px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg whitespace-nowrap">
+                    <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>Infos</span>
                 </button>
-                <button data-tab="shifts" class="tab-btn px-3 sm:px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-500 hover:bg-white/50 whitespace-nowrap flex-shrink-0">
-                    <i data-lucide="clock" class="w-4 h-4"></i>
-                    Créneaux
+                <button data-tab="shifts" class="tab-btn min-w-fit px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-500 hover:bg-white/50 whitespace-nowrap">
+                    <i data-lucide="clock" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>Créneaux</span>
                     <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[10px] font-black">${eventState.shifts.length}</span>
                 </button>
             </div>

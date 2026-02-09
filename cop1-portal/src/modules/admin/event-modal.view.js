@@ -85,60 +85,58 @@ async function loadAdmins() {
 
 function renderModalStructure() {
     return `
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in m-4 md:m-0">
+        <div class="bg-white rounded-2xl sm:rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-scale-in mx-2 sm:m-4 md:m-0">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 md:p-6 flex justify-between items-center flex-shrink-0 relative overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-4 flex justify-between items-center flex-shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
-                <div class="relative z-10 flex items-center gap-3 md:gap-4">
-                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
-                        <i data-lucide="${eventState.eventToEdit ? 'edit-3' : 'calendar-plus'}" class="w-5 h-5 md:w-6 md:h-6 text-white"></i>
+                <div class="relative z-10 flex items-center gap-3 min-w-0 flex-1">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10 flex-shrink-0">
+                        <i data-lucide="${eventState.eventToEdit ? 'edit-3' : 'calendar-plus'}" class="w-5 h-5 text-white"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h2 class="text-lg md:text-2xl font-black text-white tracking-tight truncate">
-                            ${eventState.eventToEdit ? 'Modifier l\'événement' : 'Nouvel Événement'}
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-base sm:text-lg md:text-2xl font-black text-white tracking-tight truncate">
+                            ${eventState.eventToEdit ? 'Modifier' : 'Nouvel Événement'}
                         </h2>
-                        <p class="text-slate-400 text-xs md:text-sm font-medium truncate">Configurez les détails et les créneaux</p>
+                        <p class="text-slate-400 text-[10px] sm:text-xs font-medium truncate hidden sm:block">Configurez les détails et les créneaux</p>
                     </div>
                 </div>
-                <button id="close-modal" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition flex items-center justify-center backdrop-blur-md flex-shrink-0">
+                <button id="close-modal" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition flex items-center justify-center backdrop-blur-md flex-shrink-0 ml-2">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <!-- Tabs -->
-            <div class="flex border-b border-slate-100 bg-slate-50/50 px-6 py-2 gap-2">
-                <button data-tab="event" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg">
+            <div class="flex border-b border-slate-100 bg-slate-50/50 px-3 sm:px-6 py-2 gap-2 overflow-x-auto no-scrollbar">
+                <button data-tab="event" class="tab-btn px-3 sm:px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-white text-slate-900 shadow-lg whitespace-nowrap flex-shrink-0">
                     <i data-lucide="info" class="w-4 h-4"></i>
-                    Informations Générales
+                    <span class="hidden sm:inline">Informations</span>
+                    <span class="sm:hidden">Infos</span>
                 </button>
-                <button data-tab="shifts" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-500 hover:bg-white/50">
+                <button data-tab="shifts" class="tab-btn px-3 sm:px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-500 hover:bg-white/50 whitespace-nowrap flex-shrink-0">
                     <i data-lucide="clock" class="w-4 h-4"></i>
-                    Créneaux &amp; Responsables
-                    <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[10px] font-black ml-1">${eventState.shifts.length}</span>
+                    Créneaux
+                    <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[10px] font-black">${eventState.shifts.length}</span>
                 </button>
             </div>
 
             <!-- Content -->
-            <div id="event-modal-content" class="flex-1 overflow-y-auto bg-slate-50/30 scrollbar-hide relative">
+            <div id="event-modal-content" class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50/30 scrollbar-hide relative">
                 <!-- Injected via JS -->
             </div>
 
             <!-- Footer -->
-            <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex flex-col-reverse md:flex-row justify-between items-center gap-3 md:gap-4 flex-shrink-0 z-50 relative">
+            <div class="p-3 sm:p-4 bg-white border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-between items-center gap-3 flex-shrink-0 z-50 relative">
                 ${eventState.eventToEdit ? `
-                    <button id="btn-delete-event" class="w-full md:w-auto px-5 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition text-sm flex items-center justify-center gap-2">
+                    <button id="btn-delete-event" class="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition text-sm flex items-center justify-center gap-2">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                         Supprimer
                     </button>
-                ` : '<div class="hidden md:block"></div>'}
+                ` : '<div class="hidden sm:block"></div>'}
 
-                <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-
-                    <button id="btn-save-event" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-lg shadow-brand-500/30 transition text-sm flex items-center justify-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4"></i>
-                        ${eventState.eventToEdit ? 'Enregistrer' : 'Créer l\'événement'}
-                    </button>
-                </div>
+                <button id="btn-save-event" class="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-lg shadow-brand-500/30 transition text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    ${eventState.eventToEdit ? 'Enregistrer' : 'Créer'}
+                </button>
             </div>
         </div>
     `;
@@ -156,21 +154,21 @@ function renderEventTab() {
     const isVisible = eventState.draft.is_visible;
 
     return `
-        <div class="p-6 space-y-6">
+        <div class="p-3 sm:p-6 space-y-4 sm:space-y-6">
             <!-- Templates Quick Access -->
-            <div class="bg-gradient-to-r from-brand-500/10 to-indigo-500/10 p-4 rounded-2xl border border-brand-200/50 backdrop-blur-sm">
+            <div class="bg-gradient-to-r from-brand-500/10 to-indigo-500/10 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-brand-200/50 backdrop-blur-sm">
                 <h3 class="text-xs font-bold text-brand-700 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <i data-lucide="zap" class="w-4 h-4"></i>
-                    Modèles rapides
+                    Modèles
                 </h3>
-                <div class="flex flex-col md:flex-row gap-2 relative z-50">
+                <div class="flex flex-col sm:flex-row gap-2 relative z-50">
                     <!-- Custom Searchable Dropdown -->
                     <div class="flex-1 relative group">
                         <input type="hidden" id="template-select-hidden">
                         
                         <div class="relative">
                             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-400 z-10 pointer-events-none"></i>
-                            <input type="text" id="template-search" placeholder="Rechercher un modèle..." autocomplete="off"
+                            <input type="text" id="template-search" placeholder="Rechercher..." autocomplete="off"
                                 class="w-full pl-10 pr-8 py-3 bg-white/80 rounded-xl border border-brand-200 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none backdrop-blur-sm placeholder:text-brand-300/70 transition-all hover:bg-white cursor-pointer group-hover:border-brand-300 text-brand-900">
                             <i id="template-chevron" data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-400 transition-transform duration-300 pointer-events-none"></i>
                         </div>
@@ -183,7 +181,7 @@ function renderEventTab() {
                         </div>
                     </div>
 
-                    <button type="button" id="btn-apply-template" class="px-4 py-3 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition flex items-center gap-2 whitespace-nowrap shadow-lg shadow-brand-500/20 active:scale-[0.98]">
+                    <button type="button" id="btn-apply-template" class="w-full sm:w-auto px-4 py-3 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-brand-500/20 active:scale-[0.98]">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         Appliquer
                     </button>
@@ -191,44 +189,44 @@ function renderEventTab() {
             </div>
 
             <!-- Basic Info -->
-            <div class="space-y-4">
-                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Informations Générales</h4>
+            <div class="space-y-3 sm:space-y-4">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Informations</h4>
                 
                 <div>
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Titre de l'événement *</label>
-                    <input id="field-title" type="text" value="${escapeHtml(title)}" placeholder="Ex: Distribution Alimentaire" class="w-full p-3 md:p-4 bg-white rounded-xl md:rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all text-sm md:text-base">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Titre *</label>
+                    <input id="field-title" type="text" value="${escapeHtml(title)}" placeholder="Ex: Distribution Alimentaire" class="w-full p-3 bg-white rounded-xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 focus:bg-white transition-all text-base">
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Lieu *</label>
-                        <input id="field-location" type="text" value="${escapeHtml(location)}" placeholder="Ex: 2 Bd Foch" class="w-full p-3 md:p-4 bg-white rounded-xl md:rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-sm md:text-base">
+                        <input id="field-location" type="text" value="${escapeHtml(location)}" placeholder="Ex: 2 Bd Foch" class="w-full p-3 bg-white rounded-xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-base">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Date *</label>
-                        <input id="field-date" type="date" value="${date}" class="w-full p-3 md:p-4 bg-white rounded-xl md:rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-sm md:text-base">
+                        <input id="field-date" type="date" value="${date}" class="w-full p-3 bg-white rounded-xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-base">
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Description</label>
-                    <textarea id="field-description" placeholder="Décrivez l'événement..." class="w-full p-3 md:p-4 bg-white rounded-xl md:rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all min-h-[100px] resize-none text-sm md:text-base">${escapeHtml(description)}</textarea>
+                    <textarea id="field-description" placeholder="Décrivez l'événement..." class="w-full p-3 bg-white rounded-xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all min-h-[80px] resize-none text-base">${escapeHtml(description)}</textarea>
                 </div>
 
                 <!-- Global Referent -->
-                <div class="bg-indigo-50/50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-indigo-100 relative z-40">
+                <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 relative z-40">
                     <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2">
                         <i data-lucide="user-check" class="w-4 h-4 text-indigo-500"></i>
-                        Responsable de l'événement
+                        Responsable
                     </label>
-                    <div class="flex flex-col md:flex-row gap-2 relative">
+                    <div class="flex flex-col sm:flex-row gap-2 relative">
                         <div class="flex-1 relative group w-full">
                             <input type="hidden" id="field-global-referent-hidden" value="${escapeHtml(globalReferent)}">
                             
                             <div class="relative">
                                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 z-10 pointer-events-none"></i>
                                 <input type="text" id="field-global-referent-search" placeholder="Rechercher..." autocomplete="off"
-                                    class="w-full pl-10 pr-8 py-3 bg-white rounded-xl border-2 border-indigo-100 text-sm font-bold focus:border-indigo-400 focus:bg-white outline-none placeholder:text-indigo-300 transition-all cursor-pointer text-indigo-900" value="${escapeHtml(globalReferent)}">
+                                    class="w-full pl-10 pr-8 py-3 bg-white rounded-xl border-2 border-indigo-100 text-base font-bold focus:border-indigo-400 focus:bg-white outline-none placeholder:text-indigo-300 transition-all cursor-pointer text-indigo-900" value="${escapeHtml(globalReferent)}">
                                 <i id="global-referent-chevron" data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 transition-transform duration-300 pointer-events-none"></i>
                             </div>
 
@@ -240,23 +238,23 @@ function renderEventTab() {
                             </div>
                         </div>
 
-                        <button id="btn-apply-global-referent" type="button" class="w-full md:w-auto px-4 py-3 bg-indigo-100 text-indigo-700 font-bold rounded-xl text-sm hover:bg-indigo-200 transition flex items-center justify-center gap-2 flex-shrink-0" title="Appliquer à tous les créneaux créés">
+                        <button id="btn-apply-global-referent" type="button" class="w-full sm:w-auto px-4 py-3 bg-indigo-100 text-indigo-700 font-bold rounded-xl text-sm hover:bg-indigo-200 transition flex items-center justify-center gap-2 flex-shrink-0" title="Appliquer à tous les créneaux créés">
                             <i data-lucide="copy" class="w-4 h-4"></i>
                             <span>Appliquer à tout</span>
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-2 ml-1">Sélectionnez un responsable par défaut pour tous les créneaux.</p>
+                    <p class="text-[10px] text-slate-400 mt-2 ml-1 hidden sm:block">Sélectionnez un responsable par défaut pour tous les créneaux.</p>
                 </div>
 
                 <div>
-                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Date et heure de publication (optionnel)</label>
-                    <input id="field-publish-at" type="datetime-local" value="${publishAt}" class="w-full p-3 md:p-4 bg-white rounded-xl md:rounded-2xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-sm md:text-base">
-                    <p class="text-xs text-slate-400 mt-1">Laisser vide pour publier immédiatement</p>
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1 mb-2 block">Publication (optionnel)</label>
+                    <input id="field-publish-at" type="datetime-local" value="${publishAt}" class="w-full p-3 bg-white rounded-xl font-semibold border-2 border-slate-100 outline-none focus:border-brand-400 transition-all text-base">
+                    <p class="text-[10px] text-slate-400 mt-1">Laisser vide pour publier immédiatement</p>
                 </div>
 
                 <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                    <input id="field-visible" type="checkbox" ${isVisible ? 'checked' : ''} class="w-5 h-5 rounded border-blue-300 text-blue-600">
-                    <label for="field-visible" class="text-sm font-bold text-blue-800 cursor-pointer">Événement visible pour les bénévoles</label>
+                    <input id="field-visible" type="checkbox" ${isVisible ? 'checked' : ''} class="w-6 h-6 rounded border-blue-300 text-blue-600 flex-shrink-0">
+                    <label for="field-visible" class="text-sm font-bold text-blue-800 cursor-pointer">Visible pour les bénévoles</label>
                 </div>
             </div>
 
@@ -265,7 +263,7 @@ function renderEventTab() {
             <div class="border-t border-slate-100 pt-4">
                 <button id="btn-save-template" type="button" class="w-full px-4 py-3 bg-amber-50 text-amber-700 font-bold rounded-xl text-sm border border-amber-200 hover:bg-amber-100 transition flex items-center justify-center gap-2">
                     <i data-lucide="bookmark" class="w-4 h-4"></i>
-                    Sauvegarder cette configuration en modèle
+                    Sauvegarder en modèle
                 </button>
             </div>
             ` : ''}
@@ -282,20 +280,20 @@ function renderShiftsTab() {
     const shifts = eventState.shifts;
 
     return `
-        <div class="p-6 space-y-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Liste des créneaux</h3>
-                <button id="btn-add-shift" class="px-4 py-2 bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-emerald-600 transition">
+        <div class="p-3 sm:p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Créneaux</h3>
+                <button id="btn-add-shift" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-emerald-600 transition">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Ajouter un créneau
                 </button>
             </div>
 
             ${shifts.length === 0 ? `
-                <div class="text-center py-12 bg-white rounded-2xl border border-slate-100">
-                    <i data-lucide="calendar-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
-                    <p class="text-slate-400 font-semibold">Aucun créneau pour le moment</p>
-                    <p class="text-xs text-slate-300 mt-1">Cliquez sur "Ajouter un créneau" pour commencer</p>
+                <div class="text-center py-8 sm:py-12 bg-white rounded-xl sm:rounded-2xl border border-slate-100">
+                    <i data-lucide="calendar-x" class="w-10 h-10 sm:w-12 sm:h-12 text-slate-300 mx-auto mb-3"></i>
+                    <p class="text-slate-400 font-semibold text-sm sm:text-base">Aucun créneau</p>
+                    <p class="text-[10px] sm:text-xs text-slate-300 mt-1">Cliquez sur "Ajouter un créneau"</p>
                 </div>
             ` : `
                 <div class="space-y-3 pb-24">

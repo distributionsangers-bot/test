@@ -537,11 +537,11 @@ function renderEventCard(e) {
                         <span class="text-xs sm:text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
                         ${visibilityBadge}
                     </div>
-                    <h3 class="font-bold text-base sm:text-base text-slate-900 truncate">${safeTitle}</h3>
-                    <div class="flex items-center gap-2 text-xs sm:text-xs text-slate-500 mt-1">
-                        <span class="flex items-center gap-1 truncate">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5 sm:w-3 sm:h-3 flex-shrink-0"></i>
-                            <span class="truncate">${safeLoc}</span>
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900 leading-tight">${safeTitle}</h3>
+                    <div class="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 mt-1 flex-wrap">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i>
+                            <span class="break-words">${safeLoc}</span>
                         </span>
                         <span class="text-slate-300">•</span>
                         <span>${e.shifts?.length || 0} crén.</span>

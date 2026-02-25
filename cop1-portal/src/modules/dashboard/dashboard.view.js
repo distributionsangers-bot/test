@@ -411,7 +411,7 @@ async function renderUserDashboard(container) {
             </div>
 
             <!-- QUICK ACTIONS (moved to top) -->
-            <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <button data-link="/events" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
                     <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                         <i data-lucide="calendar-plus" class="w-6 h-6"></i>
@@ -434,6 +434,14 @@ async function renderUserDashboard(container) {
                     </div>
                     <div class="font-bold text-slate-800 text-sm group-hover:text-purple-600 transition-colors">Messages</div>
                     <div class="text-[10px] text-slate-400">Contacter</div>
+                </button>
+
+                <button data-link="/poles" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300">
+                        <i data-lucide="network" class="w-6 h-6"></i>
+                    </div>
+                    <div class="font-bold text-slate-800 text-sm group-hover:text-amber-600 transition-colors">Pôles</div>
+                    <div class="text-[10px] text-slate-400">Voir les postes de l'asso</div>
                 </button>
             </div>
 

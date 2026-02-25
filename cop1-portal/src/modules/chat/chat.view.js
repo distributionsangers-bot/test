@@ -321,7 +321,7 @@ async function openTicket(id) {
             form?.classList.remove('hidden');
         }
 
-        const otherName = isAnnouncement ? 'Annonce Système' : formatIdentity(ticket.profiles?.first_name, ticket.profiles?.last_name);
+        const otherName = isAnnouncement ? 'Annonce COP1' : formatIdentity(ticket.profiles?.first_name, ticket.profiles?.last_name);
         const initial = otherName[0].toUpperCase();
 
         // Check if admin (based on logic or if it's me)

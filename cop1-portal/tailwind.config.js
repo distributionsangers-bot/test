@@ -8,7 +8,7 @@ export default {
         extend: {
             fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
             colors: {
-                brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+                brand: { 50: '#eef0f7', 100: '#d8dcea', 200: '#b5bad4', 300: '#9198be', 400: '#7880ac', 500: '#5e6799', 600: '#4a5280', 700: '#3b4270', 800: '#2e3458', 900: '#1e2240' },
             },
             animation: {
                 'fade-in': 'fadeIn 0.3s ease-out',

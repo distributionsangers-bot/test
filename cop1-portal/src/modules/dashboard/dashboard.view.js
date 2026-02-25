@@ -391,7 +391,7 @@ async function renderUserDashboard(container) {
         <div class="animate-fade-in max-w-4xl mx-auto pb-24 pt-2">
             
             <!-- HERO HEADER -->
-            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-700 via-zinc-800 to-slate-900 p-6 mb-6 shadow-2xl shadow-zinc-500/20">
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 p-6 mb-6 shadow-2xl shadow-brand-500/20">
                 <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
                 
                 <div class="relative flex items-center justify-between">

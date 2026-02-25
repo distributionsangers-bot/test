@@ -591,7 +591,7 @@ function createMessageHtml(msg) {
                         </div>
                         
                         <!-- Content: left-aligned, scrollable, markdown -->
-                        <div class="text-sm text-slate-700 leading-relaxed text-left max-h-[300px] overflow-y-auto pr-1">
+                        <div class="text-sm text-slate-700 leading-relaxed text-left">
                             ${parseMarkdown(msg.content)}
                         </div>
                         

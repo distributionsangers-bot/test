@@ -19,6 +19,10 @@ export const ScannerView = {
         style.innerHTML = `
             #qr-reader video { object-fit: cover; width: 100% !important; height: 100% !important; border-radius: 1.5rem; }
             #qr-reader { border: none !important; width: 100% !important; height: 100% !important; }
+            #qr-reader #qr-shaded-region { display: none !important; }
+            #qr-reader img[alt="Info icon"] { display: none !important; }
+            #qr-reader div[style*="border"] { border: none !important; box-shadow: none !important; }
+            @keyframes scanLine { 0%, 100% { top: 0; } 50% { top: calc(100% - 2px); } }
         `;
         document.head.appendChild(style);
 
@@ -38,10 +42,21 @@ export const ScannerView = {
                 
                 <div id="qr-reader" class="w-full h-full bg-black"></div>
 
-                <div class="absolute inset-0 border-[3rem] border-black/50 z-10 pointer-events-none"></div>
-                
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-brand-500 rounded-3xl z-20 opacity-80 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-400 to-transparent opacity-50 animate-scan"></div>
+                <!-- Dark vignette overlay -->
+                <div class="absolute inset-0 z-10 pointer-events-none" style="box-shadow: inset 0 0 80px 40px rgba(0,0,0,0.6);"></div>
+
+                <!-- Custom scan frame with corner brackets -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-56 h-56 z-20 pointer-events-none">
+                    <!-- Top-left corner -->
+                    <div class="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-white rounded-tl-lg"></div>
+                    <!-- Top-right corner -->
+                    <div class="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-white rounded-tr-lg"></div>
+                    <!-- Bottom-left corner -->
+                    <div class="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-white rounded-bl-lg"></div>
+                    <!-- Bottom-right corner -->
+                    <div class="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-white rounded-br-lg"></div>
+                    <!-- Scan line -->
+                    <div class="absolute left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-brand-400 to-transparent opacity-70" style="animation: scanLine 2.5s ease-in-out infinite;"></div>
                 </div>
             </div>
 

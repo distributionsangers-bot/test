@@ -962,7 +962,7 @@ function injectCreateModal() {
                         <label class="type-option relative cursor-pointer group">
                             <input type="radio" name="type" value="support" class="sr-only peer" checked>
                             <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg peer-checked:shadow-blue-500/20 group-hover:border-slate-300">
-                                <i data-lucide="headset" class="w-6 h-6 text-slate-600 mb-2"></i>
+                                <i data-lucide="message-circle" class="w-6 h-6 text-slate-600 mb-2"></i>
                                 <p class="font-semibold text-sm text-slate-800">Support</p>
                                 <p class="text-xs text-slate-500 mt-1">
                                     ${isAdmin ? 'Demande d\'aide' : 'Message aux Admins'}

@@ -598,7 +598,7 @@ function createMessageHtml(msg) {
                         <!-- Footer -->
                         <div class="flex items-center justify-end pt-2 border-t border-amber-200/30">
                             <span class="text-[10px] font-semibold text-amber-600/60 tracking-wide uppercase">
-                                Annonce Système • ${time}
+                                Annonce COP1 • ${new Date(msg.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} • ${time}
                             </span>
                         </div>
                     </div>

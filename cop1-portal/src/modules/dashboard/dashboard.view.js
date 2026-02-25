@@ -645,7 +645,8 @@ async function renderAdminDashboard(container) {
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(a.event)}</span>
-                    ${a.count > 1 ? `<span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${a.count} créneaux</span>` : ''}
+                </div>
+                    ${a.count > 1 ? `<span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded w-fit">${a.count} créneaux</span>` : ''}
                 </div>
             </div>
             <span class="text-[10px] text-slate-300 flex-shrink-0">${formatTimeAgo(a.created_at)}</span>

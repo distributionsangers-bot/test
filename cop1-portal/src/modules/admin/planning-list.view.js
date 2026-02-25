@@ -15,6 +15,11 @@ let abortController = null;
 let registrationSubscription = null;
 let registrationRefreshTimeout = null;
 let currentEventsData = []; // Stocke les données d'événements actuels
+let historyState = {
+    page: 1,
+    limit: 10,
+    total: 0
+};
 
 export function renderPlanningList() {
     return `
@@ -30,55 +35,55 @@ export function renderPlanningList() {
                     </div>
                     
                     <!-- Stats -->
-                    <div id="planning-stats" class="flex flex-wrap gap-3">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
-                            <div id="stat-events" class="text-xl font-black text-white">-</div>
-                            <div class="text-[9px] font-bold text-white/60 uppercase">Événements</div>
+                    <div id="planning-stats" class="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-center border border-white/20 flex-1 min-w-0">
+                            <div id="stat-events" class="text-lg sm:text-xl font-black text-white">-</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-white/60 uppercase truncate">Événements</div>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
-                            <div id="stat-urgent" class="text-xl font-black text-amber-300">-</div>
-                            <div class="text-[9px] font-bold text-white/60 uppercase">À pourvoir</div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-center border border-white/20 flex-1 min-w-0">
+                            <div id="stat-urgent" class="text-lg sm:text-xl font-black text-amber-300">-</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-white/60 uppercase truncate">À pourvoir</div>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center border border-white/20 flex-1 min-w-[80px]">
-                            <div id="stat-fill" class="text-xl font-black text-emerald-300">-</div>
-                            <div class="text-[9px] font-bold text-white/60 uppercase">Rempli</div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-center border border-white/20 flex-1 min-w-0">
+                            <div id="stat-fill" class="text-lg sm:text-xl font-black text-emerald-300">-</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-white/60 uppercase truncate">Rempli</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- TOOLBAR -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6">
-                <div class="flex flex-col md:flex-row gap-4">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+                <div class="flex flex-col gap-3">
                     <!-- Search -->
-                    <div class="relative flex-1">
-                        <i data-lucide="search" class="absolute left-4 top-3 w-4 h-4 text-slate-400"></i>
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400"></i>
                         <input type="text" id="planning-search" placeholder="Rechercher un événement..." 
-                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 rounded-xl outline-none font-medium text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition border border-slate-100">
+                            class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-2.5 bg-slate-50 rounded-xl outline-none font-medium text-base sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition border border-slate-100">
                     </div>
                     
                     <!-- Actions -->
                     <div class="flex gap-2">
-                        <button id="btn-export-planning" class="px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition flex items-center gap-2 text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                            <span class="hidden sm:inline">Exporter</span>
+                        <button id="btn-export-planning" class="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition flex items-center justify-center gap-2 text-sm">
+                            <i data-lucide="download" class="w-5 h-5 sm:w-4 sm:h-4"></i>
+                            <span>Exporter</span>
                         </button>
-                        <button id="btn-create-event" class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition flex items-center gap-2 text-sm">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            Nouveau
+                        <button id="btn-create-event" class="flex-1 sm:flex-none px-5 py-3 sm:py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
+                            <i data-lucide="plus" class="w-5 h-5 sm:w-4 sm:h-4"></i>
+                            <span>Nouveau</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Tabs -->
-                <div class="flex gap-2 mt-4">
-                    <button data-tab="upcoming" class="tab-btn active px-4 py-2 rounded-xl text-sm font-bold transition bg-slate-900 text-white shadow-md">
+                <div class="flex gap-2 mt-3 sm:mt-4 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+                    <button data-tab="upcoming" class="tab-btn active px-4 sm:px-4 py-2.5 sm:py-2 rounded-xl text-sm font-bold transition bg-slate-900 text-white shadow-md whitespace-nowrap flex-shrink-0">
                         📅 À venir <span id="tab-count-upcoming" class="opacity-60"></span>
                     </button>
-                    <button data-tab="history" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold transition text-slate-500 bg-slate-50 hover:bg-slate-100">
+                    <button data-tab="history" class="tab-btn px-4 sm:px-4 py-2.5 sm:py-2 rounded-xl text-sm font-bold transition text-slate-500 bg-slate-50 hover:bg-slate-100 whitespace-nowrap flex-shrink-0">
                         📜 Historique
                     </button>
-                    <button data-tab="templates" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold transition text-slate-500 bg-slate-50 hover:bg-slate-100">
+                    <button data-tab="templates" class="tab-btn px-4 sm:px-4 py-2.5 sm:py-2 rounded-xl text-sm font-bold transition text-slate-500 bg-slate-50 hover:bg-slate-100 whitespace-nowrap flex-shrink-0">
                         📋 Modèles
                     </button>
                 </div>
@@ -88,6 +93,9 @@ export function renderPlanningList() {
             <div id="planning-list" class="space-y-4">
                 ${renderSkeleton()}
             </div>
+            
+            <!-- PAGINATION (History only) -->
+            <div id="planning-pagination" class="mt-6 hidden"></div>
         </div>
     `;
 }
@@ -122,6 +130,7 @@ export async function initPlanningList() {
             });
             btn.className = 'tab-btn active px-4 py-2 rounded-xl text-sm font-bold transition bg-slate-900 text-white shadow-md';
             currentTab = btn.dataset.tab;
+            historyState.page = 1; // Reset pagination on tab change
             loadEvents();
         }, { signal });
     });
@@ -147,6 +156,7 @@ export async function initPlanningList() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             searchQuery = e.target.value.trim().toLowerCase();
+            historyState.page = 1; // Reset pagination on search
             loadEvents();
         }, 300);
     }, { signal });
@@ -402,21 +412,29 @@ async function loadEvents() {
             const res = await PlanningService.getTemplates();
             data = res.data;
             error = res.error;
+            historyState.total = 0; // Not used
+        } else if (currentTab === 'history') {
+            const res = await PlanningService.getHistoryEvents(historyState.page, historyState.limit, searchQuery);
+            data = res.data;
+            historyState.total = res.count || 0;
+            error = res.error;
         } else {
+            // Upcoming
             const res = await PlanningService.getAllEventsAdmin(currentTab);
             data = res.data;
             error = res.error;
+            historyState.total = 0; // Not used
         }
 
         if (error) throw error;
 
         // Sauvegarder les données pour la subscription realtime
-        if (!currentTab.includes('template') && data) {
+        if (data) {
             currentEventsData = data;
         }
 
-        // Filter by search
-        if (searchQuery && data) {
+        // Filter by search Client-Side (Only for Upcoming and Templates)
+        if (searchQuery && data && currentTab !== 'history') {
             data = data.filter(e =>
                 e.title?.toLowerCase().includes(searchQuery) ||
                 e.location?.toLowerCase().includes(searchQuery) ||
@@ -447,10 +465,17 @@ async function loadEvents() {
         } else {
             if (currentTab === 'templates') {
                 list.innerHTML = data.map(t => renderTemplateCard(t)).join('');
+                document.getElementById('planning-pagination').classList.add('hidden');
+            } else if (currentTab === 'history') {
+                list.innerHTML = data.map(evt => renderEventCard(evt)).join('');
+                renderPagination(document.getElementById('planning-pagination'));
             } else {
                 list.innerHTML = data.map(evt => renderEventCard(evt)).join('');
+                document.getElementById('planning-pagination').classList.add('hidden');
             }
             createIcons({ icons, root: list });
+            // Re-create icons for pagination too if visible
+            if (currentTab === 'history') createIcons({ icons, root: document.getElementById('planning-pagination') });
         }
     } catch (err) {
         console.error(err);
@@ -495,7 +520,7 @@ function renderEventCard(e) {
     const safeTitle = escapeHtml(e.title);
     const safeLoc = escapeHtml(e.location);
     const isCollapsed = collapsedEvents.has(e.id);
-    const showActions = currentTab === 'upcoming';
+    const showActions = currentTab === 'upcoming' || currentTab === 'history';
 
     // Visibility
     const isVisible = e.is_visible !== false;
@@ -526,22 +551,22 @@ function renderEventCard(e) {
             <!-- Header -->
             <div class="p-3 sm:p-4 flex gap-3 cursor-pointer" data-action="toggle-collapse" data-id="${e.id}">
                 <!-- Date Block -->
-                <div class="w-12 h-14 sm:w-14 sm:h-16 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
-                    <span class="text-lg sm:text-xl font-black leading-none">${dayNum}</span>
-                    <span class="text-[8px] sm:text-[9px] font-bold opacity-80">${monthStr}</span>
+                <div class="w-14 h-16 sm:w-14 sm:h-16 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl sm:rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
+                    <span class="text-xl sm:text-xl font-black leading-none">${dayNum}</span>
+                    <span class="text-[9px] sm:text-[9px] font-bold opacity-80">${monthStr}</span>
                 </div>
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                        <span class="text-[10px] sm:text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
+                        <span class="text-xs sm:text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
                         ${visibilityBadge}
                     </div>
-                    <h3 class="font-bold text-sm sm:text-base text-slate-900 truncate">${safeTitle}</h3>
-                    <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 mt-0.5">
-                        <span class="flex items-center gap-1 truncate">
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900 leading-tight">${safeTitle}</h3>
+                    <div class="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 mt-1 flex-wrap">
+                        <span class="flex items-center gap-1">
                             <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i>
-                            <span class="truncate">${safeLoc}</span>
+                            <span class="break-words">${safeLoc}</span>
                         </span>
                         <span class="text-slate-300">•</span>
                         <span>${e.shifts?.length || 0} crén.</span>
@@ -549,7 +574,7 @@ function renderEventCard(e) {
                 </div>
 
                 <!-- Right Side -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1 sm:gap-2">
                     <!-- Fill Badge (mobile) / Circle (desktop) -->
                     <div class="hidden sm:block relative w-10 h-10">
                         <svg class="w-10 h-10 transform -rotate-90">
@@ -561,28 +586,28 @@ function renderEventCard(e) {
                         </svg>
                         <span data-fill-text class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-600">${fillRate}%</span>
                     </div>
-                    <span data-fill-mobile class="sm:hidden text-[10px] font-bold px-2 py-1 rounded-lg ${fillColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : fillColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                    <span data-fill-mobile class="sm:hidden text-xs font-bold px-2.5 py-1.5 rounded-lg ${fillColor === 'emerald' ? 'bg-emerald-100 text-emerald-700' : fillColor === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
                         ${fillRate}%
                     </span>
 
                     ${showActions ? `
                     <!-- Actions Dropdown -->
                     <div class="relative">
-                        <button data-action="open-actions-menu" data-id="${e.id}" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition" title="Actions">
+                        <button data-action="open-actions-menu" data-id="${e.id}" class="p-2.5 sm:p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition" title="Actions">
                             <i data-lucide="more-vertical" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                     </div>
                     ` : ''}
 
                     <!-- Collapse Toggle -->
-                    <button data-action="toggle-collapse" data-id="${e.id}" class="p-1.5 text-slate-300 hover:text-slate-500 transition">
+                    <button data-action="toggle-collapse" data-id="${e.id}" class="p-2 sm:p-1.5 text-slate-300 hover:text-slate-500 transition">
                         <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" class="w-5 h-5 pointer-events-none"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Shifts (collapsible) -->
-            <div class="${isCollapsed ? 'hidden' : ''} border-t border-slate-100 bg-slate-50/50 p-2 sm:p-3 space-y-1.5">
+            <div class="${isCollapsed ? 'hidden' : ''} border-t border-slate-100 bg-slate-50/50 p-2 sm:p-3 space-y-2">
                 ${shiftsHtml || '<div class="text-center text-slate-400 text-sm py-2">Aucun créneau</div>'}
             </div>
         </div>
@@ -614,42 +639,51 @@ function renderShiftItem(s, eventId) {
     }
 
     return `
-        <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-100 flex items-center gap-2 sm:gap-3 hover:shadow-sm transition" data-shift-id="${s.id}">
-            <!-- Time -->
-            <div class="w-12 sm:w-14 text-center flex-shrink-0">
-                <div class="text-xs sm:text-sm font-bold text-slate-700">${(s.start_time || '').slice(0, 5)}</div>
-                <div class="text-[9px] sm:text-[10px] text-slate-400">${(s.end_time || '').slice(0, 5)}</div>
-            </div>
+        <div class="bg-white p-3 sm:p-3 rounded-xl border border-slate-100 hover:shadow-sm transition" data-shift-id="${s.id}">
+            <!-- Mobile-first layout: Stack vertically on mobile -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <!-- Row 1: Time + Title -->
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <!-- Time -->
+                    <div class="w-14 sm:w-14 text-center flex-shrink-0 bg-slate-50 rounded-lg py-1.5 sm:py-0 sm:bg-transparent">
+                        <div class="text-sm sm:text-sm font-bold text-slate-700">${(s.start_time || '').slice(0, 5)}</div>
+                        <div class="text-[10px] sm:text-[10px] text-slate-400">${(s.end_time || '').slice(0, 5)}</div>
+                    </div>
 
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-semibold text-xs sm:text-sm text-slate-800 truncate" data-shift-title>${escapeHtml(s.title)}</span>
-                    <span class="text-[8px] ${statusClass}" data-status-badge>${statusBadge}</span>
-                    ${reservedBadge}
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-semibold text-sm sm:text-sm text-slate-800 truncate" data-shift-title>${escapeHtml(s.title)}</span>
+                            <span class="text-[8px] ${statusClass}" data-status-badge>${statusBadge}</span>
+                            ${reservedBadge}
+                        </div>
+                        <div class="text-[10px] sm:text-[10px] text-slate-400 truncate">Réf: ${escapeHtml(s.referent_name || '-')}</div>
+                    </div>
                 </div>
-                <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">Réf: ${escapeHtml(s.referent_name || '-')}</div>
-            </div>
 
-            <!-- Progress -->
-            <div class="w-16 sm:w-20 flex-shrink-0">
-                <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold mb-0.5">
-                    <span class="${isFull ? 'text-emerald-600' : 'text-slate-500'}"><span data-counter="taken">${taken}</span>/<span data-counter="max">${total}</span></span>
-                    <span class="text-slate-400">(<span data-counter="available">${available}</span>)</span>
-                </div>
-                <div class="h-1 sm:h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                    <div data-progress-bar class="${barColor} h-full transition-all" style="width: ${percent}%"></div>
-                </div>
-            </div>
+                <!-- Row 2 on mobile / Same row on desktop: Progress + Actions -->
+                <div class="flex items-center gap-2 sm:gap-2 justify-between sm:justify-end mt-1 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-100">
+                    <!-- Progress -->
+                    <div class="w-24 sm:w-20 flex-shrink-0">
+                        <div class="flex items-center justify-between text-xs sm:text-[10px] font-bold mb-1 sm:mb-0.5">
+                            <span class="${isFull ? 'text-emerald-600' : 'text-slate-500'}"><span data-counter="taken">${taken}</span>/<span data-counter="max">${total}</span></span>
+                            <span class="text-slate-400">(<span data-counter="available">${available}</span>)</span>
+                        </div>
+                        <div class="h-2 sm:h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div data-progress-bar class="${barColor} h-full transition-all" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
 
-            <!-- Actions -->
-            <div class="flex gap-0.5 flex-shrink-0">
-                <button data-action="view-participants" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 bg-brand-50 text-brand-600 rounded-lg hover:bg-brand-100 transition" title="Inscrits">
-                    <i data-lucide="users" class="w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none"></i>
-                </button>
-                <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition" title="QR">
-                    <i data-lucide="qr-code" class="w-4 h-4 pointer-events-none"></i>
-                </button>
+                    <!-- Actions -->
+                    <div class="flex gap-1 flex-shrink-0">
+                        <button data-action="view-participants" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-2.5 sm:p-2 bg-brand-50 text-brand-600 rounded-xl sm:rounded-lg hover:bg-brand-100 transition" title="Inscrits">
+                            <i data-lucide="users" class="w-5 h-5 sm:w-4 sm:h-4 pointer-events-none"></i>
+                        </button>
+                        <button data-action="qr-shift" data-id="${s.id}" data-title="${escapeHtml(s.title)}" class="p-2.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl sm:rounded-lg transition" title="QR">
+                            <i data-lucide="qr-code" class="w-5 h-5 sm:w-4 sm:h-4 pointer-events-none"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -687,6 +721,58 @@ function renderTemplateCard(t) {
             </div>
         </div>
     `;
+}
+
+function renderPagination(container) {
+    if (!container) return;
+
+    // Unhide container
+    container.classList.remove('hidden');
+
+    if (historyState.total === 0) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+        return;
+    }
+
+    const totalPages = Math.ceil(historyState.total / historyState.limit);
+    const start = (historyState.page - 1) * historyState.limit + 1;
+    const end = Math.min(historyState.page * historyState.limit, historyState.total);
+
+    container.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <div class="text-xs font-semibold text-slate-400">
+                Affichage <span class="text-slate-700">${start}-${end}</span> sur <span class="text-slate-700">${historyState.total}</span> événements
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-prev-page" ${historyState.page === 1 ? 'disabled' : ''} class="p-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <span class="text-sm font-bold text-slate-700 min-w-[4rem] text-center">${historyState.page} / ${totalPages || 1}</span>
+                <button id="btn-next-page" ${historyState.page >= totalPages ? 'disabled' : ''} class="p-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Add listeners
+    container.querySelector('#btn-prev-page')?.addEventListener('click', () => {
+        if (historyState.page > 1) {
+            historyState.page--;
+            loadEvents();
+            // Scroll to top of list
+            document.getElementById('planning-list')?.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    container.querySelector('#btn-next-page')?.addEventListener('click', () => {
+        if (historyState.page < totalPages) {
+            historyState.page++;
+            loadEvents();
+            document.getElementById('planning-list')?.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
 }
 
 async function handleListClick(e) {
@@ -1037,3 +1123,5 @@ async function handleExportEventCSV(eventId) {
     URL.revokeObjectURL(url);
     showToast("Export téléchargé ✓");
 }
+
+// Event listeners are managed in initPlanningList with AbortController

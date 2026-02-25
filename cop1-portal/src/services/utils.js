@@ -104,6 +104,40 @@ export function toLocalInputDate(isoString) {
     return localDate.toISOString().slice(0, 16);
 }
 
+/**
+ * Convertit le texte en HTML avec support Markdown basique
+ * Sécurisé contre XSS car on échappe d'abord tout le HTML
+ */
+export function parseMarkdown(text) {
+    if (!text) return '';
+
+    // 1. D'abord on échappe TOUT pour la sécurité (XSS)
+    let safeText = escapeHtml(text);
+
+    // 2. On remplace les sauts de ligne par <br>
+    safeText = safeText.replace(/\n/g, '<br>');
+
+    // 3. Gras (**texte**)
+    safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // 4. Italique (*texte*)
+    safeText = safeText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // 5. Souligné (__texte__)
+    safeText = safeText.replace(/__(.*?)__/g, '<u>$1</u>');
+
+    // 6. Liens simples (https://...)
+    // Regex basique pour détecter les URLs commençant par http/https
+    // On doit faire attention car le texte est déjà échappé (ex: &amp; au lieu de &)
+    // Mais pour les bases http://, ça va.
+    safeText = safeText.replace(
+        /(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-200 underline hover:text-white">$1</a>'
+    );
+
+    return safeText;
+}
+
 // ============================================================
 // 3.1 FORMATAGE IDENTITÉ (Prénom Nom)
 // ============================================================
@@ -147,17 +181,21 @@ export function showConfirm(message, onConfirm, options = {}) {
         title = 'Confirmation',
         confirmText = 'Confirmer',
         cancelText = 'Annuler',
-        type = 'info' // 'info' (bleu) ou 'danger' (rouge)
+        type = 'info', // 'info' (bleu) ou 'danger' (rouge)
+        confirmIcon = null,
+        headerIcon = null
     } = options;
 
     const isDanger = type === 'danger';
-    const iconName = isDanger ? 'alert-triangle' : 'help-circle';
+    const iconName = headerIcon || (isDanger ? 'alert-triangle' : 'help-circle');
     const headerGradient = isDanger
         ? 'from-red-600 to-red-700'
         : 'from-slate-900 to-slate-800';
     const confirmBtnClass = isDanger
         ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-red-500/30'
         : 'bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-brand-500/30';
+
+    const finalConfirmIcon = confirmIcon || (isDanger ? 'trash-2' : 'check');
 
     const el = document.createElement('div');
     el.id = modalId;
@@ -187,7 +225,7 @@ export function showConfirm(message, onConfirm, options = {}) {
                     ${cancelText}
                 </button>
                 <button id="confirm-ok-btn" class="flex-1 px-4 py-3 text-white ${confirmBtnClass} rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
-                    <i data-lucide="${isDanger ? 'trash-2' : 'check'}" class="w-4 h-4"></i>
+                    <i data-lucide="${finalConfirmIcon}" class="w-4 h-4"></i>
                     ${confirmText}
                 </button>
             </div>

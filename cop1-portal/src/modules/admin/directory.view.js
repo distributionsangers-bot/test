@@ -255,7 +255,7 @@ function renderUserCard(u) {
                         <button data-action="toggle-role" data-id="${u.id}" data-is-admin="${isAdmin}" 
                             class="p-2.5 rounded-xl transition ${isAdmin ? 'text-rose-600 bg-rose-50 hover:bg-rose-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100'}" 
                             title="${isAdmin ? 'Retirer Admin' : 'Passer Admin'}">
-                            <i data-lucide="shield" class="w-5 h-5 pointer-events-none"></i>
+                            <i data-lucide="${isAdmin ? 'shield-off' : 'shield-check'}" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                         <button data-action="delete" data-id="${u.id}" 
                             class="p-2.5 rounded-xl text-slate-400 bg-slate-50 hover:text-red-500 hover:bg-red-50 transition" 
@@ -399,7 +399,10 @@ function setupEventListeners(container) {
                     showToast(newAdmin ? "Admin ajouté ✓" : "Admin retiré");
                     loadUsers();
                 }
-            }, { type: 'danger' });
+            }, {
+                confirmIcon: newAdmin ? 'shield-check' : 'shield-off',
+                headerIcon: 'shield'
+            });
         } else if (action === 'delete') {
             showConfirm("⚠️ Supprimer définitivement ce bénévole ?\n\nCette action supprimera :\n• Son profil\n• Ses inscriptions\n• Ses justificatifs", async () => {
                 toggleLoader(true);
@@ -449,7 +452,7 @@ async function viewUserDetails(uid) {
     modal.className = 'fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in';
 
     modal.innerHTML = `
-        <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up">
+        <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[85vh] md:max-h-[90vh]">
             <!-- Header -->
             <div class="bg-gradient-to-br ${avatarBg} p-8 text-center text-white relative">
                 <button id="close-details-btn" class="absolute top-4 right-4 bg-white/20 p-2 rounded-full hover:bg-white/30 transition">
@@ -474,7 +477,7 @@ async function viewUserDetails(uid) {
             </div>
 
             <!-- CONTENT -->
-            <div id="content-area" class="max-h-[50vh] overflow-y-auto custom-scrollbar bg-slate-50">
+            <div id="content-area" class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 min-h-0">
                 
                 <!-- TAB: INFO -->
                 <div id="view-info" class="space-y-4 p-6">

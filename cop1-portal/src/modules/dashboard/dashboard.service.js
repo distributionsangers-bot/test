@@ -24,14 +24,16 @@ export const DashboardService = {
 
             // 2. Urgent Shifts (Next 7 days)
             const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             const nextWeek = new Date();
             nextWeek.setDate(today.getDate() + 7);
+            const nextWeekStr = `${nextWeek.getFullYear()}-${String(nextWeek.getMonth() + 1).padStart(2, '0')}-${String(nextWeek.getDate()).padStart(2, '0')}`;
 
             const { data: events, error: eventError } = await supabase
                 .from('events')
                 .select('*, shifts(*, registrations(count))')
-                .gte('date', today.toISOString())
-                .lte('date', nextWeek.toISOString())
+                .gte('date', todayStr)
+                .lte('date', nextWeekStr)
                 .order('date');
 
             if (eventError) throw eventError;

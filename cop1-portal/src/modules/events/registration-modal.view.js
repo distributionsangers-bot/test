@@ -8,8 +8,8 @@ export function renderRegistrationModal(event, shift, isRegistered) {
     const shiftTime = `${(shift.start_time || '').slice(0, 5)} - ${(shift.end_time || '').slice(0, 5)}`;
 
     return `
-        <div id="reg-modal-backdrop" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-            <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-in relative">
+        <div id="reg-modal-backdrop" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-fade-in">
+            <div class="bg-white w-full max-w-lg max-h-[85vh] sm:max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden overflow-y-auto animate-scale-in relative">
                 
                 <!-- Close Button -->
                 <button id="btn-close-modal" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 text-white flex items-center justify-center transition backdrop-blur-sm">
@@ -27,7 +27,13 @@ export function renderRegistrationModal(event, shift, isRegistered) {
 
                 <!-- Content -->
                 <div class="pt-12 px-6 pb-6">
-                    <h2 class="text-2xl font-black text-slate-900 leading-tight mb-1">${escapeHtml(event.title)}</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mb-1">${escapeHtml(event.title)}</h2>
+                    ${event.location ? `
+                        <div class="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                            <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0 text-slate-400"></i>
+                            <span>${escapeHtml(event.location)}</span>
+                        </div>
+                    ` : ''}
                     
                     <!-- Shift Info -->
                     <div class="flex items-center gap-3 mb-4">
@@ -61,9 +67,9 @@ export function renderRegistrationModal(event, shift, isRegistered) {
                     ${!isRegistered ? `
                         <div class="mb-6">
                             <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">
-                                Ajouter une remarque <span class="text-slate-400 font-normal lowercase">(optionnel)</span>
+                                Remarque <span class="text-slate-400 font-normal lowercase">(optionnel)</span>
                             </label>
-                            <textarea id="reg-note" rows="2" class="w-full rounded-xl bg-slate-50 border-slate-200 text-sm py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition placeholder:text-slate-400" placeholder="Ex: J'arriverai avec 10 min de retard..."></textarea>
+                            <textarea id="reg-note" rows="2" class="w-full rounded-xl bg-slate-50 border border-slate-200 text-sm px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition placeholder:text-slate-400 resize-none" placeholder="Ex: J'arriverai avec 10 min de retard..."></textarea>
                             <p class="text-[10px] text-slate-400 mt-1">Visible uniquement par les administrateurs.</p>
                         </div>
                     ` : `
@@ -75,8 +81,8 @@ export function renderRegistrationModal(event, shift, isRegistered) {
 
                     <!-- Actions -->
                     <div class="flex gap-3">
-                         <button id="btn-cancel" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
-                            Fermer
+                        <button id="btn-cancel" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
+                            ${isRegistered ? 'Fermer' : 'Annuler'}
                         </button>
                         <button id="btn-confirm-reg" class="flex-[2] py-3 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95
                             ${isRegistered ? 'bg-red-500 hover:bg-red-600 shadow-red-500/30' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30'}">

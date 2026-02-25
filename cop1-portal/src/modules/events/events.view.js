@@ -24,7 +24,7 @@ export async function renderEvents() {
                     events!inner ( id, title, date, location, is_visible, publish_at, description ),
                     registrations ( user_id )
                 `)
-                .gte('events.date', new Date().toISOString().split('T')[0])
+                .gte('events.date', (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })())
                 .order('start_time', { ascending: true }),
 
             EventsService.getShiftCounts()
@@ -35,12 +35,20 @@ export async function renderEvents() {
 
         if (error) throw error;
 
-        // Filter out hidden events
+        // Filter out hidden events AND past shifts (time-based)
         const now = new Date();
         const visibleShifts = shifts.filter(shift => {
             if (!shift.events) return false;
             const isVisible = shift.events.is_visible !== false;
             const isScheduledForFuture = shift.events.publish_at && new Date(shift.events.publish_at) > now;
+
+            // Time Check: Hide shift if end_time is passed
+            const eventDate = shift.events.date; // YYYY-MM-DD
+            const endTime = shift.end_time || '23:59:59';
+            const shiftEnd = new Date(`${eventDate}T${endTime}`);
+
+            if (shiftEnd < now) return false;
+
             return isVisible && !isScheduledForFuture;
         });
 
@@ -114,11 +122,20 @@ export async function renderEvents() {
                                     <div class="text-[9px] font-bold text-white/60 uppercase">Inscrit</div>
                                 </div>
                             </div>
-                            <button id="btn-scan-qr" class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white hover:bg-white/30 transition border border-white/30">
-                                <i data-lucide="scan-line" class="w-6 h-6"></i>
-                            </button>
                         </div>
                     </div>
+
+                    <!-- SCAN BUTTON - Prominent -->
+                    <button id="btn-scan-qr" class="mt-4 w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center gap-3 text-white transition border-2 border-white/30 hover:border-white/50 group">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i data-lucide="scan-line" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-base">Scanner pour pointer</div>
+                            <div class="text-xs text-white/70">Présentez-vous le jour J</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 opacity-50 group-hover:translate-x-1 transition"></i>
+                    </button>
 
                     ${nextMission ? renderNextMissionBanner(nextMission) : ''}
                 </div>
@@ -203,30 +220,30 @@ function renderEventGroup(group, userId, countsMap) {
     return `
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden ${hasRegistration ? 'ring-2 ring-emerald-400' : ''}">
             <!-- Event Header -->
-            <div class="p-4 flex gap-4 border-b border-slate-100 bg-slate-50/50">
+            <div class="p-3 sm:p-4 flex gap-3 sm:gap-4 border-b border-slate-100 bg-slate-50/50">
                 <!-- Date Block -->
-                <div class="w-14 h-16 bg-gradient-to-br ${hasRegistration ? 'from-emerald-500 to-teal-600' : 'from-slate-700 to-slate-900'} rounded-xl flex flex-col items-center justify-center text-white shadow-lg flex-shrink-0">
-                    <span class="text-xl font-black leading-none">${dayNum}</span>
-                    <span class="text-[9px] font-bold opacity-80">${monthStr}</span>
+                <div class="w-12 h-14 sm:w-14 sm:h-16 bg-gradient-to-br ${hasRegistration ? 'from-emerald-500 to-teal-600' : 'from-slate-700 to-slate-900'} rounded-xl flex flex-col items-center justify-center text-white shadow-lg flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-black leading-none">${dayNum}</span>
+                    <span class="text-[8px] sm:text-[9px] font-bold opacity-80">${monthStr}</span>
                 </div>
 
                 <!-- Event Info -->
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap mb-1">
-                        <span class="text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
-                        ${isSoon ? '<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">⚡ C\'est bientôt !</span>' : ''}
-                        ${hasRegistration ? '<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">✓ Inscrit</span>' : ''}
+                    <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <span class="text-[10px] sm:text-xs font-semibold text-slate-400 capitalize">${dayStr}</span>
+                        ${isSoon ? '<span class="text-[8px] sm:text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200">⚡ Bientôt</span>' : ''}
+                        ${hasRegistration ? '<span class="text-[8px] sm:text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200">✓ Inscrit</span>' : ''}
                     </div>
-                    <h3 class="font-bold text-lg text-slate-900 truncate">${escapeHtml(event.title)}</h3>
-                    <div class="flex items-center gap-1 text-xs text-slate-500 mt-1">
-                        <i data-lucide="map-pin" class="w-3 h-3"></i>
-                        ${escapeHtml(event.location)}
+                    <h3 class="font-bold text-sm sm:text-base text-slate-900 leading-tight">${escapeHtml(event.title)}</h3>
+                    <div class="flex items-center gap-1 text-[11px] sm:text-xs text-slate-500 mt-1">
+                        <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i>
+                        <span class="break-words">${escapeHtml(event.location)}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Shifts -->
-            <div class="p-3 space-y-2">
+            <div class="p-2 sm:p-3 space-y-2">
                 ${shiftsHtml}
             </div>
         </div>
@@ -263,57 +280,50 @@ function renderShiftCard(shift, userId, countsMap, event) {
     }));
 
     return `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-emerald-200 transition-colors group" data-shift-id="${shift.id}">
+        <div class="flex items-center justify-between gap-3 p-2.5 sm:p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-emerald-200 transition-colors group" data-shift-id="${shift.id}">
             
-            <!-- Time Column -->
-            <div class="flex items-center gap-4">
-                <div class="w-12 sm:w-14 text-center flex-shrink-0">
-                    <div class="text-xs sm:text-sm font-bold text-slate-700">${(shift.start_time || '').slice(0, 5)}</div>
-                    <div class="text-[9px] sm:text-[10px] text-slate-400">${(shift.end_time || '').slice(0, 5)}</div>
+            <!-- Left: Time + Shift Info -->
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <!-- Time Column -->
+                <div class="w-10 text-center flex-shrink-0">
+                    <div class="text-sm font-bold text-slate-700">${(shift.start_time || '').slice(0, 5)}</div>
+                    <div class="text-[10px] text-slate-400">${(shift.end_time || '').slice(0, 5)}</div>
                 </div>
                 
                 <!-- Shift Info -->
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                        <!-- Shift Title -->
-                        <span class="font-bold text-slate-800">${escapeHtml(shift.title || 'Créneau')}</span>
-                        
+                    <!-- Title -->
+                    <div class="font-semibold text-sm text-slate-800 leading-tight truncate">${escapeHtml(shift.title || 'Créneau')}</div>
+                    
+                    <!-- Badges Row -->
+                    <div class="flex items-center gap-1 flex-wrap mt-0.5">
                         <!-- Badge Places -->
                         <div data-status-badge class="${isFull
-            ? 'text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg'
+            ? 'text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-md'
             : available <= 2
-                ? 'text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg'
-                : 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg'
+                ? 'text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md'
+                : 'text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md'
         }">
                             ${isFull
             ? '🔴 Complet'
-            : available <= 2
-                ? `🟠 <span data-available-slots>${available}</span> places`
-                : `<span data-available-slots>${available}</span> places`
+            : `<span data-available-slots>${available}</span> place${available > 1 ? 's' : ''}`
         }
                         </div>
 
                         <!-- Badge Réservé -->
                         ${reservedTotal > 0 ? `
                             <div class="${reservedRemaining > 0
-                ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg'
-                : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg'
+                ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md'
+                : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md'
             }" title="${reservedRemaining} places réservées restantes">
-                                <span data-reserved-badge-text>${reservedRemaining > 0 ? `🎓 ${reservedRemaining} réservées` : '🎓 Complet'}</span>
+                                <span data-reserved-badge-text>🎓 ${reservedRemaining} écoles</span>
                             </div>
                         ` : ''}
                     </div>
-                    
-                    <!-- Referent Name -->
-                    ${shift.referent_name ? `
-                        <div class="text-[10px] text-slate-400 flex items-center gap-1">
-                            <i data-lucide="user" class="w-3 h-3"></i>
-                            Réf: ${escapeHtml(shift.referent_name)}
-                        </div>
-                    ` : ''}
                 </div>
             </div>
 
+            <!-- Right: Action Button -->
             <button
                 data-action="toggle-reg"
                 data-shift-id="${shift.id}"
@@ -323,14 +333,14 @@ function renderShiftCard(shift, userId, countsMap, event) {
                 data-reserved-full="${isReserveFull}"
                 data-registered="${isRegistered}"
                 ${isFull && !isRegistered ? 'disabled' : ''}
-                class="px-4 py-2 rounded-xl text-sm font-bold transition flex-shrink-0 ${isRegistered
-            ? 'bg-red-100 text-red-600 hover:bg-red-200 active:scale-95'
+                class="px-3 py-2 rounded-lg text-xs font-bold transition flex-shrink-0 ${isRegistered
+            ? 'bg-red-100 text-red-600 hover:bg-red-200 active:scale-[0.98]'
             : isFull
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 active:scale-95'
-        } min-h-[44px] flex items-center justify-center"
+                : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm active:scale-[0.98]'
+        } min-h-[40px] min-w-[70px]"
             >
-                ${isRegistered ? 'Désister' : isFull ? '🔴 Complet' : "S'inscrire"}
+                ${isRegistered ? 'Annuler' : isFull ? 'Complet' : "S'inscrire"}
             </button>
         </div>
     `;
@@ -373,15 +383,37 @@ export function initEvents() {
     });
 
     // Event Delegation for Registrations
+    // Event Delegation for Registrations (Click on Card OR Button)
     document.getElementById('events-view-container')?.addEventListener('click', async (e) => {
-        const btn = e.target.closest('[data-action="toggle-reg"]');
+        // 1. Check if clicked element is the button itself
+        let btn = e.target.closest('[data-action="toggle-reg"]');
+
+        // 2. If not button, check if it's the card (group)
+        if (!btn) {
+            const card = e.target.closest('.group[data-shift-id]');
+            if (card) {
+                // Find the button inside this card to get the data
+                btn = card.querySelector('[data-action="toggle-reg"]');
+            }
+        }
+
+        // 3. If we found a valid button (either clicked directly or via card)
         if (btn && !btn.disabled) {
             const shiftId = btn.dataset.shiftId;
             const hours = parseFloat(btn.dataset.hours || 0);
             const isReserveFull = btn.dataset.reservedFull === 'true';
             const isRegistered = btn.dataset.registered === 'true';
-            const eventData = btn.dataset.event ? JSON.parse(decodeURIComponent(btn.dataset.event)) : null;
-            const shiftDataParsed = btn.dataset.shift ? JSON.parse(decodeURIComponent(btn.dataset.shift)) : { id: shiftId };
+
+            // Decodes data safely
+            let eventData = null;
+            let shiftDataParsed = { id: shiftId };
+
+            try {
+                if (btn.dataset.event) eventData = JSON.parse(decodeURIComponent(btn.dataset.event));
+                if (btn.dataset.shift) shiftDataParsed = JSON.parse(decodeURIComponent(btn.dataset.shift));
+            } catch (err) {
+                console.error("Error parsing event/shift data", err);
+            }
 
             await handleToggleRegistration(shiftId, isRegistered, hours, isReserveFull, eventData, shiftDataParsed);
         }

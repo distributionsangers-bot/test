@@ -56,7 +56,7 @@ export const SCHOOLS = [
     "Studio M",
     "TALM",
     "Terrade",
-    "Université Catholique de l'Ouest",
+    "Université Catholique de l'Ouest (UCO)",
     "Université d'Angers : Faculté de droit, économie et gestion",
     "Université d'Angers : Faculté de lettres, langues et sciences humaines",
     "Université d'Angers : Faculté de santé",

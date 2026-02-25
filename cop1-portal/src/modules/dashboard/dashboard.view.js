@@ -84,16 +84,52 @@ async function renderUserDashboard(container) {
     // Count total missions completed
     const completedMissions = myRegs?.filter(r => r.attended).length || 0;
 
-    // Count upcoming registrations (not yet attended, future dates)
-    const upcomingRegsCount = myRegs?.filter(r => !r.attended && new Date(r.shifts?.events?.date) >= today).length || 0;
+    // Count upcoming registrations (not yet attended, future dates OR today future time)
+    const now = new Date();
+    // FIX: Use Local Date instead of UTC ISOString
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+
+    // FIX: Use robust local time string HH:MM
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
+
+    const upcomingRegsCount = myRegs?.filter(r => {
+        if (r.attended) return false;
+        const evtDate = r.shifts?.events?.date;
+        if (evtDate > todayStr) return true;
+        if (evtDate === todayStr) {
+            const shiftEnd = (r.shifts?.end_time || '23:59').slice(0, 5);
+            return shiftEnd >= timeStr;
+        }
+        return false;
+    }).length || 0;
 
     // Next scheduled mission
     let nextMission = null;
     if (myRegs && myRegs.length > 0) {
         const candidates = myRegs
             .map(r => ({ ...r.shifts, event: r.shifts.events }))
-            .filter(s => new Date(s.event.date) >= today)
-            .sort((a, b) => new Date(a.event.date) - new Date(b.event.date));
+            .filter(s => {
+                const d = s.event.date;
+                if (d > todayStr) return true;
+                if (d === todayStr) {
+                    const shiftEnd = (s.end_time || '23:59').slice(0, 5);
+                    return shiftEnd >= timeStr;
+                }
+                return false;
+            })
+            .sort((a, b) => {
+                // Sort by date then start_time
+                const dateA = a.event.date;
+                const dateB = b.event.date;
+                if (dateA !== dateB) return dateA.localeCompare(dateB);
+                return (a.start_time || '').localeCompare(b.start_time || '');
+            });
+
         if (candidates.length > 0) nextMission = candidates[0];
     }
 
@@ -105,24 +141,43 @@ async function renderUserDashboard(container) {
         .from('events')
         .select(`
             id, title, date, location, publish_at,
-            shifts (id, title, start_time, max_slots, total_registrations)
+            shifts (id, title, start_time, end_time, max_slots, total_registrations)
         `)
-        .gte('date', today.toISOString())
+        .gte('date', todayStr)
         .eq('is_visible', true)
         .order('date')
         .limit(20); // Fetch a bit more to allow for filtering
 
     let availableMission = null;
     if (availableEvents) {
-        const now = new Date();
-        for (const event of availableEvents) {
+        // Sort events by date + earliest shift start_time
+        const sortedEvents = [...availableEvents].sort((a, b) => {
+            const dateCmp = a.date.localeCompare(b.date);
+            if (dateCmp !== 0) return dateCmp;
+            const aTime = a.shifts?.map(s => s.start_time || '').sort()[0] || '';
+            const bTime = b.shifts?.map(s => s.start_time || '').sort()[0] || '';
+            return aTime.localeCompare(bTime);
+        });
+
+        for (const event of sortedEvents) {
             // Filter: Hide if scheduled for future
             if (event.publish_at && new Date(event.publish_at) > now) continue;
 
-            const availableShift = event.shifts?.find(s =>
-                !myShiftIds.has(s.id) &&
-                (s.max_slots - (s.total_registrations || 0)) > 0
+            const sortedShifts = [...(event.shifts || [])].sort((a, b) =>
+                (a.start_time || '').localeCompare(b.start_time || '')
             );
+
+            const availableShift = sortedShifts.find(s => {
+                // Time Check
+                if (event.date === todayStr) {
+                    const shiftEnd = (s.end_time || '23:59').slice(0, 5);
+                    if (shiftEnd < timeStr) return false;
+                }
+
+                return !myShiftIds.has(s.id) &&
+                    (s.max_slots - (s.total_registrations || 0)) > 0;
+            });
+
             if (availableShift) {
                 availableMission = {
                     event,
@@ -201,31 +256,22 @@ async function renderUserDashboard(container) {
         <div class="mb-6">
             <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
                 <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
-                Mission Disponible
+                Missions disponibles
             </h2>
-            <button data-link="/events" class="w-full bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-200 hover:shadow-lg hover:shadow-amber-500/10 transition-all text-left group relative overflow-hidden">
+            <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-orange-500"></div>
-                
                 <div class="pl-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-lg uppercase flex items-center gap-1">
-                            🟢 ${availableMission.available} places
-                        </span>
-                        <i data-lucide="arrow-right" class="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                    
-                    <h3 class="font-bold text-lg text-slate-900 leading-tight mb-1">${escapeHtml(availableMission.event.title)}</h3>
-                    <p class="text-sm text-slate-500 font-medium mb-3">${escapeHtml(availableMission.shift.title)}</p>
-                    
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/80 px-3 py-1.5 rounded-lg">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-500"></i>
-                            ${new Date(availableMission.event.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                            <span class="font-bold text-slate-800 text-sm">${escapeHtml(availableMission.event.title)}</span>
+                            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                                <span>${new Date(availableMission.event.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                <span class="text-slate-300">•</span>
+                                <span>${(availableMission.shift.start_time || '').slice(0, 5)}</span>
+                                <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">${availableMission.available} places</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/80 px-3 py-1.5 rounded-lg">
-                            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
-                            ${(availableMission.shift.start_time || '').slice(0, 5)}
-                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
                     </div>
                 </div>
             </button>
@@ -456,13 +502,7 @@ async function renderUserDashboard(container) {
             ${availableMissionHtml}
 
             <!-- NEXT REGISTERED MISSION -->
-            <div class="mb-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                    <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
-                    Prochaine Mission Inscrit
-                </h2>
-                ${missionHtml}
-            </div>
+            ${missionHtml}
 
             <!-- ACTIVITY -->
             ${activityHtml}
@@ -498,38 +538,64 @@ async function renderAdminDashboard(container) {
     // Events this month
     const monthStart = new Date();
     monthStart.setDate(1);
+    const monthStartStr = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}-01`;
     const { count: eventsThisMonth } = await supabase
         .from('events')
         .select('id', { count: 'exact', head: true })
-        .gte('date', monthStart.toISOString());
+        .gte('date', monthStartStr);
 
     // Urgencies (7 days)
     const today = new Date();
+    const todayAdminStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const nextWeek = new Date();
     nextWeek.setDate(today.getDate() + 7);
+    const nextWeekStr = `${nextWeek.getFullYear()}-${String(nextWeek.getMonth() + 1).padStart(2, '0')}-${String(nextWeek.getDate()).padStart(2, '0')}`;
 
     const { data: events } = await supabase
         .from('events')
         .select('*, shifts(*, registrations(count))')
-        .gte('date', today.toISOString())
-        .lte('date', nextWeek.toISOString())
+        .gte('date', todayAdminStr)
+        .lte('date', nextWeekStr)
         .order('date');
 
-    let urgentItems = [];
+    // Build urgencies grouped by event
+    const now = new Date();
+    const currentHours = String(now.getHours()).padStart(2, '0');
+    const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+    let urgentEvents = [];
+    let totalUrgentShifts = 0;
     events?.forEach(e => {
+        const urgentShifts = [];
         e.shifts?.forEach(s => {
+            // Filter past shifts if event is today
+            // Use startsWith to handle both 'YYYY-MM-DD' and 'YYYY-MM-DDT...' formats
+            if (e.date.startsWith(todayAdminStr)) {
+                const shiftEnd = (s.end_time || '23:59').slice(0, 5);
+                if (shiftEnd < currentTimeStr) return;
+            }
+
             const taken = s.registrations?.[0]?.count || 0;
             const remaining = s.max_slots - taken;
             if (remaining > 0) {
-                urgentItems.push({
-                    title: e.title,
+                urgentShifts.push({
                     shift: s.title,
-                    date: e.date,
                     remaining,
                     startTime: s.start_time
                 });
             }
         });
+        if (urgentShifts.length > 0) {
+            const totalRemaining = urgentShifts.reduce((sum, s) => sum + s.remaining, 0);
+            urgentEvents.push({
+                title: e.title,
+                date: e.date,
+                shifts: urgentShifts,
+                totalRemaining
+            });
+            totalUrgentShifts += urgentShifts.length;
+        }
     });
 
     // Recent activity
@@ -555,17 +621,32 @@ async function renderAdminDashboard(container) {
         </div>
     `).join('') || '<div class="text-center text-slate-400 py-4 text-sm">Aucune activité récente</div>';
 
-    // Urgencies HTML
-    const urgentHtml = urgentItems.length > 0
-        ? urgentItems.slice(0, 4).map(u => `
-            <div class="flex items-center justify-between p-3 bg-red-50 rounded-2xl border border-red-100">
-                <div>
-                    <div class="font-bold text-slate-800 text-sm">${escapeHtml(u.title)}</div>
-                    <div class="text-xs text-red-500 font-bold">⚠️ Manque ${u.remaining} pers. • ${new Date(u.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</div>
+    // Urgencies HTML — grouped by event
+    const urgentHtml = urgentEvents.length > 0
+        ? urgentEvents.map(evt => `
+            <div class="bg-red-50 rounded-2xl border border-red-100 overflow-hidden">
+                <!-- Event Header -->
+                <div class="flex items-center justify-between p-3 border-b border-red-100/60">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-slate-800 text-sm truncate">${escapeHtml(evt.title)}</div>
+                        <div class="text-[10px] text-red-400 font-semibold mt-0.5">${new Date(evt.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} • ${evt.totalRemaining} place${evt.totalRemaining > 1 ? 's' : ''} à pourvoir</div>
+                    </div>
+                    <button data-link="/admin_planning" class="px-3 py-2 bg-white text-red-600 text-xs font-bold border border-red-200 rounded-xl hover:bg-red-100 transition flex-shrink-0 ml-2">
+                        Gérer
+                    </button>
                 </div>
-                <button data-link="/admin_planning" class="px-3 py-2 bg-white text-red-600 text-xs font-bold border border-red-200 rounded-xl hover:bg-red-100 transition">
-                    Gérer
-                </button>
+                <!-- Shifts list -->
+                <div class="divide-y divide-red-100/40">
+                    ${evt.shifts.map(s => `
+                        <div class="flex items-center gap-2 px-3 py-2">
+                            <div class="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="clock" class="w-3 h-3 text-red-500"></i>
+                            </div>
+                            <span class="text-xs text-slate-600 truncate flex-1">${escapeHtml(s.shift)} ${s.startTime ? '(' + s.startTime.slice(0, 5) + ')' : ''}</span>
+                            <span class="text-[10px] font-bold text-red-500 bg-red-100 px-1.5 py-0.5 rounded flex-shrink-0">⚠️ ${s.remaining} pers.</span>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `).join('')
         : '<div class="p-4 text-center text-slate-400 text-sm bg-emerald-50 rounded-2xl border border-emerald-100"><i data-lucide="check-circle" class="w-5 h-5 mx-auto mb-1 text-emerald-500"></i>Aucune urgence !</div>';
@@ -689,7 +770,7 @@ async function renderAdminDashboard(container) {
                             <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>
                         </div>
                         <span class="truncate">Urgences (7 jours)</span>
-                        ${urgentItems.length > 0 ? `<span class="ml-auto px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex-shrink-0">${urgentItems.length}</span>` : ''}
+                        ${totalUrgentShifts > 0 ? `<span class="ml-auto px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex-shrink-0">${urgentEvents.length}</span>` : ''}
                     </h3>
                     <div class="space-y-2 overflow-x-hidden min-w-0">
                         ${urgentHtml}
@@ -746,54 +827,59 @@ function formatTimeAgo(dateStr) {
 function renderNextMissionCard(mission) {
     if (mission) {
         const date = new Date(mission.event.date);
-        const dayStr = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const dayStr = date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
         const timeStr = (mission.start_time || '').slice(0, 5);
 
         // Countdown
         const now = new Date();
         const eventDate = new Date(mission.event.date);
         const diffDays = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
-        const countdownText = diffDays === 0 ? "Aujourd'hui !" : diffDays === 1 ? "Demain !" : `Dans ${diffDays} jours`;
+        const countdownText = diffDays === 0 ? "Aujourd'hui" : diffDays === 1 ? "Demain" : `Dans ${diffDays}j`;
 
         return `
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-500 to-indigo-600"></div>
-                
-                <div class="pl-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded-lg uppercase">${countdownText}</span>
-                        <button data-link="/events" class="text-slate-400 hover:text-brand-600 transition">
-                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    
-                    <h3 class="font-bold text-lg text-slate-900 leading-tight mb-1">${escapeHtml(mission.event.title)}</h3>
-                    <p class="text-sm text-slate-500 font-medium mb-3">${escapeHtml(mission.title)}</p>
-                    
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-brand-500"></i>
-                            ${dayStr}
-                        </div>
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg">
-                            <i data-lucide="clock" class="w-3.5 h-3.5 text-brand-500"></i>
-                            ${timeStr}
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
+                    Prochaine mission inscrite
+                </h2>
+                <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-500 to-indigo-600"></div>
+                    <div class="pl-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <span class="font-bold text-slate-800 text-sm">${escapeHtml(mission.event.title)}</span>
+                                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                                    <span>${dayStr}</span>
+                                    <span class="text-slate-300">•</span>
+                                    <span>${timeStr}</span>
+                                    <span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${countdownText}</span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
                         </div>
                     </div>
-                </div>
+                </button>
             </div>
         `;
     }
 
     return `
-        <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
-            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-300">
-                <i data-lucide="calendar-x" class="w-7 h-7"></i>
-            </div>
-            <h3 class="text-sm font-bold text-slate-600 mb-1">Rien de prévu ?</h3>
-            <p class="text-xs text-slate-400 mb-4">Inscrivez-vous à votre prochaine mission.</p>
-            <button data-link="/events" class="px-5 py-2.5 bg-brand-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-200 hover:bg-brand-700 transition">
-                Voir les missions
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
+                <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
+                Prochaine mission inscrite
+            </h2>
+            <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-slate-300 to-slate-400"></div>
+                <div class="pl-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                            <span class="font-bold text-slate-500 text-sm">Aucune mission inscrite</span>
+                            <div class="text-[11px] text-slate-400 mt-1">Inscrivez-vous à une mission</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                    </div>
+                </div>
             </button>
         </div>
     `;

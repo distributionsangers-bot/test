@@ -22,16 +22,16 @@ import { showConfirm, showToast, formatIdentity } from '../../services/utils.js'
 const NAV_ITEMS = {
     admin: [
         { id: '/dashboard', icon: 'layout-grid', label: 'Accueil', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
-        { id: '/admin_planning', icon: 'calendar-days', label: 'Planning', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
-        { id: '/admin_users', icon: 'users', label: 'Annuaire', color: 'from-amber-500 to-orange-600', iconBgLight: 'bg-amber-50', iconText: 'text-amber-600' },
+        { id: '/admin_planning', icon: 'calendar-days', label: 'Planning', color: 'from-emerald-500 to-teal-600', badgeType: 'planning', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badgeType: 'messages', iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
+        { id: '/admin_users', icon: 'users', label: 'Annuaire', color: 'from-amber-500 to-orange-600', badgeType: 'pending', iconBgLight: 'bg-amber-50', iconText: 'text-amber-600' },
         { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
         { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
     ],
     volunteer: [
         { id: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-blue-500 to-indigo-600', iconBgLight: 'bg-blue-50', iconText: 'text-blue-600' },
-        { id: '/events', icon: 'calendar-check', label: 'Missions', color: 'from-emerald-500 to-teal-600', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badge: true, iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
+        { id: '/events', icon: 'calendar-check', label: 'Missions', color: 'from-emerald-500 to-teal-600', badgeType: 'missions', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badgeType: 'messages', iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
         { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
         { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
     ]
@@ -77,7 +77,7 @@ export function renderSidebar(profile, currentView, adminMode) {
             >
                 <div class="relative flex items-center justify-center w-9 h-9 rounded-lg ${iconBgClass} transition-all duration-200">
                     <i data-lucide="${item.icon}" class="w-[18px] h-[18px] ${iconTextClass}"></i>
-                    ${item.badge ? `<span id="sidebar-chat-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>` : ''}
+                    ${item.badgeType ? `<span id="sidebar-badge-${item.badgeType}" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-1 leading-none"></span>` : ''}
                 </div>
                 <span class="flex-1 ${isActive ? 'font-semibold' : ''}">${item.label}</span>
                 ${isActive ? '<div class="w-1.5 h-1.5 rounded-full bg-white/80"></div>' : ''}
@@ -111,8 +111,8 @@ export function renderSidebar(profile, currentView, adminMode) {
         <aside class="hidden md:flex w-72 flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/50 z-50 flex-shrink-0 h-full shadow-xl shadow-slate-200/50">
             <!-- Header avec Logo -->
             <div class="h-20 flex items-center gap-3 px-6 flex-shrink-0 border-b border-slate-100/50">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center">
-                    <img src="${LOGO_URL}" class="h-6 w-auto" alt="Logo COP1">
+                <div class="h-10 flex items-center justify-center">
+                    <img src="${LOGO_URL}" class="h-8 w-auto object-contain" alt="Logo COP1">
                 </div>
                 <div>
                     <span class="font-extrabold text-xl text-slate-900">COP1</span>

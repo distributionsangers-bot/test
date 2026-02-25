@@ -20,9 +20,9 @@ export function renderRegister() {
             <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
                 
                 <!-- Header -->
-                <div class="text-center mb-8"> 
-                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">
-                        <img src="${LOGO_URL}" class="w-12 h-12 object-contain" alt="Logo">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center h-24 px-6 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">
+                        <img src="${LOGO_URL}" class="h-16 w-auto object-contain" alt="Logo">
                     </div>
                     <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Inscription</h1>
                     <p class="text-slate-500 font-medium">Rejoignez la communauté COP1</p>

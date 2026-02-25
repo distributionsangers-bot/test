@@ -19,14 +19,14 @@ import { showConfirm, showToast, escapeHtml } from '../../services/utils.js';
 const MOBILE_NAV_ITEMS = {
     admin: [
         { id: '/dashboard', icon: 'home', label: 'Accueil' },
-        { id: '/admin_planning', icon: 'calendar', label: 'Planning' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
+        { id: '/admin_planning', icon: 'calendar', label: 'Planning', badgeType: 'planning' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', badgeType: 'messages' },
         { id: 'MENU', icon: 'menu', label: 'Menu' }
     ],
     volunteer: [
         { id: '/dashboard', icon: 'home', label: 'Accueil' },
-        { id: '/events', icon: 'calendar-check', label: 'Missions' },
-        { id: '/messages', icon: 'message-circle', label: 'Messages', badge: true },
+        { id: '/events', icon: 'calendar-check', label: 'Missions', badgeType: 'missions' },
+        { id: '/messages', icon: 'message-circle', label: 'Messages', badgeType: 'messages' },
         { id: 'MENU', icon: 'menu', label: 'Menu' }
     ]
 };
@@ -102,7 +102,7 @@ function renderNavItem(item, isActive, isMenu) {
             
             <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50' : 'bg-transparent'}">
                 <i data-lucide="${item.icon}" class="w-6 h-6 transition-all duration-200 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}"></i>
-                ${item.badge ? '<span id="mobile-chat-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>' : ''}
+                ${item.badgeType ? `<span id="mobile-badge-${item.badgeType}" class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-0.5 leading-none"></span>` : ''}
             </div>
             
             <span class="text-[10px] font-semibold transition-colors duration-200">${item.label}</span>

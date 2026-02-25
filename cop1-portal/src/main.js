@@ -9,6 +9,7 @@ import { toggleLoader, showToast, showConfirm } from './services/utils.js';
 import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
 import { startInactivityMonitor, stopInactivityMonitor } from './services/inactivity.js';
+import { initBadges, cleanupBadges } from './services/notification-badge.service.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
@@ -130,11 +131,14 @@ async function init() {
                 renderAppLayout();
                 // Start inactivity monitor for logged-in users
                 startInactivityMonitor();
+                // Initialize notification badges (real-time)
+                initBadges();
             }
 
         } else {
             // Pas de session - stop inactivity monitor
             stopInactivityMonitor();
+            cleanupBadges();
             const path = window.location.pathname;
             if (!['/login', '/register', '/reset-password'].includes(path) && !path.startsWith('/legal')) {
                 router.navigateTo('/login');

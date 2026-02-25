@@ -2,7 +2,7 @@ import { ChatService } from './chat.service.js';
 import { store } from '../../core/store.js';
 import { supabase } from '../../services/supabase.js';
 import { createIcons, icons } from 'lucide';
-import { showToast, showConfirm, escapeHtml, toggleLoader, formatIdentity } from '../../services/utils.js';
+import { showToast, showConfirm, escapeHtml, parseMarkdown, toggleLoader, formatIdentity } from '../../services/utils.js';
 
 // =============================================================================
 // 🎨 CONSTANTS & CONFIG
@@ -575,27 +575,39 @@ function createMessageHtml(msg) {
     if (isAnnouncement) {
         return `
             <div class="w-full flex flex-col items-center my-6 animate-scale-in px-4">
-                <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 text-slate-700 p-6 rounded-2xl shadow-sm max-w-lg w-full text-center relative overflow-hidden">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 text-slate-700 p-5 rounded-2xl shadow-sm max-w-lg w-full relative overflow-hidden">
                     <!-- Decorative Icon Background -->
                     <i data-lucide="megaphone" class="absolute -right-4 -top-4 w-24 h-24 text-amber-500/10 rotate-12"></i>
                     
-                    <div class="relative z-10 flex flex-col items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-1 ring-4 ring-white shadow-sm">
-                            <i data-lucide="megaphone" class="w-5 h-5"></i>
+                    <div class="relative z-10 flex flex-col gap-3">
+                        <!-- Header: icon + subject -->
+                        <div class="flex items-center gap-2.5 pb-2.5 border-b border-amber-200/40">
+                            <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="megaphone" class="w-4 h-4"></i>
+                            </div>
+                            <span class="font-bold text-sm text-slate-800">
+                                ${escapeHtml(currentTicket?.subject || 'Annonce')}
+                            </span>
                         </div>
-                        <p class="text-base text-slate-800 leading-relaxed font-medium">
-                            ${escapeHtml(msg.content)}
-                        </p>
-                        <span class="text-[11px] font-semibold text-amber-600/70 tracking-wide uppercase mt-2">
-                            Annonce Système • ${time}
-                        </span>
+                        
+                        <!-- Content: left-aligned, scrollable, markdown -->
+                        <div class="text-sm text-slate-700 leading-relaxed text-left max-h-[300px] overflow-y-auto pr-1">
+                            ${parseMarkdown(msg.content)}
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="flex items-center justify-end pt-2 border-t border-amber-200/30">
+                            <span class="text-[10px] font-semibold text-amber-600/60 tracking-wide uppercase">
+                                Annonce Système • ${time}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    let content = isDeleted ? '<span class="italic text-slate-400 text-xs flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Message supprimé</span>' : escapeHtml(msg.content);
+    let content = isDeleted ? '<span class="italic text-slate-400 text-xs flex items-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i> Message supprimé</span>' : parseMarkdown(msg.content);
 
     // Parent Message (Reply)
     let replyBlock = '';
@@ -1272,7 +1284,7 @@ function showEditMessageModal(msgId) {
                     // Rebuild content with new text
                     msgBubble.innerHTML = `
                         ${replyBlock ? replyBlock.outerHTML : ''}
-                        ${escapeHtml(newContent)}
+                        ${parseMarkdown(newContent)}
                         <div class="flex items-center justify-end gap-1 mt-1 opacity-70">
                             <span class="text-[9px] italic mr-1">(modifié)</span>
                             ${timeBlock ? timeBlock.innerHTML : ''}

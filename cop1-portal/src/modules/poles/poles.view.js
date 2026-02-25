@@ -24,85 +24,82 @@ export async function renderPoles(container) {
         const teamLeaders = leaders ? leaders.filter(l => l.pole_id === t.id) : [];
 
         const adminActions = isViewAdmin ? `
-            <div class="absolute top-3 right-3 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-slate-100 transition shadow-sm" title="Voir les intéressés">
+            <div class="absolute top-3 right-3 flex gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="p-1.5 rounded-lg bg-white text-slate-400 hover:text-blue-600 border border-slate-100 shadow-sm transition" title="Voir les intéressés">
                     <i data-lucide="users" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="edit-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-100 transition shadow-sm" title="Modifier">
+                <button data-action="edit-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white text-slate-400 hover:text-amber-600 border border-slate-100 shadow-sm transition" title="Modifier">
                     <i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="delete-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-100 transition shadow-sm" title="Supprimer">
+                <button data-action="delete-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white text-slate-400 hover:text-red-600 border border-slate-100 shadow-sm transition" title="Supprimer">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
             </div>
         ` : '';
 
-        // Leaders HTML (all leaders with responsive layout)
-        const leadersHtml = teamLeaders.length > 0 ? `
-            <div class="mt-auto pt-3 border-t border-slate-100">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 Responsables</p>
-                <div class="flex flex-wrap gap-2">
+        // Leaders list with name + title
+        let leadersHtml = '';
+        if (teamLeaders.length > 0) {
+            leadersHtml = `
+                <div class="mt-auto pt-3 space-y-2">
                     ${teamLeaders.map(l => `
-                        <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 min-w-0">
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 border border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden border border-white">
                                 ${l.photo_url
-                ? `<img src="${l.photo_url}" class="w-full h-full object-cover" alt="${l.first_name}">`
-                : l.first_name[0].toUpperCase()
-            }
+                    ? `<img src="${l.photo_url}" class="w-full h-full object-cover rounded-full" alt="${l.first_name}">`
+                    : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-500">${l.first_name[0]}</div>`
+                }
                             </div>
-                            <div class="min-w-0 flex-1">
-                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
-                                ${l.role_title ? `<span class="text-[10px] text-slate-400 truncate block">${escapeHtml(l.role_title)}</span>` : ''}
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold text-slate-700 truncate">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</div>
+                                <div class="text-[10px] text-slate-400 truncate">${escapeHtml(l.role_title || 'Responsable')}</div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
-            </div>
-        ` : '';
+            `;
+        } else {
+            leadersHtml = `<div class="mt-auto pt-4 text-[10px] text-slate-300 italic">Aucun responsable</div>`;
+        }
 
         return `
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full group relative" data-pole-id="${t.id}">
+            <div class="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden" data-pole-id="${t.id}">
                 ${adminActions}
                 
-                <!-- Header -->
-                <div class="p-4 bg-gradient-to-br from-brand-50/50 to-indigo-50/30 border-b border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/80 border border-white/50 flex items-center justify-center text-brand-600 shadow-sm">
-                            <i data-lucide="${t.icon || 'users'}" class="w-5 h-5"></i>
+                <div class="p-5 flex flex-col flex-1 cursor-pointer min-w-0" data-action="open-pole-detail" data-id="${t.id}">
+                    <!-- Icon -->
+                    <div class="mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-50 group-hover:bg-brand-50 group-hover:text-brand-600 text-slate-400 transition-colors flex items-center justify-center">
+                            <i data-lucide="${t.icon || 'users'}" class="w-6 h-6"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-900 line-clamp-2">${escapeHtml(t.name)}</h4>
                     </div>
-                </div>
 
-                <!-- Content -->
-                <div class="p-4 flex flex-col flex-1">
-                    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">
+                    <h4 class="font-bold text-lg text-slate-900 mb-1 leading-tight group-hover:text-brand-600 transition-colors break-words overflow-hidden">${escapeHtml(t.name)}</h4>
+                    
+                    ${t.email ? `
+                        <a href="mailto:${t.email}" class="text-xs text-slate-400 hover:text-brand-500 transition inline-flex items-center gap-1 mb-2 min-w-0" title="${t.email}">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                            <span class="break-all">${escapeHtml(t.email)}</span>
+                        </a>
+                    ` : ''}
+
+                    <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-1">
                         ${escapeHtml(t.description || 'Découvrez cette équipe et ses missions.')}
                     </p>
-
-                    <!-- Contact Link -->
-                    ${t.email ? `
-                        <div class="mb-3">
-                            <a href="mailto:${t.email}" class="inline-flex items-start gap-1.5 text-[11px] font-semibold text-brand-600 hover:text-brand-700 bg-brand-50/50 hover:bg-brand-50 px-2 py-1 rounded-md transition">
-                                <i data-lucide="mail" class="w-3 h-3 flex-shrink-0 mt-0.5"></i>
-                                <span class="break-all">${t.email}</span>
-                            </a>
-                        </div>
-                    ` : ''}
 
                     ${leadersHtml}
                 </div>
 
-                <!-- Footer Button (Only for non-admin) -->
+                <!-- Footer Action -->
                 ${!isViewAdmin ? `
-                    <div class="p-3 border-t border-slate-100 bg-slate-50/30">
-                        <button data-action="toggle-interest" data-id="${t.id}" data-interested="${intr}" class="w-full py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${intr
-                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
-                    : 'bg-slate-900 text-white shadow-md shadow-slate-900/20 hover:bg-slate-800 active:scale-[0.98]'
+                    <div class="mt-auto border-t border-slate-50">
+                        <button data-action="toggle-interest" data-id="${t.id}" data-interested="${intr}" class="w-full py-3 text-xs font-bold transition flex items-center justify-center gap-2 group/btn ${intr
+                    ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                    : 'bg-white text-slate-400 hover:text-brand-600 hover:bg-brand-50'
                 }">
                             ${intr
-                    ? `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Intéressé(e)`
-                    : `<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`
+                    ? `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i> Intéressé(e)`
+                    : `<span>Rejoindre</span> <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"></i>`
                 }
                         </button>
                     </div>
@@ -112,97 +109,80 @@ export async function renderPoles(container) {
     };
 
     // Helper: Render a Direction section with its poles
-    const renderDirectionSection = (direction, childPoles = []) => {
+    const renderDirectionSection = (direction, childPoles = [], dirIndex = 0, totalDirs = 1) => {
         const directionLeaders = leaders ? leaders.filter(l => l.pole_id === direction.id) : [];
+        const isFirst = dirIndex === 0;
+        const isLast = dirIndex === totalDirs - 1;
 
         const adminActionsDirection = isViewAdmin ? `
-            <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button data-action="add-child-pole" data-parent-id="${direction.id}" class="p-2 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition" title="Ajouter un pôle">
-                    <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+            <div class="flex gap-1.5 opacity-0 group-hover/dir:opacity-100 transition-opacity">
+                <button data-action="move-direction-up" data-id="${direction.id}" class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 transition ${isFirst ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:text-brand-600 hover:bg-brand-50'}" title="Monter" ${isFirst ? 'disabled' : ''}>
+                    <i data-lucide="chevron-up" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="edit-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-200 transition" title="Modifier">
-                    <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
+                <button data-action="move-direction-down" data-id="${direction.id}" class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 transition ${isLast ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:text-brand-600 hover:bg-brand-50'}" title="Descendre" ${isLast ? 'disabled' : ''}>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
-                <button data-action="delete-pole" data-id="${direction.id}" class="p-2 rounded-lg bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition" title="Supprimer">
-                    <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                <div class="w-px h-6 bg-slate-200 mx-0.5"></div>
+                <button data-action="add-child-pole" data-parent-id="${direction.id}" class="px-3 py-1.5 rounded-lg bg-brand-50 text-brand-600 text-xs font-bold hover:bg-brand-100 transition flex items-center gap-1.5" title="Ajouter un pôle">
+                    <i data-lucide="plus" class="w-3.5 h-3.5 pointer-events-none"></i> Pôle
                 </button>
-            </div>
-        ` : '';
-
-        // Leaders HTML (detailed view similar to Pole Card)
-        const leadersHtml = directionLeaders.length > 0 ? `
-            <div class="mt-3">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">👥 Responsables</p>
-                <div class="flex flex-wrap gap-2">
-                    ${directionLeaders.map(l => `
-                        <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 min-w-0 border border-slate-100">
-                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 border border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">
-                                ${l.photo_url
-                ? `<img src="${l.photo_url}" class="w-full h-full object-cover" alt="${l.first_name}">`
-                : l.first_name[0].toUpperCase()
-            }
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <span class="text-xs font-medium text-slate-700 truncate block">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
-                                ${l.role_title ? `<span class="text-[10px] text-slate-400 truncate block">${escapeHtml(l.role_title)}</span>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                <button data-action="edit-pole" data-id="${direction.id}" class="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-200 transition" title="Modifier">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i>
+                </button>
+                <button data-action="delete-pole" data-id="${direction.id}" class="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition" title="Supprimer">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
+                </button>
             </div>
         ` : '';
 
         return `
             <!-- Direction Card Container -->
-            <div class="mb-10 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8" data-direction-id="${direction.id}">
+            <div class="group/dir mb-16" data-direction-id="${direction.id}">
                 
-                <!-- Direction Header (Responsive Layout) -->
-                <div class="group mb-8">
-                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                        
-                        <!-- Left: Info -->
-                        <div class="flex gap-4 max-w-2xl">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 flex-shrink-0">
-                                <i data-lucide="${direction.icon || 'folder'}" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-2xl font-black text-slate-900 tracking-tight">${escapeHtml(direction.name)}</h2>
-                                ${direction.description ? `<p class="text-sm text-slate-500 mt-1.5 leading-relaxed">${escapeHtml(direction.description)}</p>` : ''}
-                                
-                                <!-- Email Link -->
-                                ${direction.email ? `
-                                    <div class="mt-3">
-                                        <a href="mailto:${direction.email}" class="inline-flex items-center gap-2 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100/80 px-3 py-1.5 rounded-lg transition border border-brand-100">
-                                            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-                                            ${escapeHtml(direction.email)}
-                                        </a>
-                                    </div>
-                                ` : ''}
-                            </div>
+                <!-- Direction Header -->
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 px-2 md:px-0">
+                    <div class="flex gap-4 md:gap-5 max-w-3xl">
+                        <!-- Icon Box -->
+                        <div class="hidden md:flex w-16 h-16 rounded-2xl bg-white border border-slate-100 shadow-sm items-center justify-center text-slate-400 flex-shrink-0 group-hover/dir:text-brand-600 group-hover/dir:border-brand-200 group-hover/dir:shadow-brand-500/10 transition-all duration-300">
+                            <i data-lucide="${direction.icon || 'folder'}" class="w-8 h-8"></i>
                         </div>
 
-                        <!-- Right: Actions & Leaders -->
-                        <div class="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto">
-                            ${adminActionsDirection ? `<div class="self-end">${adminActionsDirection}</div>` : ''}
+                        <div>
+                            <div class="flex items-center gap-3 mb-1 flex-wrap">
+                                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">${escapeHtml(direction.name)}</h2>
+                                ${adminActionsDirection}
+                            </div>
                             
+                            ${direction.email ? `
+                                <a href="mailto:${direction.email}" class="text-sm text-slate-400 hover:text-brand-600 transition inline-flex items-center gap-1.5 mb-1">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                                    <span class="break-all">${escapeHtml(direction.email)}</span>
+                                </a>
+                            ` : ''}
+                            
+                            ${direction.description ? `<p class="text-slate-500 text-sm md:text-base max-w-2xl leading-relaxed">${escapeHtml(direction.description)}</p>` : ''}
+                            
+                            <!--- Direction Leaders Inline -->
                             ${directionLeaders.length > 0 ? `
-                                <div class="bg-slate-50/50 rounded-xl p-3 border border-slate-100 w-full md:w-auto min-w-[200px]">
-                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                        <i data-lucide="crown" class="w-3 h-3 text-brand-400"></i> Responsables
-                                    </p>
-                                    <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-3 mt-4">
+                                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Responsables</span>
+                                     <div class="h-4 w-px bg-slate-200"></div>
+                                     <div class="flex items-center gap-2 flex-wrap">
                                         ${directionLeaders.map(l => `
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-white border-2 border-white shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
-                                                    ${l.photo_url ? `<img src="${l.photo_url}" class="w-full h-full object-cover">` : l.first_name[0]}
+                                            <div class="flex items-center gap-2 bg-slate-50 py-1.5 px-2.5 rounded-lg border border-slate-100">
+                                                <div class="w-6 h-6 rounded-full bg-slate-200 overflow-hidden box-content border border-white flex-shrink-0">
+                                                    ${l.photo_url
+                ? `<img src="${l.photo_url}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full flex items-center justify-center text-[8px] font-bold text-slate-500">${l.first_name[0]}</div>`
+            }
                                                 </div>
-                                                <div class="flex flex-col leading-none">
-                                                    <span class="text-xs font-bold text-slate-700">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
-                                                    ${l.role_title ? `<span class="text-[9px] text-slate-400 mt-0.5">${escapeHtml(l.role_title)}</span>` : ''}
+                                                <div class="min-w-0">
+                                                    <span class="text-xs font-bold text-slate-600 block truncate">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</span>
+                                                    <span class="text-[10px] text-slate-400 block truncate">${escapeHtml(l.role_title || 'Responsable')}</span>
                                                 </div>
                                             </div>
                                         `).join('')}
-                                    </div>
+                                     </div>
                                 </div>
                             ` : ''}
                         </div>
@@ -211,17 +191,17 @@ export async function renderPoles(container) {
 
                 <!-- Poles Grid -->
                 ${childPoles.length > 0 ? `
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         ${childPoles.map(p => renderPoleCard(p)).join('')}
                     </div>
                 ` : `
-                    <div class="bg-slate-50/50 rounded-2xl p-8 text-center border-2 border-dashed border-slate-200">
+                    <div class="bg-slate-50 rounded-2xl p-12 text-center border-2 border-dashed border-slate-200 mx-4 md:mx-0">
                         <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100">
                             <i data-lucide="inbox" class="w-5 h-5 text-slate-300"></i>
                         </div>
                         <p class="text-sm font-medium text-slate-500">Aucun pôle dans cette direction</p>
                         ${isViewAdmin ? `
-                            <button data-action="add-child-pole" data-parent-id="${direction.id}" class="mt-4 px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm hover:shadow transition flex items-center gap-2 mx-auto">
+                            <button data-action="add-child-pole" data-parent-id="${direction.id}" class="mt-4 px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition inline-flex items-center gap-2">
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Ajouter un pôle
                             </button>
                         ` : ''}
@@ -243,13 +223,13 @@ export async function renderPoles(container) {
         const antenneEntry = antenne[0]; // Usually just one entry
 
         const adminActions = isViewAdmin ? `
-            <div class="flex gap-2">
+            <div class="absolute top-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 ${antenneEntry ? `
-                    <button data-action="edit-pole" data-id="${antenneEntry.id}" class="p-2 rounded-lg bg-white/20 text-white/80 hover:text-white hover:bg-white/30 transition" title="Modifier">
+                    <button data-action="edit-pole" data-id="${antenneEntry.id}" class="p-2 rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border border-white/10 transition shadow-sm" title="Modifier">
                         <i data-lucide="pencil" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 ` : `
-                    <button id="btn-create-antenne" class="px-4 py-2 rounded-lg bg-white/20 text-white font-bold hover:bg-white/30 transition flex items-center gap-2">
+                    <button id="btn-create-antenne" class="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold hover:bg-white/20 border border-white/10 transition flex items-center gap-2 shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i> Ajouter
                     </button>
                 `}
@@ -257,123 +237,128 @@ export async function renderPoles(container) {
         ` : '';
 
         return `
-            <div class="mb-10 bg-gradient-to-r from-indigo-600 via-brand-600 to-purple-600 rounded-2xl p-6 shadow-xl shadow-brand-500/20 relative overflow-hidden">
-                <!-- Background Pattern -->
-                <div class="absolute inset-0 opacity-10">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
-                </div>
+            <div class="group relative mb-6 rounded-2xl overflow-hidden shadow-lg shadow-indigo-500/10 isolate max-w-4xl mx-auto">
+                <!-- Dynamic Background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500"></div>
+                <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9XYwMCUiPjxmaWx0ZXIgaWQ9Im4iPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjYiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ0cmFuc3BhcmVudCIvPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iMC41Ii8+PC9zdmc+')] mix-blend-overlay"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
                 
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                <i data-lucide="crown" class="w-6 h-6 text-white"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-black text-white">Direction d'Antenne</h2>
-                                ${antenneEntry?.description ? `<p class="text-white/80 text-sm">${escapeHtml(antenneEntry.description)}</p>` : ''}
-                                ${antenneEntry?.email ? `
-                                    <a href="mailto:${antenneEntry.email}" class="inline-flex items-center gap-1.5 text-white/90 hover:text-white text-xs mt-1.5 bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">
-                                        <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-                                        ${escapeHtml(antenneEntry.email)}
-                                    </a>
-                                ` : ''}
-                            </div>
+                ${adminActions}
+
+                <div class="relative z-10 px-4 py-5 md:px-6 md:py-6 flex flex-col md:flex-row items-center gap-4 md:gap-5">
+                    <!-- Icon / Brand -->
+                    <div class="relative flex-shrink-0">
+                        <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 flex items-center justify-center shadow-lg transition-transform duration-500 hover:rotate-6">
+                            <i data-lucide="crown" class="w-6 h-6 md:w-7 md:h-7 text-white drop-shadow-md"></i>
                         </div>
-                        ${adminActions}
                     </div>
-                    
-                    ${antenneLeaders.length > 0 ? `
-                        <div class="flex flex-wrap gap-3 mt-4">
-                            ${antenneLeaders.map(l => `
-                                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-white/20">
-                                    <div class="w-10 h-10 rounded-full bg-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-brand-600 text-sm font-bold">
-                                        ${l.photo_url
-                ? `<img src="${l.photo_url}" class="w-full h-full object-cover" alt="${l.first_name}">`
-                : l.first_name[0].toUpperCase()
+
+                    <div class="flex-1 min-w-0 text-center md:text-left">
+                        <h2 class="text-lg md:text-xl font-black text-white tracking-tight mb-1 drop-shadow-sm">Direction d'Antenne</h2>
+                        
+                        ${antenneEntry?.description ?
+                `<p class="text-white/90 text-xs md:text-sm font-medium leading-relaxed mb-2 max-w-xl mx-auto md:mx-0 line-clamp-2">${escapeHtml(antenneEntry.description)}</p>`
+                : '<p class="text-white/70 text-xs italic mb-2">L\'équipe qui coordonne l\'ensemble des pôles.</p>'
             }
-                                    </div>
-                                    <div>
-                                        <p class="text-white font-bold text-sm">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</p>
-                                        <p class="text-white/70 text-xs">${escapeHtml(l.role_title || "Directeur·ice d'antenne")}</p>
-                                    </div>
-                                </div>
-        `).join('')}
+
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            ${antenneEntry?.email ? `
+                                <a href="mailto:${antenneEntry.email}" class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 border border-white/20 px-2.5 py-1 rounded-lg text-white font-bold text-xs transition backdrop-blur-sm">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                                    <span>${escapeHtml(antenneEntry.email)}</span>
+                                </a>
+                            ` : ''}
                         </div>
-                    ` : `
-                        <p class="text-white/60 text-sm mt-2 italic">Aucun directeur d'antenne assigné</p>
-                    `}
+                    </div>
+
+                    <!-- Leaders Stack -->
+                    ${antenneLeaders.length > 0 ? `
+                        <div class="flex-shrink-0 bg-black/20 backdrop-blur-md rounded-xl p-2.5 border border-white/10 w-full md:w-auto min-w-[200px]">
+                            <p class="text-[9px] font-bold text-white/80 uppercase tracking-widest mb-2 text-center md:text-left">Responsables</p>
+                            <div class="flex flex-col gap-2">
+                                ${antenneLeaders.map(l => `
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-full bg-white p-0.5 shadow-sm flex-shrink-0">
+                                            ${l.photo_url
+                    ? `<img src="${l.photo_url}" class="w-full h-full object-cover rounded-full" alt="${l.first_name}">`
+                    : `<div class="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-[10px]">${l.first_name[0]}</div>`
+                }
+                                        </div>
+                                        <div class="text-left leading-tight min-w-0">
+                                            <div class="font-bold text-white text-xs truncate">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</div>
+                                            <div class="text-[10px] text-indigo-100 font-medium truncate">${escapeHtml(l.role_title || "Directeur·ice")}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         `;
     };
 
-    // Render all content
+    // Helper: Render Content (Antenne, Directions, Orphans)
     const renderContent = () => {
-        if (directions.length === 0 && allTeams.length === 0 && antenne.length === 0) {
-            return `
-                <div class="rounded-3xl border border-slate-100 bg-white p-16 text-center">
-                    <div class="w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                        <i data-lucide="users-round" class="w-10 h-10 text-slate-300"></i>
-                    </div>
-                    <h3 class="text-2xl font-black text-slate-700">Aucun pôle actif</h3>
-                    <p class="text-slate-400 text-sm mt-2">Les pôles apparaîtront ici une fois créés.</p>
-                </div>
-            `;
-        }
-
-        // Render Antenne section first
+        // 1. Antenne Section (Top of page)
         let html = renderAntenneSection();
 
-        // Render each direction with its child poles
-        html += directions.map(dir => {
-            const childPoles = poles[dir.id] || [];
-            return renderDirectionSection(dir, childPoles);
-        }).join('');
+        // 2. Directions & their Poles
+        directions.forEach((dir, idx) => {
+            const dirPoles = allTeams.filter(p => p.parent_id === dir.id);
+            html += renderDirectionSection(dir, dirPoles, idx, directions.length);
+        });
 
-        // Also render orphan poles (poles without a valid parent) - shown as standalone section
-        const orphanPoles = allTeams.filter(t => t.parent_id && !directions.find(d => d.id === t.parent_id));
+        // 3. Orphan Poles (no parent and not direction/antenne type if distinct)
+        const orphanPoles = allTeams.filter(p => !p.parent_id && p.team_type !== 'direction' && p.team_type !== 'antenne');
+
         if (orphanPoles.length > 0) {
+            /* 
+            // Hidden for now as it seems to display irrelevant/confusing data
             html += `
-                <div class="mb-10">
-                    <div class="flex items-center gap-3 mb-5 pb-4 border-b-2 border-slate-200">
-                        <div class="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500">
-                            <i data-lucide="help-circle" class="w-5 h-5"></i>
+                <div class="mb-12">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                             <i data-lucide="layers" class="w-6 h-6"></i>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-600">Pôles non classés</h2>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Autres Pôles</h3>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         ${orphanPoles.map(p => renderPoleCard(p)).join('')}
                     </div>
                 </div>
             `;
+            */
         }
 
         return html;
     };
 
     const header = `
-        <div class="mb-10 animate-slide-up">
-            <div class="flex flex-col gap-3 mb-4">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-100/50 text-brand-700 text-xs font-bold uppercase tracking-wider w-fit border border-brand-200/50">
-                    <i data-lucide="network" class="w-4 h-4"></i> Organisation & Pôles
-                </div>
-            </div>
+        <div class="mb-12 animate-slide-up">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">Les Pôles</h1>
-                    <p class="text-slate-500 mt-3 text-lg max-w-2xl leading-relaxed">Rejoignez les équipes qui font bouger les choses. Découvrez les responsables et signifiez votre intérêt.</p>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider mb-4 border border-slate-200">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                        Organisation & Pôles
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                        Explorez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Pôles</span>
+                    </h1>
+                    <p class="text-slate-500 mt-4 text-lg max-w-2xl leading-relaxed">
+                        Rejoignez les équipes qui font bouger les choses. Découvrez les responsables, leurs missions et engagez-vous.
+                    </p>
                 </div>
                 ${isViewAdmin ? `
-                    <div class="flex gap-3 flex-shrink-0">
-                        <button id="btn-create-direction" class="h-fit bg-white text-brand-600 px-5 py-3 rounded-xl font-bold border-2 border-brand-200 hover:border-brand-400 hover:bg-brand-50 transition flex items-center gap-2">
-                            <i data-lucide="folder-plus" class="w-5 h-5"></i>
-                            Direction
+                    <div class="flex flex-wrap gap-3">
+                        <button id="btn-create-direction" class="px-5 py-3 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition flex items-center gap-2 shadow-sm">
+                            <i data-lucide="folder-plus" class="w-5 h-5 text-slate-400"></i>
+                            <span>Direction</span>
                         </button>
-                        <button id="btn-create-pole" class="h-fit bg-brand-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:shadow-xl active:scale-95 transition flex items-center gap-2">
+                        <button id="btn-create-pole" class="px-6 py-3 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/20 active:scale-95 transition flex items-center gap-2">
                             <i data-lucide="plus" class="w-5 h-5"></i>
-                            Nouveau Pôle
+                            <span>Nouveau Pôle</span>
                         </button>
                     </div>
                 ` : ''}
@@ -382,7 +367,7 @@ export async function renderPoles(container) {
     `;
 
     container.innerHTML = `
-        <div class="max-w-4xl mx-auto pb-24">
+        <div class="max-w-7xl mx-auto pb-24 px-4 md:px-8">
             ${header}
             <div id="poles-content" class="animate-fade-in">
                 ${renderContent()}
@@ -397,14 +382,26 @@ export async function renderPoles(container) {
         initAdminListeners(container, allTeams, leaders, directions);
     }
 
-    // Common Listeners
+    // Common Listeners (unified action handler)
     container.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        const action = btn.dataset.action;
-        const id = btn.dataset.id;
+        // Skip mailto links
+        if (e.target.closest('a[href^="mailto:"]')) return;
+
+        // Find the closest element with a data-action
+        const actionEl = e.target.closest('[data-action]');
+        if (!actionEl) return;
+
+        const action = actionEl.dataset.action;
+        const id = actionEl.dataset.id;
+
+        if (action === 'open-pole-detail') {
+            const pole = allTeams.find(t => String(t.id) === String(id));
+            if (pole) openPoleDetailModal(pole, leaders, myInterests);
+            return;
+        }
 
         if (action === 'toggle-interest') {
+            const btn = actionEl;
             const isInterested = btn.dataset.interested === 'true';
 
             if (!store.state.user?.id) {
@@ -469,13 +466,31 @@ function initAdminListeners(container, teams, leaders, directions) {
                 : "⚠️ Supprimer ce pôle ?\nCela supprimera aussi l'historique des intérêts.";
 
             showConfirm(confirmMsg, async () => {
+                // Optimistic UI Removal
+                const elementToRemove = isDirection
+                    ? container.querySelector(`[data-direction-id="${id}"]`)
+                    : container.querySelector(`[data-pole-id="${id}"]`)?.closest('.group'); // pole card container
+
+                if (elementToRemove) {
+                    elementToRemove.style.transition = 'all 0.3s ease';
+                    elementToRemove.style.opacity = '0';
+                    elementToRemove.style.transform = 'scale(0.9)';
+                    setTimeout(() => elementToRemove.remove(), 300);
+                }
+
                 toggleLoader(true);
                 try {
                     await PolesService.deleteTeam(id);
                     showToast(isDirection ? "Direction supprimée" : "Pôle supprimé");
-                    await renderPoles(container);
+
+                    // Small delay to ensure DB propagation before re-fetch
+                    setTimeout(() => renderPoles(container), 500);
                 } catch (err) {
                     showToast("Erreur suppression", "error");
+                    console.error(err);
+                    // Re-render to restore state if error
+                    renderPoles(container);
+                } finally {
                     toggleLoader(false);
                 }
             }, { type: 'danger', confirmText: 'Supprimer définitivement' });
@@ -502,6 +517,29 @@ function initAdminListeners(container, teams, leaders, directions) {
         } else if (btn.id === 'btn-create-antenne') {
             // Create the Antenne team (special type)
             openAntenneModal();
+
+        } else if (action === 'move-direction-up' || action === 'move-direction-down') {
+            const currentDir = directions.find(d => String(d.id) === String(id));
+            if (!currentDir) return;
+
+            const currentIdx = directions.indexOf(currentDir);
+            const swapIdx = action === 'move-direction-up' ? currentIdx - 1 : currentIdx + 1;
+            if (swapIdx < 0 || swapIdx >= directions.length) return;
+
+            const swapDir = directions[swapIdx];
+
+            // Use index-based order values to guarantee distinct values
+            // currentDir goes to swapIdx position, swapDir goes to currentIdx position
+            try {
+                await PolesService.swapDisplayOrder(currentDir.id, currentIdx, swapDir.id, swapIdx);
+                showToast('📦 Ordre mis à jour');
+                // Re-render with fresh data
+                await renderPoles(container);
+            } catch (err) {
+                console.error('Swap order error:', err);
+                showToast('Erreur lors du déplacement', 'error');
+                renderPoles(container);
+            }
         }
     });
 }
@@ -1121,5 +1159,124 @@ async function openCandidatesModal(teamId, teamName) {
             }
         };
     });
+}
+
+// =============================================================================
+// ℹ️ POLE DETAIL MODAL (Public)
+// =============================================================================
+
+function openPoleDetailModal(pole, allLeaders, myInterests) {
+    const m = document.createElement('div');
+    m.className = 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in';
+
+    const poleLeaders = allLeaders.filter(l => l.pole_id === pole.id);
+    const isInterested = myInterests && myInterests.includes(pole.id);
+    const showJoinButton = !!store.state.user && !store.state.profile?.is_admin;
+
+    m.innerHTML = `
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl animate-scale-in overflow-hidden flex flex-col max-h-[85vh]" data-modal="pole-detail">
+            
+            <!-- Header with gradient -->
+            <div class="relative bg-gradient-to-br from-brand-600 via-indigo-600 to-purple-700 p-6 pb-14">
+                <button class="absolute top-4 right-4 w-9 h-9 bg-white/20 backdrop-blur-md rounded-full text-white/80 hover:bg-white/30 hover:text-white flex items-center justify-center transition btn-close z-10">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+                <div class="absolute -bottom-8 left-6">
+                    <div class="w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center text-brand-600 border-4 border-white">
+                        <i data-lucide="${pole.icon || 'users'}" class="w-7 h-7"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 pb-6 pt-12 flex-1 overflow-y-auto custom-scrollbar">
+                
+                <!-- Title & Email -->
+                <div class="mb-5">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-1">${escapeHtml(pole.name)}</h2>
+                    ${pole.email ? `
+                        <a href="mailto:${pole.email}" class="text-sm text-slate-400 hover:text-brand-600 font-medium inline-flex items-center gap-1.5 transition mt-1">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                            <span class="break-all">${escapeHtml(pole.email)}</span>
+                        </a>
+                    ` : ''}
+                </div>
+
+                <!-- Description -->
+                <div class="mb-6">
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Description
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(pole.description || "Aucune description disponible pour ce pôle.")}</p>
+                    </div>
+                </div>
+
+                <!-- Leaders -->
+                ${poleLeaders.length > 0 ? `
+                    <div>
+                        <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                            <i data-lucide="crown" class="w-3.5 h-3.5"></i> Responsables
+                        </h4>
+                        <div class="space-y-2">
+                            ${poleLeaders.map(l => `
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-brand-200 hover:bg-brand-50/30 transition">
+                                    <div class="w-10 h-10 rounded-full bg-white shadow-sm flex-shrink-0 overflow-hidden border-2 border-white">
+                                        ${l.photo_url
+            ? `<img src="${l.photo_url}" class="w-full h-full object-cover rounded-full">`
+            : `<div class="w-full h-full bg-gradient-to-br from-brand-100 to-indigo-100 rounded-full flex items-center justify-center text-brand-600 font-bold text-sm">${l.first_name[0]}</div>`
+        }
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="font-bold text-sm text-slate-900 truncate">${escapeHtml(formatIdentity(l.first_name, l.last_name))}</div>
+                                        <div class="text-xs text-brand-600 font-semibold truncate">${escapeHtml(l.role_title || "Responsable")}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="text-center py-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 mx-auto mb-2 flex items-center justify-center">
+                            <i data-lucide="user-x" class="w-5 h-5 text-slate-300"></i>
+                        </div>
+                        <p class="text-sm text-slate-400">Aucun responsable assigné</p>
+                    </div>
+                `}
+            </div>
+
+            <!-- Footer with Join button (visible for ALL logged-in users) -->
+            ${showJoinButton ? `
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/80">
+                    <button class="w-full py-3.5 px-6 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${isInterested
+                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600'
+                : 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 hover:-translate-y-0.5'
+            }" id="btn-detail-toggle" data-pole-id="${pole.id}" data-interested="${isInterested}">
+                        ${isInterested
+                ? `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Intéressé(e)`
+                : `<i data-lucide="hand-metal" class="w-5 h-5"></i> Rejoindre ce pôle`
+            }
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    document.body.appendChild(m);
+    createIcons({ icons, root: m });
+
+    const closeModal = () => m.remove();
+    m.querySelectorAll('.btn-close').forEach(b => b.onclick = closeModal);
+    m.onclick = (e) => { if (e.target === m) closeModal(); };
+
+    // Handle join button click inside modal
+    const btn = m.querySelector('#btn-detail-toggle');
+    if (btn) {
+        btn.onclick = async () => {
+            const mainBtn = document.querySelector(`button[data-action="toggle-interest"][data-id="${pole.id}"]`);
+            if (mainBtn) mainBtn.click();
+            closeModal();
+        };
+    }
 }
 

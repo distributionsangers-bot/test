@@ -420,10 +420,10 @@ async function saveTemplate() {
     } else {
         showToast("Modèle enregistré ✓");
         document.getElementById(modalId)?.remove();
-        // Refresh list
-        window.dispatchEvent(new CustomEvent('templateSaved'));
-        // Also if we are in planning list, we should reload.
-        // But `planning-list` doesn't listen to `templateSaved`. I'll update `planning-list` to listen or just reload manually.
-        // For now, I'll dispatch event.
+
+        // Reload page to refresh list as requested by user
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
     }
 }

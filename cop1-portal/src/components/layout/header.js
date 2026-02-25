@@ -9,7 +9,9 @@
  * ============================================
  */
 
-const LOGO_URL = "logo.png";
+import { APP_CONFIG } from '../../core/constants.js';
+
+const { LOGO_URL } = APP_CONFIG;
 
 /**
  * Renders the Premium Mobile Header
@@ -24,8 +26,8 @@ export function renderHeader(profile) {
             <div class="h-16 w-full flex items-center justify-between px-4">
                 <!-- Logo + Brand -->
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center">
-                        <img src="${LOGO_URL}" class="h-5 w-auto" alt="Logo">
+                    <div class="h-9 flex items-center justify-center">
+                        <img src="${LOGO_URL}" class="h-7 w-auto object-contain" alt="Logo">
                     </div>
                     <div class="flex items-baseline gap-0.5">
                         <span class="font-extrabold text-lg text-slate-900">COP1</span>

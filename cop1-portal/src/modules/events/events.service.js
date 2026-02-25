@@ -8,7 +8,8 @@ export const EventsService = {
      */
     async getAllEvents() {
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const d = new Date();
+            const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             const { data, error } = await supabase
                 .from('events')
                 .select('*, description, shifts(*, registrations(count))') // count checks how many regs total
@@ -77,21 +78,18 @@ export const EventsService = {
     async toggleRegistration(shiftId, userId, isCurrentlyRegistered, note = null) {
         try {
             if (isCurrentlyRegistered) {
-                // UNREGISTER
-                const { error } = await supabase
-                    .from('registrations')
-                    .delete()
-                    .eq('user_id', userId)
-                    .eq('shift_id', shiftId);
+                // UNREGISTER (Secure RPC)
+                const { error } = await supabase.rpc('unregister_from_shift', {
+                    p_shift_id: shiftId
+                });
 
                 if (error) throw error;
                 return { success: true, action: 'unregister', error: null };
             } else {
                 // REGISTER (Secure RPC)
-                // Force update: ensuring singular argument
                 const { error } = await supabase.rpc('register_to_shift', {
                     p_shift_id: shiftId,
-                    p_note: note // Add note
+                    p_note: note
                 });
 
                 if (error) throw error;

@@ -8,6 +8,7 @@ export const PolesService = {
         const { data, error } = await supabase
             .from('teams')
             .select('*')
+            .order('display_order', { ascending: true })
             .order('name');
 
         if (error) {
@@ -25,6 +26,7 @@ export const PolesService = {
             .from('teams')
             .select('*')
             .is('parent_id', null)
+            .order('display_order', { ascending: true })
             .order('name');
 
         if (error) {
@@ -42,6 +44,7 @@ export const PolesService = {
         const { data: allTeams, error } = await supabase
             .from('teams')
             .select('*')
+            .order('display_order', { ascending: true })
             .order('name');
 
         if (error) {
@@ -248,8 +251,19 @@ export const PolesService = {
     },
 
     /**
-     * Récupère ou créée une conversation avec un utilisateur (pour le contacter)
-     * Utilise ChatService.createTicket si nécessaire, mais ici on retourne juste l'info
-     * On peut déléguer ça au ChatService directement depuis la vue.
+     * Échange l'ordre d'affichage de deux équipes
      */
+    async swapDisplayOrder(idA, orderA, idB, orderB) {
+        const { error: e1 } = await supabase
+            .from('teams')
+            .update({ display_order: orderB })
+            .eq('id', idA);
+        if (e1) throw e1;
+
+        const { error: e2 } = await supabase
+            .from('teams')
+            .update({ display_order: orderA })
+            .eq('id', idB);
+        if (e2) throw e2;
+    },
 };

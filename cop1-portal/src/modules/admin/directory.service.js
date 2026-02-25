@@ -439,6 +439,41 @@ export const DirectoryService = {
     },
 
     /**
+     * Ajuste manuellement les heures d'un bénévole (admin)
+     * @param {string} userId - ID de l'utilisateur
+     * @param {number} adjustment - Heures à ajouter (positif) ou retirer (négatif)
+     * @returns {Promise<{success, newTotal, error}>}
+     */
+    async adjustUserHours(userId, adjustment) {
+        try {
+            // 1. Récupérer le total actuel
+            const { data: profile, error: fetchError } = await supabase
+                .from('profiles')
+                .select('total_hours')
+                .eq('id', userId)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            const currentHours = profile.total_hours || 0;
+            const newTotal = Math.max(0, parseFloat((currentHours + adjustment).toFixed(2)));
+
+            // 2. Mettre à jour le profil
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ total_hours: newTotal })
+                .eq('id', userId);
+
+            if (updateError) throw updateError;
+
+            return { success: true, newTotal, error: null };
+        } catch (error) {
+            console.error('❌ Erreur ajustement heures:', error);
+            return { success: false, newTotal: null, error };
+        }
+    },
+
+    /**
      * Récupère l'historique des participations d'un bénévole
      * @param {string} userId
      * @param {string|null} startDate - Format YYYY-MM-DD

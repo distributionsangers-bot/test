@@ -497,6 +497,51 @@ async function viewUserDetails(uid) {
                         </div>
                     </div>
 
+                    <!-- Hours Adjustment Section -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3 border-b border-emerald-100/50">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5 text-white"></i>
+                                </div>
+                                <span class="text-sm font-bold text-emerald-800">Ajuster les heures</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <!-- Quick Adjust Buttons + Total -->
+                            <div class="flex items-center justify-center gap-2">
+                                <button data-adjust="-1" class="hours-adjust-btn px-3 py-2 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100" title="Retirer 1h">
+                                    −1h
+                                </button>
+                                <button data-adjust="-0.5" class="hours-adjust-btn px-3 py-2 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100" title="Retirer 30min">
+                                    −30min
+                                </button>
+                                <div class="px-4 py-2 text-center min-w-[70px]">
+                                    <div id="hours-live-total" class="text-2xl font-black text-emerald-600 leading-none">${hours}h</div>
+                                    <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total</div>
+                                </div>
+                                <button data-adjust="0.5" class="hours-adjust-btn px-3 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100" title="Ajouter 30min">
+                                    +30min
+                                </button>
+                                <button data-adjust="1" class="hours-adjust-btn px-3 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100" title="Ajouter 1h">
+                                    +1h
+                                </button>
+                            </div>
+                            <!-- Custom Adjustment -->
+                            <div class="flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="custom-hours-input" step="0.5" placeholder="Ex: 1.5 ou -2" 
+                                        class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10 transition placeholder:text-slate-300">
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">heures</span>
+                                </div>
+                                <button id="btn-custom-hours" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-1.5">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                    Appliquer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition px-2 rounded-lg">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Téléphone</span>
@@ -763,6 +808,82 @@ async function viewUserDetails(uid) {
     };
 
     modal.querySelector('#btn-filter-history').addEventListener('click', loadHistory);
+
+    // ==========================================
+    // HOURS ADJUSTMENT LOGIC
+    // ==========================================
+    let currentTotalHours = hours; // Track locally for live updates
+
+    const applyHoursAdjustment = (adjustment) => {
+        const delta = parseFloat(adjustment);
+        if (isNaN(delta) || delta === 0) {
+            showToast('Veuillez saisir un nombre valide', 'error');
+            return;
+        }
+
+        const isAdding = delta > 0;
+        const display = isAdding ? `+${Math.abs(delta)}h` : `−${Math.abs(delta)}h`;
+        const willBeNegative = (currentTotalHours + delta) < 0;
+
+        if (willBeNegative) {
+            showToast(`Impossible : le total ne peut pas être négatif (actuel: ${currentTotalHours}h)`, 'error');
+            return;
+        }
+
+        showConfirm(
+            `${isAdding ? 'Ajouter' : 'Retirer'} <strong>${Math.abs(delta)}h</strong> ${isAdding ? 'à' : 'de'} ce bénévole ?<br><br><span class="text-slate-400 text-xs">${currentTotalHours}h → ${parseFloat((currentTotalHours + delta).toFixed(2))}h</span>`,
+            async () => {
+                toggleLoader(true);
+                const res = await DirectoryService.adjustUserHours(uid, delta);
+                toggleLoader(false);
+
+                if (res.error) {
+                    showToast('Erreur ajustement heures', 'error');
+                } else {
+                    currentTotalHours = res.newTotal;
+                    // Update all displays
+                    const liveTotal = modal.querySelector('#hours-live-total');
+                    if (liveTotal) liveTotal.textContent = `${res.newTotal}h`;
+                    const statsTotal = modal.querySelector('.grid .text-emerald-600');
+                    if (statsTotal) statsTotal.textContent = `${res.newTotal}h`;
+                    showToast(`${display} appliqué — Total : ${res.newTotal}h ✓`);
+                    loadUsers(); // Refresh background list
+                }
+            },
+            {
+                type: isAdding ? 'info' : 'danger',
+                confirmText: isAdding ? 'Ajouter' : 'Retirer',
+                confirmIcon: isAdding ? 'plus-circle' : 'minus-circle',
+                headerIcon: 'clock'
+            }
+        );
+    };
+
+    // Quick adjust buttons
+    modal.querySelectorAll('.hours-adjust-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            applyHoursAdjustment(btn.dataset.adjust);
+        });
+    });
+
+    // Custom adjustment
+    modal.querySelector('#btn-custom-hours')?.addEventListener('click', () => {
+        const input = modal.querySelector('#custom-hours-input');
+        const val = input?.value;
+        if (!val) {
+            showToast('Saisissez un nombre d\'heures', 'error');
+            return;
+        }
+        applyHoursAdjustment(val);
+        input.value = '';
+    });
+
+    // Allow Enter key on custom input
+    modal.querySelector('#custom-hours-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            modal.querySelector('#btn-custom-hours')?.click();
+        }
+    });
 
     // Existing Note Logic
     modal.querySelector('#btn-save-note')?.addEventListener('click', async () => {

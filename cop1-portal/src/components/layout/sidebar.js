@@ -292,7 +292,7 @@ async function handleLogout() {
             console.error('❌ Erreur déconnexion:', error);
             window.location.reload();
         }
-    }, { type: 'danger', confirmText: 'Déconnecter' });
+    }, { type: 'danger', confirmText: 'Déconnecter', confirmIcon: 'log-out' });
 }
 
 /**

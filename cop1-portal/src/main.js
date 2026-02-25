@@ -232,17 +232,6 @@ function attachGlobalListeners() {
 
 
 
-        // Logout
-        const logoutBtn = e.target.closest('[data-action="logout"]');
-        if (logoutBtn) {
-            showConfirm("Déconnexion ?", () => {
-                supabase.auth.signOut().then(() => {
-                    store.state.user = null;
-                    store.state.profile = null;
-                    window.location.href = '/login';
-                });
-            }, { confirmText: 'Se déconnecter' });
-        }
     });
 
     // Custom Events

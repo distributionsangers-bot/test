@@ -365,7 +365,7 @@ async function handleLogout() {
             console.error('Logout error:', error);
             showToast('Erreur déconnexion', 'error');
         }
-    }, { type: 'danger', confirmText: 'Déconnecter' });
+    }, { type: 'danger', confirmText: 'Déconnecter', confirmIcon: 'log-out' });
 }
 
 export function cleanupMobileNav() {

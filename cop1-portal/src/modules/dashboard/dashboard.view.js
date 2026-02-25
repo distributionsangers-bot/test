@@ -643,11 +643,8 @@ async function renderAdminDashboard(container) {
                      <span class="text-sm font-semibold text-slate-700 truncate max-w-[120px]">${escapeHtml(a.name)}</span>
                      <span class="text-xs text-slate-400 flex-shrink-0">s'est inscrit à</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(a.event)}</span>
-                </div>
-                    ${a.count > 1 ? `<span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded w-fit">${a.count} créneaux</span>` : ''}
-                </div>
+                <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(a.event)}</span>
+                ${a.count > 1 ? `<span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded w-fit mt-0.5">${a.count} créneaux</span>` : ''}
             </div>
             <span class="text-[10px] text-slate-300 flex-shrink-0">${formatTimeAgo(a.created_at)}</span>
         </div>

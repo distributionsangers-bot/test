@@ -611,23 +611,46 @@ async function renderAdminDashboard(container) {
         .from('registrations')
         .select('created_at, profiles(first_name, last_name), shifts(title, events(title))')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(15);
 
-    const activityHtml = recentRegs?.map(r => `
+    // Group by volunteer + event
+    const groupedActivity = {};
+    recentRegs?.forEach(r => {
+        const name = `${r.profiles?.first_name || ''} ${r.profiles?.last_name || ''}`.trim();
+        const event = r.shifts?.events?.title || '';
+        const key = `${name}|${event}`;
+        if (!groupedActivity[key]) {
+            groupedActivity[key] = { name, event, count: 0, created_at: r.created_at };
+        }
+        groupedActivity[key].count++;
+        // Keep most recent date
+        if (r.created_at > groupedActivity[key].created_at) {
+            groupedActivity[key].created_at = r.created_at;
+        }
+    });
+
+    const sortedActivity = Object.values(groupedActivity)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5);
+
+    const activityHtml = sortedActivity.length > 0 ? sortedActivity.map(a => `
         <div class="flex items-center gap-3 py-2">
             <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-center">
                 <div class="flex items-center gap-1">
-                     <span class="text-sm font-semibold text-slate-700 truncate max-w-[120px]">${escapeHtml(r.profiles?.first_name || '')} ${escapeHtml(r.profiles?.last_name || '')}</span>
+                     <span class="text-sm font-semibold text-slate-700 truncate max-w-[120px]">${escapeHtml(a.name)}</span>
                      <span class="text-xs text-slate-400 flex-shrink-0">s'est inscrit à</span>
                 </div>
-                <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(r.shifts?.events?.title || '')}</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-medium text-slate-600 truncate">${escapeHtml(a.event)}</span>
+                    ${a.count > 1 ? `<span class="text-[9px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">${a.count} créneaux</span>` : ''}
+                </div>
             </div>
-            <span class="text-[10px] text-slate-300 flex-shrink-0">${formatTimeAgo(r.created_at)}</span>
+            <span class="text-[10px] text-slate-300 flex-shrink-0">${formatTimeAgo(a.created_at)}</span>
         </div>
-    `).join('') || '<div class="text-center text-slate-400 py-4 text-sm">Aucune activité récente</div>';
+    `).join('') : '<div class="text-center text-slate-400 py-4 text-sm">Aucune activité récente</div>';
 
     // Urgencies HTML — grouped by event
     const urgentHtml = urgentEvents.length > 0

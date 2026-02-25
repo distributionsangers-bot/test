@@ -508,22 +508,23 @@ async function viewUserDetails(uid) {
                             </div>
                         </div>
                         <div class="p-4 space-y-4">
-                            <!-- Quick Adjust Buttons + Total -->
-                            <div class="flex items-center justify-center gap-2">
-                                <button data-adjust="-1" class="hours-adjust-btn px-3 py-2 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100" title="Retirer 1h">
+                            <!-- Total Display -->
+                            <div class="text-center py-2">
+                                <div id="hours-live-total" class="text-3xl font-black text-emerald-600 leading-none">${hours}h</div>
+                                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total actuel</div>
+                            </div>
+                            <!-- Quick Adjust Buttons - 2x2 Grid -->
+                            <div class="grid grid-cols-4 gap-2">
+                                <button data-adjust="-1" class="hours-adjust-btn py-2.5 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100 text-center" title="Retirer 1h">
                                     −1h
                                 </button>
-                                <button data-adjust="-0.5" class="hours-adjust-btn px-3 py-2 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100" title="Retirer 30min">
+                                <button data-adjust="-0.5" class="hours-adjust-btn py-2.5 rounded-xl bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 active:scale-95 transition-all border border-red-100 text-center" title="Retirer 30min">
                                     −30min
                                 </button>
-                                <div class="px-4 py-2 text-center min-w-[70px]">
-                                    <div id="hours-live-total" class="text-2xl font-black text-emerald-600 leading-none">${hours}h</div>
-                                    <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total</div>
-                                </div>
-                                <button data-adjust="0.5" class="hours-adjust-btn px-3 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100" title="Ajouter 30min">
+                                <button data-adjust="0.5" class="hours-adjust-btn py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100 text-center" title="Ajouter 30min">
                                     +30min
                                 </button>
-                                <button data-adjust="1" class="hours-adjust-btn px-3 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100" title="Ajouter 1h">
+                                <button data-adjust="1" class="hours-adjust-btn py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 active:scale-95 transition-all border border-emerald-100 text-center" title="Ajouter 1h">
                                     +1h
                                 </button>
                             </div>

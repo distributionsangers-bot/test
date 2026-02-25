@@ -279,12 +279,12 @@ async function fetchAvailableMissions() {
  */
 async function fetchPoleInterests() {
     try {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
             .from('pole_interests')
-            .select('id', { count: 'exact', head: true });
+            .select('team_id');
 
         if (error) { console.error('Badge: fetchPoleInterests error', error); return; }
-        updateBadgeDOM('poles', count || 0);
+        updateBadgeDOM('poles', data?.length || 0);
     } catch (err) {
         console.error('Badge: fetchPoleInterests error', err);
     }

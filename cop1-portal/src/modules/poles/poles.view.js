@@ -46,14 +46,12 @@ export async function renderPoles(container) {
             </div>
         ` : '';
 
-        // Interest badge for admin (visible always, not just on hover)
+        // Interest badge for admin (inline, not absolute)
         const interestBadge = (isViewAdmin && intCount > 0) ? `
-            <div class="absolute top-3 left-3 z-10">
-                <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[11px] font-bold shadow-sm hover:bg-blue-100 transition cursor-pointer">
-                    <i data-lucide="hand-helping" class="w-3 h-3 pointer-events-none"></i>
-                    ${intCount} intéressé${intCount > 1 ? 's' : ''}
-                </button>
-            </div>
+            <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="inline-flex items-center gap-1.5 px-2.5 py-1 mt-2 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[11px] font-bold shadow-sm hover:bg-blue-100 transition cursor-pointer">
+                <i data-lucide="user-check" class="w-3 h-3 pointer-events-none"></i>
+                ${intCount} intéressé${intCount > 1 ? 's' : ''}
+            </button>
         ` : '';
 
         // Leaders list with name + title
@@ -84,7 +82,6 @@ export async function renderPoles(container) {
         return `
             <div class="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden" data-pole-id="${t.id}">
                 ${adminActions}
-                ${interestBadge}
                 
                 <div class="p-5 flex flex-col flex-1 cursor-pointer min-w-0" data-action="open-pole-detail" data-id="${t.id}">
                     <!-- Icon -->
@@ -106,6 +103,8 @@ export async function renderPoles(container) {
                     <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-1">
                         ${escapeHtml(t.description || 'Découvrez cette équipe et ses missions.')}
                     </p>
+
+                    ${interestBadge}
 
                     ${leadersHtml}
                 </div>

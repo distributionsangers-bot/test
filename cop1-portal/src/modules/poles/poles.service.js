@@ -296,7 +296,7 @@ export const PolesService = {
     async getTotalInterestCount() {
         const { count, error } = await supabase
             .from('pole_interests')
-            .select('id', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true });
 
         if (error) {
             console.error('getTotalInterestCount error:', error);

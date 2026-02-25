@@ -391,7 +391,7 @@ async function renderUserDashboard(container) {
         <div class="animate-fade-in max-w-4xl mx-auto pb-24 pt-2">
             
             <!-- HERO HEADER -->
-            <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-6 mb-6 shadow-2xl shadow-brand-500/20">
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-6 mb-6 shadow-2xl shadow-brand-500/20">
                 <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
                 
                 <div class="relative flex items-center justify-between">
@@ -417,7 +417,7 @@ async function renderUserDashboard(container) {
                         <i data-lucide="calendar-plus" class="w-6 h-6"></i>
                     </div>
                     <div class="font-bold text-slate-800 text-sm group-hover:text-emerald-600 transition-colors">Missions</div>
-                    <div class="text-[10px] text-slate-400">S'inscrire</div>
+                    <div class="text-[10px] text-slate-400">S'inscrire à nos missions</div>
                 </button>
                 
                 <button id="btn-scanner" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-slate-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
@@ -425,7 +425,7 @@ async function renderUserDashboard(container) {
                         <i data-lucide="scan-line" class="w-6 h-6"></i>
                     </div>
                     <div class="font-bold text-slate-800 text-sm group-hover:text-slate-900 transition-colors">Scanner</div>
-                    <div class="text-[10px] text-slate-400">Pointer</div>
+                    <div class="text-[10px] text-slate-400">Pointer sa présence</div>
                 </button>
 
                 <button data-link="/messages" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
@@ -433,7 +433,7 @@ async function renderUserDashboard(container) {
                         <i data-lucide="message-circle" class="w-6 h-6"></i>
                     </div>
                     <div class="font-bold text-slate-800 text-sm group-hover:text-purple-600 transition-colors">Messages</div>
-                    <div class="text-[10px] text-slate-400">Contacter</div>
+                    <div class="text-[10px] text-slate-400">Contacter un responsable</div>
                 </button>
 
                 <button data-link="/poles" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
@@ -663,7 +663,7 @@ async function renderAdminDashboard(container) {
         <div class="animate-fade-in max-w-4xl mx-auto pb-24">
             
             <!-- ADMIN HERO -->
-            <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black p-6 mb-6 shadow-2xl">
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black p-6 mb-6 shadow-2xl">
                 <div class="absolute inset-0 opacity-5" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
                 
                 <div class="relative flex items-center justify-between">

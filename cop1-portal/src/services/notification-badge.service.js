@@ -9,6 +9,7 @@
  * - Messages : conversations non lues (tout le monde)
  * - Annuaire : bénévoles en attente (admin)
  * - Planning : événements à venir (admin)
+ * - Pôles : intéressés bénévoles (admin)
  * - Missions : missions disponibles (bénévole)
  * 
  * Utilise Supabase Realtime pour des mises à jour
@@ -47,6 +48,7 @@ export async function refreshAllBadges() {
     if (isAdmin) {
         promises.push(fetchPendingVolunteers());
         promises.push(fetchUpcomingEvents());
+        promises.push(fetchPoleInterests());
     } else {
         promises.push(fetchAvailableMissions());
     }
@@ -110,6 +112,18 @@ function setupRealtimeSubscriptions() {
             )
             .subscribe();
         realtimeChannels.push(missionsChannel);
+    }
+
+    // Pole interests realtime (admin only)
+    if (isAdmin) {
+        const polesChannel = supabase.channel('badges-poles')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'pole_interests' },
+                () => fetchPoleInterests()
+            )
+            .subscribe();
+        realtimeChannels.push(polesChannel);
     }
 }
 
@@ -257,6 +271,22 @@ async function fetchAvailableMissions() {
         updateBadgeDOM('missions', count);
     } catch (err) {
         console.error('Badge: fetchAvailableMissions error', err);
+    }
+}
+
+/**
+ * Intéressés pôles (admin — Pôles)
+ */
+async function fetchPoleInterests() {
+    try {
+        const { count, error } = await supabase
+            .from('pole_interests')
+            .select('id', { count: 'exact', head: true });
+
+        if (error) { console.error('Badge: fetchPoleInterests error', error); return; }
+        updateBadgeDOM('poles', count || 0);
+    } catch (err) {
+        console.error('Badge: fetchPoleInterests error', err);
     }
 }
 

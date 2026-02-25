@@ -266,4 +266,42 @@ export const PolesService = {
             .eq('id', idB);
         if (e2) throw e2;
     },
+
+    /**
+     * Récupère le nombre d'intéressés par pôle (tous les pôles en une requête)
+     * @returns {Promise<Object>} Map { teamId: count }
+     */
+    async getAllInterestCounts() {
+        const { data, error } = await supabase
+            .from('pole_interests')
+            .select('team_id');
+
+        if (error) {
+            console.error('getAllInterestCounts error:', error);
+            return {};
+        }
+
+        // Group by team_id and count
+        const counts = {};
+        (data || []).forEach(row => {
+            counts[row.team_id] = (counts[row.team_id] || 0) + 1;
+        });
+        return counts;
+    },
+
+    /**
+     * Compte le nombre total d'intérêts (tous pôles confondus)
+     * @returns {Promise<number>}
+     */
+    async getTotalInterestCount() {
+        const { count, error } = await supabase
+            .from('pole_interests')
+            .select('id', { count: 'exact', head: true });
+
+        if (error) {
+            console.error('getTotalInterestCount error:', error);
+            return 0;
+        }
+        return count || 0;
+    },
 };

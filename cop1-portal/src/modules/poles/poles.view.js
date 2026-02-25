@@ -8,20 +8,29 @@ export async function renderPoles(container) {
     if (!container) return;
 
     // 1. Fetch Data with hierarchy
-    const [hierarchy, allTeams, leaders, myInterests] = await Promise.all([
+    const isViewAdmin = store.state.adminMode && store.state.profile?.is_admin;
+
+    const fetchPromises = [
         PolesService.getTeamsHierarchy(),
         PolesService.getAllTeams(),
         PolesService.getLeaders(),
         store.state.user ? PolesService.getMyInterests(store.state.user.id) : []
-    ]);
+    ];
+    // Admin: fetch interest counts for badges
+    if (isViewAdmin) fetchPromises.push(PolesService.getAllInterestCounts());
+
+    const results = await Promise.all(fetchPromises);
+    const [hierarchy, allTeams, leaders, myInterests] = results;
+    const interestCounts = isViewAdmin ? (results[4] || {}) : {};
 
     const { antenne, directions, poles } = hierarchy;
-    const isViewAdmin = store.state.adminMode && store.state.profile?.is_admin;
 
     // Helper: Render a single pole card
     const renderPoleCard = (t) => {
         const intr = myInterests.includes(t.id);
         const teamLeaders = leaders ? leaders.filter(l => l.pole_id === t.id) : [];
+
+        const intCount = interestCounts[t.id] || 0;
 
         const adminActions = isViewAdmin ? `
             <div class="absolute top-3 right-3 flex gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -33,6 +42,16 @@ export async function renderPoles(container) {
                 </button>
                 <button data-action="delete-pole" data-id="${t.id}" class="p-1.5 rounded-lg bg-white text-slate-400 hover:text-red-600 border border-slate-100 shadow-sm transition" title="Supprimer">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
+                </button>
+            </div>
+        ` : '';
+
+        // Interest badge for admin (visible always, not just on hover)
+        const interestBadge = (isViewAdmin && intCount > 0) ? `
+            <div class="absolute top-3 left-3 z-10">
+                <button data-action="view-candidates" data-id="${t.id}" data-name="${escapeHtml(t.name)}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[11px] font-bold shadow-sm hover:bg-blue-100 transition cursor-pointer">
+                    <i data-lucide="hand-helping" class="w-3 h-3 pointer-events-none"></i>
+                    ${intCount} intéressé${intCount > 1 ? 's' : ''}
                 </button>
             </div>
         ` : '';
@@ -65,6 +84,7 @@ export async function renderPoles(container) {
         return `
             <div class="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden" data-pole-id="${t.id}">
                 ${adminActions}
+                ${interestBadge}
                 
                 <div class="p-5 flex flex-col flex-1 cursor-pointer min-w-0" data-action="open-pole-detail" data-id="${t.id}">
                     <!-- Icon -->

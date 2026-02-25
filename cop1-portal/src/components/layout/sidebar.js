@@ -25,7 +25,7 @@ const NAV_ITEMS = {
         { id: '/admin_planning', icon: 'calendar-days', label: 'Planning', color: 'from-emerald-500 to-teal-600', badgeType: 'planning', iconBgLight: 'bg-emerald-50', iconText: 'text-emerald-600' },
         { id: '/messages', icon: 'message-circle', label: 'Messages', color: 'from-violet-500 to-purple-600', badgeType: 'messages', iconBgLight: 'bg-violet-50', iconText: 'text-violet-600' },
         { id: '/admin_users', icon: 'users', label: 'Annuaire', color: 'from-amber-500 to-orange-600', badgeType: 'pending', iconBgLight: 'bg-amber-50', iconText: 'text-amber-600' },
-        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
+        { id: '/poles', icon: 'network', label: 'Pôles', color: 'from-pink-500 to-rose-600', badgeType: 'poles', iconBgLight: 'bg-pink-50', iconText: 'text-pink-600' },
         { id: '/profile', icon: 'user', label: 'Mon Profil', color: 'from-slate-500 to-slate-700', iconBgLight: 'bg-slate-50', iconText: 'text-slate-600' }
     ],
     volunteer: [

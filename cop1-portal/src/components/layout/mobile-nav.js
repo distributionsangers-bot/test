@@ -232,8 +232,9 @@ function openMobileMenu() {
                     </button>
                     
                     <button data-menu-action="navigate" data-menu-path="/poles" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
+                        <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
                             <i data-lucide="network" class="w-5 h-5"></i>
+                            <span id="mobile-badge-poles" class="hidden absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-0.5 leading-none"></span>
                         </div>
                         <span class="text-xs font-semibold text-slate-700">Pôles</span>
                     </button>

@@ -208,10 +208,13 @@ async function renderUserDashboard(container) {
     if (announcements && announcements.length > 0) {
         announcementsHtml = `
             <div class="mb-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                    <i data-lucide="megaphone" class="w-5 h-5 text-purple-500"></i>
-                    Annonces
-                </h2>
+                <div class="flex items-center gap-3 mb-3 px-1">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <i data-lucide="megaphone" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Annonces</h2>
+                    <div class="flex-1 h-px bg-gradient-to-r from-purple-200 to-transparent"></div>
+                </div>
                 <div class="space-y-2">
                     ${announcements.map(a => `
                         <button data-link="/messages/${a.id}" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
@@ -254,10 +257,13 @@ async function renderUserDashboard(container) {
     // Available mission HTML
     const availableMissionHtml = availableMission ? `
         <div class="mb-6">
-            <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
-                Missions disponibles
-            </h2>
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Missions disponibles</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-amber-200 to-transparent"></div>
+            </div>
             <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-orange-500"></div>
                 <div class="pl-4">
@@ -347,10 +353,13 @@ async function renderUserDashboard(container) {
     const activityHtml = sortedEvents.length > 0 ? `
         <div class="mb-6">
             <div class="flex items-center justify-between mb-3 px-1">
-                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
-                    Mon Activité
-                </h2>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <i data-lucide="history" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Mon Activité</h2>
+                    <div class="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent"></div>
+                </div>
                 <button data-link="/profile?tab=history" class="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
                     Voir tout
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
@@ -411,6 +420,13 @@ async function renderUserDashboard(container) {
             </div>
 
             <!-- QUICK ACTIONS (moved to top) -->
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Actions rapides</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-amber-200 to-transparent"></div>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <button data-link="/events" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 group text-center">
                     <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
@@ -446,6 +462,13 @@ async function renderUserDashboard(container) {
             </div>
 
             <!-- STATS BENTO GRID (4 columns like admin) -->
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Mes statistiques</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-brand-200 to-transparent"></div>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <!-- Hours (Gradient Card) -->
                 <div class="relative group bg-gradient-to-br from-brand-500 to-indigo-600 p-5 rounded-3xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
@@ -704,6 +727,13 @@ async function renderAdminDashboard(container) {
             </div>
 
             <!-- CONTROL CENTER GRID (Bento Style) -->
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Vue d'ensemble</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-brand-200 to-transparent"></div>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 
                 <!-- 1. Bénévoles -->
@@ -750,8 +780,16 @@ async function renderAdminDashboard(container) {
                     </div>
                 </div>
 
-                <!-- ACTIONS ROW -->
-                
+            </div>
+
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Actions rapides</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-amber-200 to-transparent"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <!-- 5. Planning -->
                 <button data-link="/admin_planning" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:shadow-brand-500/10 transition-all duration-300 hover:-translate-y-1 group text-left relative overflow-hidden">
                     <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
@@ -789,6 +827,7 @@ async function renderAdminDashboard(container) {
                 </button>
 
             </div>
+
 
             <!-- TWO COLUMNS -->
             <div class="grid md:grid-cols-2 gap-4 w-full min-w-0">
@@ -867,10 +906,13 @@ function renderNextMissionCard(mission) {
 
         return `
             <div class="mb-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                    <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
-                    Prochaine mission inscrite
-                </h2>
+                <div class="flex items-center gap-3 mb-3 px-1">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                        <i data-lucide="calendar-check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Prochaine mission inscrite</h2>
+                    <div class="flex-1 h-px bg-gradient-to-r from-brand-200 to-transparent"></div>
+                </div>
                 <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-500 to-indigo-600"></div>
                     <div class="pl-4">
@@ -894,10 +936,13 @@ function renderNextMissionCard(mission) {
 
     return `
         <div class="mb-6">
-            <h2 class="text-lg font-bold text-slate-900 mb-3 px-1 flex items-center gap-2">
-                <i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i>
-                Prochaine mission inscrite
-            </h2>
+            <div class="flex items-center gap-3 mb-3 px-1">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-white"></i>
+                </div>
+                <h2 class="text-base font-extrabold text-slate-800 tracking-tight">Prochaine mission inscrite</h2>
+                <div class="flex-1 h-px bg-gradient-to-r from-brand-200 to-transparent"></div>
+            </div>
             <button data-link="/events" class="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-slate-300 to-slate-400"></div>
                 <div class="pl-4">

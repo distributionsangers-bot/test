@@ -13,6 +13,7 @@
  */
 
 import { supabase } from '../../services/supabase.js';
+import { requireAdmin } from '../../services/auth-guard.js';
 
 export const PlanningService = {
     /**
@@ -210,6 +211,8 @@ export const PlanningService = {
      * @returns {Promise<{data, error}>}
      */
     async createEvent(eventData, shiftsData) {
+        const guard = requireAdmin('créer un événement');
+        if (guard) return guard;
         try {
             // 1. Crée l'événement
             const { data: evt, error: evtError } = await supabase
@@ -254,6 +257,8 @@ export const PlanningService = {
      * @returns {Promise<{data, error}>}
      */
     async updateEvent(id, eventData) {
+        const guard = requireAdmin('modifier un événement');
+        if (guard) return guard;
         try {
             const { data, error } = await supabase
                 .from('events')
@@ -278,6 +283,8 @@ export const PlanningService = {
      * @returns {Promise<{success, error}>}
      */
     async deleteEvent(id) {
+        const guard = requireAdmin('supprimer un événement');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('events')
@@ -300,6 +307,8 @@ export const PlanningService = {
      * @returns {Promise<{success, error}>}
      */
     async deleteShift(id) {
+        const guard = requireAdmin('supprimer un créneau');
+        if (guard) return guard;
         try {
             // Supprime d'abord les inscriptions (sécurité si pas de CASCADE)
             await supabase
@@ -330,6 +339,8 @@ export const PlanningService = {
      * @returns {Promise<{success, error}>}
      */
     async updateShift(id, shiftData) {
+        const guard = requireAdmin('modifier un créneau');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('shifts')
@@ -351,6 +362,8 @@ export const PlanningService = {
      * @returns {Promise<{success, error}>}
      */
     async createShift(shiftData) {
+        const guard = requireAdmin('créer un créneau');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('shifts')
@@ -392,6 +405,8 @@ export const PlanningService = {
      * @returns {Promise<{data, error}>}
      */
     async createTemplate(templateData) {
+        const guard = requireAdmin('créer un modèle');
+        if (guard) return guard;
         try {
             const { data, error } = await supabase
                 .from('event_templates')
@@ -414,6 +429,8 @@ export const PlanningService = {
      * @returns {Promise<{success, error}>}
      */
     async deleteTemplate(id) {
+        const guard = requireAdmin('supprimer un modèle');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('event_templates')
@@ -430,6 +447,8 @@ export const PlanningService = {
     },
 
     async updateTemplate(id, templateData) {
+        const guard = requireAdmin('modifier un modèle');
+        if (guard) return guard;
         try {
             const { data, error } = await supabase
                 .from('event_templates')

@@ -15,6 +15,7 @@
 
 import { supabase } from '../../services/supabase.js';
 import { APP_CONFIG } from '../../core/constants.js';
+import { requireAdmin } from '../../services/auth-guard.js';
 
 export const DirectoryService = {
     /**
@@ -104,6 +105,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, error}>}
      */
     async updateUserStatus(userId, status) {
+        const guard = requireAdmin('modifier le statut d\'un utilisateur');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('profiles')
@@ -144,6 +147,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, error}>}
      */
     async updateUserRole(userId, isAdmin) {
+        const guard = requireAdmin('modifier le rôle d\'un utilisateur');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('profiles')
@@ -167,6 +172,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, error}>}
      */
     async updateUserProfile(userId, updates) {
+        const guard = requireAdmin('modifier le profil d\'un utilisateur');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('profiles')
@@ -189,6 +196,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, error}>}
      */
     async updateAdminNote(userId, note) {
+        const guard = requireAdmin('modifier une note admin');
+        if (guard) return guard;
         try {
             const { error } = await supabase
                 .from('profiles')
@@ -211,6 +220,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, error}>}
      */
     async deleteUserProfile(userId) {
+        const guard = requireAdmin('supprimer un utilisateur');
+        if (guard) return guard;
         try {
             // Supprime d'abord le justificatif du storage si existe
             await this.deleteProofFile(userId);
@@ -378,6 +389,8 @@ export const DirectoryService = {
      * @returns {Promise<{csv, error}>}
      */
     async exportUsersCSV(filter = 'all') {
+        const guard = requireAdmin('exporter les utilisateurs');
+        if (guard) return { csv: null, error: guard.error };
         try {
             // Récupère tous les utilisateurs (sans pagination)
             const { data: users, error } = await this.getUsers(1, 10000, '', filter);
@@ -445,6 +458,8 @@ export const DirectoryService = {
      * @returns {Promise<{success, newTotal, error}>}
      */
     async adjustUserHours(userId, adjustment) {
+        const guard = requireAdmin('ajuster les heures d\'un bénévole');
+        if (guard) return guard;
         try {
             // 1. Récupérer le total actuel
             const { data: profile, error: fetchError } = await supabase

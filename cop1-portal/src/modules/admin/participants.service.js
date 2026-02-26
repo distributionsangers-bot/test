@@ -14,6 +14,7 @@
  */
 
 import { supabase } from '../../services/supabase.js';
+import { requireAdmin } from '../../services/auth-guard.js';
 
 export const ParticipantsService = {
     /**
@@ -95,6 +96,8 @@ export const ParticipantsService = {
      * @returns {Promise<{data, error}>}
      */
     async updateAttendance(regId, isPresent) {
+        const guard = requireAdmin('modifier la présence');
+        if (guard) return guard;
         try {
             // Use RPC to handle hours calculation atomically
             const { data, error } = await supabase.rpc('toggle_attendance', {
@@ -118,6 +121,8 @@ export const ParticipantsService = {
      * @returns {Promise<{data, error}>}
      */
     async deleteRegistration(regId) {
+        const guard = requireAdmin('désinscrire un participant');
+        if (guard) return guard;
         try {
             const { data, error } = await supabase
                 .from('registrations')
@@ -144,6 +149,8 @@ export const ParticipantsService = {
      * @returns {Promise<{data, error, needsConfirmation}>}
      */
     async addParticipant(shiftId, userId, force = false) {
+        const guard = requireAdmin('ajouter un participant manuellement');
+        if (guard) return guard;
         try {
             // 1. Vérifie si déjà inscrit
             const { data: existing } = await supabase
@@ -349,6 +356,8 @@ export const ParticipantsService = {
      * @param {boolean} shouldCount - Force à TRUE ou FALSE
      */
     async forceHoursValidation(regId, shouldCount) {
+        const guard = requireAdmin('forcer la validation des heures');
+        if (guard) return guard;
         try {
             // 1. Update counts_for_hours
             const { data: reg, error } = await supabase

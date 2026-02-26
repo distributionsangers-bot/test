@@ -10,6 +10,7 @@ import { createIcons, icons } from 'lucide';
 import { CookieConsent } from './components/layout/cookie-consent.js';
 import { startInactivityMonitor, stopInactivityMonitor } from './services/inactivity.js';
 import { initBadges, cleanupBadges } from './services/notification-badge.service.js';
+import { isRouteAllowed } from './services/auth-guard.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
@@ -190,6 +191,13 @@ function renderAppLayout() {
 
     // On lance le routeur pour injecter la vue courante
     try {
+        // 🔒 Guard de route : vérifie les droits avant navigation
+        const currentPath = window.location.pathname;
+        if (!isRouteAllowed(currentPath)) {
+            console.warn(`⛔ Route "${currentPath}" bloquée : droits admin requis.`);
+            window.history.replaceState({}, '', '/dashboard');
+            showToast('Accès non autorisé', 'error');
+        }
         router.handleLocation();
     } catch (err) {
         console.error("Router Error:", err);
@@ -220,6 +228,12 @@ function attachGlobalListeners() {
         if (link) {
             e.preventDefault();
             const path = link.dataset.link;
+
+            // 🔒 Guard de route : vérifie les droits avant navigation
+            if (!isRouteAllowed(path)) {
+                showToast('Accès non autorisé', 'error');
+                return;
+            }
 
             // Mise à jour state view pour Sidebar
             const viewName = path.replace('/', '').split('/')[0];

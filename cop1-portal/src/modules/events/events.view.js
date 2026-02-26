@@ -310,8 +310,8 @@ function renderShiftCard(shift, userId, countsMap, event) {
         }
                         </div>
 
-                        <!-- Badge Réservé -->
-                        ${reservedTotal > 0 ? `
+                        <!-- Badge Réservé (masqué si créneau complet) -->
+                        ${reservedTotal > 0 && !isFull ? `
                             <div class="${reservedRemaining > 0
                 ? 'text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md'
                 : 'text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md'
@@ -492,16 +492,20 @@ function handleShiftUpdate(shiftData) {
     }
 
     // 3. Met à jour le texte des places réservées (Badge spécifique)
+    // Masquer le badge si le créneau est complet
     const reservedBadgeSpan = shiftEl.querySelector('[data-reserved-badge-text]');
     if (reservedBadgeSpan) {
-        if (reservedRemaining > 0) {
+        if (available === 0) {
+            // Créneau complet → masquer le badge réservé
+            reservedBadgeSpan.parentElement.style.display = 'none';
+        } else if (reservedRemaining > 0) {
+            reservedBadgeSpan.parentElement.style.display = '';
             reservedBadgeSpan.textContent = `🎓 ${reservedRemaining} réservées`;
-            // Assure le style correct
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg ml-1";
             reservedBadgeSpan.parentElement.title = `${reservedRemaining} places réservées restantes`;
         } else {
+            reservedBadgeSpan.parentElement.style.display = '';
             reservedBadgeSpan.textContent = `🎓 Complet`;
-            // Style gris
             reservedBadgeSpan.parentElement.className = "text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg ml-1";
             reservedBadgeSpan.parentElement.title = "Places réservées complètes";
         }

@@ -1,4 +1,5 @@
 import { supabase } from '../../services/supabase.js';
+import { requireAdmin } from '../../services/auth-guard.js';
 
 export const PolesService = {
     /**
@@ -125,6 +126,8 @@ export const PolesService = {
      * Supprime complètement un intérêt (Action Admin)
      */
     async removeCandidateInterest(userId, teamId) {
+        const guard = requireAdmin('retirer un intérêt candidat');
+        if (guard) throw new Error(guard.error.message);
         const { error, count } = await supabase
             .from('pole_interests')
             .delete({ count: 'exact' })
@@ -139,6 +142,8 @@ export const PolesService = {
      * Crée un nouveau pôle
      */
     async createTeam(poleData) {
+        const guard = requireAdmin('créer un pôle');
+        if (guard) throw new Error(guard.error.message);
         const { error } = await supabase
             .from('teams')
             .insert([poleData]);
@@ -149,6 +154,8 @@ export const PolesService = {
      * Met à jour un pôle
      */
     async updateTeam(id, poleData) {
+        const guard = requireAdmin('modifier un pôle');
+        if (guard) throw new Error(guard.error.message);
         const { error } = await supabase
             .from('teams')
             .update(poleData)
@@ -160,6 +167,8 @@ export const PolesService = {
      * Supprime un pôle
      */
     async deleteTeam(id) {
+        const guard = requireAdmin('supprimer un pôle');
+        if (guard) throw new Error(guard.error.message);
         // Nettoyage préalable des liens
         await supabase.from('pole_interests').delete().eq('team_id', id);
         // Les profiles.pole_id seront mis à NULL automatiquement si ON DELETE SET NULL, 
@@ -194,6 +203,8 @@ export const PolesService = {
      * Assigne un utilisateur comme responsable d'un pôle
      */
     async assignLeader(userId, poleId, roleTitle = 'Responsable') {
+        const guard = requireAdmin('assigner un responsable');
+        if (guard) throw new Error(guard.error.message);
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -208,6 +219,8 @@ export const PolesService = {
      * Retire un responsable de son pôle
      */
     async removeLeader(userId) {
+        const guard = requireAdmin('retirer un responsable');
+        if (guard) throw new Error(guard.error.message);
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -222,6 +235,8 @@ export const PolesService = {
      * Met à jour le titre du poste d'un responsable
      */
     async updateLeaderTitle(userId, newTitle) {
+        const guard = requireAdmin('modifier le titre d\'un responsable');
+        if (guard) throw new Error(guard.error.message);
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -254,6 +269,8 @@ export const PolesService = {
      * Échange l'ordre d'affichage de deux équipes
      */
     async swapDisplayOrder(idA, orderA, idB, orderB) {
+        const guard = requireAdmin('modifier l\'ordre d\'affichage');
+        if (guard) throw new Error(guard.error.message);
         const { error: e1 } = await supabase
             .from('teams')
             .update({ display_order: orderB })

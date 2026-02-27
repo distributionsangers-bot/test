@@ -284,6 +284,303 @@ body {
     border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
+/* =========================================
+   ADDITIONAL DARK MODE OVERRIDES
+   Covers modals, legal, chat, profile, events, admin
+   ========================================= */
+
+/* --- More text colors --- */
+.dark .text-slate-300 {
+    color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+    color: #64748b !important;
+}
+
+.dark .text-blue-800 {
+    color: #93c5fd !important;
+}
+
+.dark .text-emerald-900 {
+    color: #6ee7b7 !important;
+}
+
+.dark .text-orange-800 {
+    color: #fdba74 !important;
+}
+
+.dark .text-orange-800\/80 {
+    color: rgba(253, 186, 116, 0.8) !important;
+}
+
+.dark .text-green-600 {
+    color: #4ade80 !important;
+}
+
+/* --- Background accents for dark --- */
+.dark .bg-indigo-50 {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.dark .bg-indigo-50\/50 {
+    background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.dark .bg-indigo-100 {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark .bg-blue-200 {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.dark .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.dark .bg-amber-200 {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .bg-brand-100 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* --- Modal content area --- */
+.dark .bg-slate-50\/30 {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+}
+
+/* --- Border accents --- */
+.dark .border-brand-200 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .border-brand-200\/50 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .border-brand-100 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .border-indigo-100 {
+    border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.dark .border-emerald-100 {
+    border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.dark .border-orange-200 {
+    border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.dark .border-amber-200 {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.dark .border-blue-200 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .border-blue-300 {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* --- Shadow inner backgrounds (icon containers) --- */
+.dark .shadow-inner {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* --- Ring white (legal page icon) --- */
+.dark .ring-white\/5 {
+    --tw-ring-color: rgba(51, 65, 85, 0.3) !important;
+}
+
+/* --- Hover accent states --- */
+.dark .hover\:bg-red-100:hover {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark .hover\:bg-slate-100:hover {
+    background-color: #334155 !important;
+}
+
+.dark .hover\:bg-indigo-200:hover {
+    background-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .hover\:bg-amber-100:hover {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .hover\:bg-brand-50:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .hover\:bg-indigo-50:hover {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* --- Table / directory / participants --- */
+.dark .even\:bg-slate-50:nth-child(even) {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* --- Specific hover border states for inputs --- */
+.dark .hover\:border-slate-300:hover {
+    border-color: #475569 !important;
+}
+
+/* --- Chat specific --- */
+.dark .bg-brand-600\/10 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .bg-slate-200 {
+    background-color: #334155 !important;
+}
+
+/* --- Gradient separator lines --- */
+.dark .from-brand-200 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .from-purple-200 {
+    --tw-gradient-from: rgba(168, 85, 247, 0.3) !important;
+}
+
+.dark .from-blue-200 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .from-amber-200 {
+    --tw-gradient-from: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* --- Date input / special inputs --- */
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="time"] {
+    color-scheme: dark;
+}
+
+/* --- Dropdown/Popover items text --- */
+.dark .text-brand-900 {
+    color: #93c5fd !important;
+}
+
+.dark .text-indigo-900 {
+    color: #a5b4fc !important;
+}
+
+.dark .text-brand-700 {
+    color: #93c5fd !important;
+}
+
+.dark .text-indigo-700 {
+    color: #a5b4fc !important;
+}
+
+/* --- Amber accents (templates, save-as section) --- */
+.dark .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* --- Green accents in legal pages --- */
+.dark .bg-green-50 {
+    background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+/* --- Placeholder text in dark inputs --- */
+.dark .placeholder\:text-brand-300\/70::placeholder {
+    color: rgba(147, 197, 253, 0.5) !important;
+}
+
+.dark .placeholder\:text-slate-400::placeholder {
+    color: #64748b !important;
+}
+
+.dark .placeholder\:text-indigo-300::placeholder {
+    color: rgba(165, 180, 252, 0.5) !important;
+}
+
+/* --- Scrollbar for dark mode --- */
+.dark ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* --- Gradient from-emerald-50 (reset password icon) --- */
+.dark .from-emerald-50 {
+    --tw-gradient-from: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .to-white {
+    --tw-gradient-to: #1e293b !important;
+}
+
+.dark .from-teal-50 {
+    --tw-gradient-from: rgba(20, 184, 166, 0.15) !important;
+}
+
+.dark .to-teal-50 {
+    --tw-gradient-to: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* --- Border width + white (registration modal date badge) --- */
+.dark .border-white {
+    border-color: #1e293b !important;
+}
+
+.dark .border-emerald-100\/50 {
+    border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* --- QR display page --- */
+.dark .bg-gray-50 {
+    background-color: #0f172a !important;
+}
+
+.dark .bg-gray-100 {
+    background-color: #1e293b !important;
+}
+
+.dark .text-gray-800 {
+    color: #f1f5f9 !important;
+}
+
+.dark .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+.dark .text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+.dark .border-gray-200 {
+    border-color: #334155 !important;
+}
+
 /* Glass Effect for Header */
 .glass-header {
     background: rgba(255, 255, 255, 0.9);

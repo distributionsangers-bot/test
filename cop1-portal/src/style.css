@@ -770,10 +770,230 @@ body {
     border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
-/* --- Received message bubble (not me) - bg-white in dark --- */
 .dark .msg-bubble.bg-white {
     background-color: #1e293b !important;
     border-color: #334155 !important;
+}
+
+/* =========================================
+   PLANNING / ADMIN ACTION MENU (Bottom Sheet)
+   ========================================= */
+.dark #event-actions-menu>div {
+    background-color: #1e293b !important;
+}
+
+.dark #event-actions-menu .border-b.border-slate-100 {
+    border-color: #334155 !important;
+}
+
+.dark #event-actions-menu .bg-slate-200 {
+    background-color: #475569 !important;
+}
+
+.dark #event-actions-menu button {
+    color: #e2e8f0 !important;
+}
+
+.dark #event-actions-menu button:hover {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark #event-actions-menu .text-slate-700 {
+    color: #e2e8f0 !important;
+}
+
+.dark #event-actions-menu .bg-brand-100 {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.dark #event-actions-menu .bg-purple-100 {
+    background-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+.dark #event-actions-menu .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.25) !important;
+}
+
+.dark #event-actions-menu .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.dark #event-actions-menu .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark #event-actions-menu .h-px.bg-slate-100 {
+    background-color: #334155 !important;
+}
+
+.dark #event-actions-menu button:last-child:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Annuler button in action menu */
+.dark #event-actions-menu+div,
+.dark #event-actions-menu .bg-white.rounded-2xl+div {
+    background-color: #1e293b !important;
+}
+
+/* =========================================
+   SIDEBAR ICON BACKGROUNDS (Dark adapted)
+   ========================================= */
+.dark .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .bg-violet-50 {
+    background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+.dark .bg-pink-50 {
+    background-color: rgba(236, 72, 153, 0.15) !important;
+}
+
+.dark .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .bg-amber-50\/80 {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+/* Sidebar icon text colors for dark */
+.dark .text-violet-600 {
+    color: #a78bfa !important;
+}
+
+.dark .text-pink-600 {
+    color: #f472b6 !important;
+}
+
+.dark .text-amber-600 {
+    color: #fbbf24 !important;
+}
+
+.dark .text-teal-600 {
+    color: #2dd4bf !important;
+}
+
+.dark .text-emerald-600 {
+    color: #34d399 !important;
+}
+
+.dark .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+/* =========================================
+   PLANNING CARDS / TABS / PROGRESS
+   ========================================= */
+
+/* Planning toolbar (white card) */
+.dark #admin-planning-container .bg-white {
+    background-color: #1e293b !important;
+}
+
+.dark #admin-planning-container .border-slate-100 {
+    border-color: #334155 !important;
+}
+
+/* Tab active state - bg-slate-900 should stand out in dark */
+.dark .tab-btn.active {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.dark .tab-btn:not(.active) {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+    color: #94a3b8 !important;
+}
+
+.dark .tab-btn:not(.active):hover {
+    background-color: rgba(51, 65, 85, 0.8) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Event card SVG circle bg */
+.dark circle[stroke="#f1f5f9"] {
+    stroke: #334155 !important;
+}
+
+/* Progress bar track */
+.dark [data-progress-bar]+.bg-slate-200,
+.dark .h-2.bg-slate-200 {
+    background-color: #334155 !important;
+}
+
+/* Shift area bg */
+.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* Template card icon */
+.dark .from-purple-100 {
+    --tw-gradient-from: rgba(168, 85, 247, 0.2) !important;
+}
+
+.dark .to-indigo-100 {
+    --tw-gradient-to: rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark .text-purple-500 {
+    color: #c4b5fd !important;
+}
+
+/* =========================================
+   ACCENT BUTTON BACKGROUNDS (brand-50 etc.)
+   ========================================= */
+.dark .bg-brand-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .hover\:bg-brand-100:hover {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.dark .bg-purple-100 {
+    background-color: rgba(168, 85, 247, 0.2) !important;
+}
+
+.dark .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+.dark .bg-teal-50 {
+    background-color: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* =========================================
+   TEXT COLORS - ORANGE / AMBER for dark
+   ========================================= */
+.dark .text-orange-600 {
+    color: #fb923c !important;
+}
+
+.dark .bg-orange-100 {
+    background-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+.dark .bg-orange-50 {
+    background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+/* =========================================
+   MOBILE BOTTOM NAV - Active state improved
+   ========================================= */
+.dark #mobile-nav .text-brand-600 {
+    color: #93c5fd !important;
+}
+
+.dark .bg-brand-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Badge ring in dark */
+.dark .ring-white {
+    --tw-ring-color: #1e293b !important;
 }
 
 /* Glass Effect for Header */

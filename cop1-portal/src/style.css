@@ -22,6 +22,268 @@ body {
     color: #e2e8f0;
 }
 
+/* =========================================
+   GLOBAL DARK MODE OVERRIDES
+   Automatic dark variants for common Tailwind classes
+   used across all views (dashboard, events, profile, etc.)
+   ========================================= */
+
+/* --- Backgrounds --- */
+.dark .bg-white {
+    background-color: #1e293b !important;
+    /* slate-800 */
+}
+
+.dark .bg-slate-50 {
+    background-color: #0f172a !important;
+    /* slate-900 */
+}
+
+.dark .bg-slate-100 {
+    background-color: #1e293b !important;
+}
+
+/* --- Text Colors --- */
+.dark .text-slate-900 {
+    color: #f1f5f9 !important;
+    /* slate-100 */
+}
+
+.dark .text-slate-800 {
+    color: #f1f5f9 !important;
+    /* slate-100 */
+}
+
+.dark .text-slate-700 {
+    color: #e2e8f0 !important;
+    /* slate-200 */
+}
+
+.dark .text-slate-600 {
+    color: #cbd5e1 !important;
+    /* slate-300 */
+}
+
+.dark .text-slate-500 {
+    color: #94a3b8 !important;
+    /* slate-400 */
+}
+
+/* --- Borders --- */
+.dark .border-slate-100 {
+    border-color: #334155 !important;
+    /* slate-700 */
+}
+
+.dark .border-slate-200 {
+    border-color: #334155 !important;
+}
+
+.dark .border-slate-300 {
+    border-color: #475569 !important;
+    /* slate-600 */
+}
+
+/* --- Dividers --- */
+.dark .divide-slate-50>*+* {
+    border-color: #334155 !important;
+}
+
+.dark .divide-slate-100>*+* {
+    border-color: #334155 !important;
+}
+
+/* --- Form Inputs in dark mode --- */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+
+.dark input:focus:not([type="checkbox"]):not([type="radio"]) {
+    background-color: #1e293b !important;
+}
+
+.dark select {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+
+.dark textarea {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+
+/* --- Status badge backgrounds (keep readable) --- */
+.dark .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.dark .bg-orange-50 {
+    background-color: rgba(249, 115, 22, 0.15) !important;
+}
+
+.dark .bg-purple-50 {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+}
+
+.dark .bg-indigo-50 {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.dark .bg-brand-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* --- Hover states --- */
+.dark .hover\:bg-slate-50:hover {
+    background-color: #334155 !important;
+}
+
+.dark .hover\:bg-white:hover {
+    background-color: #1e293b !important;
+}
+
+.dark .hover\:bg-slate-200:hover {
+    background-color: #475569 !important;
+}
+
+/* --- Gradient overrides (from-slate-50 / to-slate-100 section headers) --- */
+.dark .from-slate-50 {
+    --tw-gradient-from: #1e293b !important;
+}
+
+.dark .to-slate-100 {
+    --tw-gradient-to: #334155 !important;
+}
+
+/* --- Background with opacity patterns --- */
+.dark .bg-white\/80 {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+.dark .bg-white\/90 {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+}
+
+.dark .bg-white\/50 {
+    background-color: rgba(30, 41, 59, 0.5) !important;
+}
+
+.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+.dark .bg-slate-50\/80 {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+.dark .bg-slate-100\/80 {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+/* --- Border with opacity patterns --- */
+.dark .border-white\/50 {
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark .border-slate-200\/50 {
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark .border-slate-100\/50 {
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* --- Shadow adjustments (deeper in dark) --- */
+.dark .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* --- Orange/mandatory checkbox section --- */
+.dark .bg-orange-50\/80 {
+    background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .border-orange-100 {
+    border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+.dark .text-orange-900 {
+    color: #fb923c !important;
+}
+
+.dark .text-orange-700 {
+    color: #fdba74 !important;
+}
+
+/* --- Blue info boxes --- */
+.dark .bg-blue-50\/50 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark .border-blue-100\/50 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* --- Urgency/red backgrounds --- */
+.dark .border-red-100 {
+    border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark .border-red-100\/60 {
+    border-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .divide-red-100\/40>*+* {
+    border-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.dark .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* --- Green success zone --- */
+.dark .bg-green-50\/50 {
+    background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.dark .bg-green-100 {
+    background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.dark .border-green-500 {
+    border-color: #22c55e !important;
+}
+
+/* --- Emerald --- */
+.dark .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* --- Brand 50 variant --- */
+.dark .border-brand-100\/50 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
 /* Glass Effect for Header */
 .glass-header {
     background: rgba(255, 255, 255, 0.9);

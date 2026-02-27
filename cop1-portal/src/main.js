@@ -11,6 +11,7 @@ import { CookieConsent } from './components/layout/cookie-consent.js';
 import { startInactivityMonitor, stopInactivityMonitor } from './services/inactivity.js';
 import { initBadges, cleanupBadges } from './services/notification-badge.service.js';
 import { isRouteAllowed } from './services/auth-guard.js';
+import { initTheme } from './services/theme.js';
 
 // Import Views
 import { renderLogin, initLogin } from './modules/auth/login.view.js';
@@ -51,6 +52,9 @@ const app = document.getElementById('app');
 
 async function init() {
     toggleLoader(true);
+
+    // Initialise le thème (dark mode)
+    initTheme();
 
     // CORRECTION ICI : On active les écouteurs globaux (navigation) dès le début
     attachGlobalListeners();
@@ -164,7 +168,7 @@ function renderAppLayout() {
     const currentView = view || (adminMode ? 'dashboard' : 'events');
 
     app.innerHTML = `
-        <div class="flex h-[100dvh] w-full bg-[#F8FAFC]">
+        <div class="flex h-[100dvh] w-full bg-[#F8FAFC] dark:bg-slate-900">
             ${renderSidebar(profile, currentView, adminMode)}
             <div class="flex-1 flex flex-col h-full relative min-w-0">
                 ${renderHeader(profile)}
@@ -203,12 +207,12 @@ function renderAppLayout() {
         console.error("Router Error:", err);
         mainSlot.innerHTML = `
             <div class="flex flex-col items-center justify-center h-full text-center p-6 animate-fade-in">
-                <div class="bg-red-50 text-red-500 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <div class="bg-red-50 dark:bg-red-900/30 text-red-500 w-16 h-16 rounded-full flex items-center justify-center mb-4">
                     <i data-lucide="alert-triangle" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-xl font-bold text-slate-900 mb-2">Une erreur est survenue</h2>
-                <p class="text-slate-500 mb-6 max-w-md">L'application a rencontré un problème inattendu. Veuillez rafraîchir la page.</p>
-                <button onclick="window.location.reload()" class="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition shadow-lg">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Une erreur est survenue</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-md">L'application a rencontré un problème inattendu. Veuillez rafraîchir la page.</p>
+                <button onclick="window.location.reload()" class="px-6 py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold rounded-xl hover:bg-black dark:hover:bg-slate-100 transition shadow-lg">
                     Rafraîchir
                 </button>
             </div>

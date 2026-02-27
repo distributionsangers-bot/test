@@ -21,7 +21,7 @@ export function renderHeader(profile) {
     const initial = firstName[0].toUpperCase();
 
     return `
-        <header class="md:hidden fixed top-0 left-0 right-0 w-full z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-sm" style="padding-top: env(safe-area-inset-top);">
+        <header class="md:hidden fixed top-0 left-0 right-0 w-full z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm" style="padding-top: env(safe-area-inset-top);">
             <!-- Navbar Content Container -->
             <div class="h-16 w-full flex items-center justify-between px-4">
                 <!-- Logo + Brand -->
@@ -30,8 +30,8 @@ export function renderHeader(profile) {
                         <img src="${LOGO_URL}" class="h-7 w-auto object-contain" alt="Logo">
                     </div>
                     <div class="flex items-baseline gap-0.5">
-                        <span class="font-extrabold text-lg text-slate-900">COP1</span>
-                        <span class="font-bold text-lg text-brand-600">Angers</span>
+                        <span class="font-extrabold text-lg text-slate-900 dark:text-white">COP1</span>
+                        <span class="font-bold text-lg text-brand-600 dark:text-brand-400">Angers</span>
                     </div>
                 </div>
                 

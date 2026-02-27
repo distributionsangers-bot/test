@@ -10,7 +10,7 @@ const { LOGO_URL } = APP_CONFIG;
 // ==========================================
 export function renderPending() {
     return `
-        <div class="min-h-[100dvh] w-full bg-slate-50 relative overflow-hidden flex flex-col items-center justify-center p-6">
+        <div class="min-h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden flex flex-col items-center justify-center p-6">
             
             <!-- Background Decorations -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -19,31 +19,31 @@ export function renderPending() {
             </div>
 
             <!-- Card -->
-            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 p-8 z-10 animate-slide-up text-center">
+            <div class="relative w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 dark:border-slate-700/50 p-8 z-10 animate-slide-up text-center">
                 
                 <!-- Icon -->
-                <div class="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-white">
+                <div class="w-24 h-24 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-white dark:ring-slate-800">
                     <div class="relative">
                         <i data-lucide="hourglass" class="w-10 h-10 text-amber-500 animate-pulse"></i>
                         <div class="absolute top-0 right-0 w-3 h-3 bg-amber-500 rounded-full animate-ping"></div>
                     </div>
                 </div>
 
-                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Inscription en cours</h1>
+                <h1 class="text-3xl font-black text-slate-800 dark:text-white mb-3 tracking-tight">Inscription en cours</h1>
                 
-                <p class="text-slate-500 font-medium leading-relaxed mb-8">
+                <p class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8">
                     Votre dossier est bien reçu ! Notre équipe examine actuellement votre profil ! 
                 </p>
 
                 <!-- Steps -->
-                <div class="bg-slate-50 rounded-2xl p-4 mb-8 text-left space-y-3 border border-slate-100/50">
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-4 mb-8 text-left space-y-3 border border-slate-100/50 dark:border-slate-600/50">
                     <div class="flex items-center gap-3 opacity-50">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
-                        <span class="text-sm font-bold text-slate-800">Compte créé</span>
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-200">Compte créé</span>
                     </div>
                     <div class="flex items-center gap-3 opacity-50">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
-                        <span class="text-sm font-bold text-slate-800">Justificatif envoyé</span>
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-200">Justificatif envoyé</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center animate-pulse">
@@ -58,7 +58,7 @@ export function renderPending() {
                         <i data-lucide="refresh-cw" class="w-5 h-5"></i>
                         Actualiser la page
                     </button>
-                    <button data-action="logout" class="w-full py-4 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-[0.98]">
+                    <button data-action="logout" class="w-full py-4 bg-white dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-200 transition-all active:scale-[0.98]">
                         Me déconnecter
                     </button>
                     <div class="text-[10px] text-slate-400 font-medium">
@@ -91,7 +91,7 @@ export function initPending() {
 // ==========================================
 export function renderRejected() {
     return `
-        <div class="min-h-[100dvh] w-full bg-slate-50 relative overflow-hidden flex flex-col items-center justify-center p-6">
+        <div class="min-h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden flex flex-col items-center justify-center p-6">
             
             <!-- Background Decorations -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -100,16 +100,16 @@ export function renderRejected() {
             </div>
 
             <!-- Card -->
-            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 p-8 z-10 animate-slide-up text-center">
+            <div class="relative w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 dark:border-slate-700/50 p-8 z-10 animate-slide-up text-center">
                 
                 <!-- Icon -->
-                <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-white">
+                <div class="w-24 h-24 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-white dark:ring-slate-800">
                     <i data-lucide="shield-alert" class="w-10 h-10 text-red-500"></i>
                 </div>
 
-                <h1 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Inscription non validée</h1>
+                <h1 class="text-3xl font-black text-slate-800 dark:text-white mb-3 tracking-tight">Inscription non validée</h1>
                 
-                <p class="text-slate-500 font-medium leading-relaxed mb-8">
+                <p class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8">
                     Nous sommes désolés, mais votre inscription n'a pas pu être validée pour le moment. Cela peut être dû à un justificatif non conforme ou à des critères d'éligibilité.
                 </p>
 

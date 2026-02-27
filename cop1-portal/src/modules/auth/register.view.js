@@ -9,7 +9,7 @@ const { LOGO_URL, BUCKET_PROOF } = APP_CONFIG;
 
 export function renderRegister() {
     return `
-        <div class="min-h-[100dvh] w-full bg-slate-50 relative overflow-hidden flex flex-col items-center justify-center p-4">
+        <div class="min-h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden flex flex-col items-center justify-center p-4">
             <!-- Background Decorations -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div class="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] bg-blue-400/20 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -17,42 +17,42 @@ export function renderRegister() {
             </div>
 
             <!-- Card -->
-            <div class="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div class="relative w-full max-w-md bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-slate-700/50 p-6 z-10 animate-fade-in max-h-[90vh] overflow-y-auto no-scrollbar">
                 
                 <!-- Header -->
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center h-24 px-6 rounded-2xl bg-gradient-to-br from-brand-50 to-white shadow-sm mb-4 border border-brand-100/50">
+                    <div class="inline-flex items-center justify-center h-24 px-6 rounded-2xl bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/30 dark:to-slate-800 shadow-sm mb-4 border border-brand-100/50 dark:border-brand-800/50">
                         <img src="${LOGO_URL}" class="h-16 w-auto object-contain" alt="Logo">
                     </div>
-                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Inscription</h1>
-                    <p class="text-slate-500 font-medium">Rejoignez la communauté COP1</p>
+                    <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">Inscription</h1>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium">Rejoignez la communauté COP1</p>
                 </div>
 
                 <!-- Segmented Control -->
-                <div class="bg-slate-100/80 p-1.5 rounded-2xl mb-8 flex relative">
-                    <button data-link="/login" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 transition-all duration-300">Connexion</button>
-                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white text-brand-600 shadow-sm transition-all duration-300 cursor-default">Inscription</button>
+                <div class="bg-slate-100/80 dark:bg-slate-700/50 p-1.5 rounded-2xl mb-8 flex relative">
+                    <button data-link="/login" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-600/50 transition-all duration-300">Connexion</button>
+                    <button class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-600 text-brand-600 dark:text-brand-400 shadow-sm transition-all duration-300 cursor-default">Inscription</button>
                 </div>
 
                 <!-- Form -->
                 <form id="form-register" class="space-y-4 pb-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Prénom</label>
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Prénom</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="user" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-fn" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Prénom">
+                                <input id="reg-fn" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Prénom">
                             </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nom</label>
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Nom</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="user" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
+                                <input id="reg-ln" type="text" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom">
                             </div>
                         </div>
                     </div>
@@ -63,7 +63,7 @@ export function renderRegister() {
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="mail" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-email" type="email" autocomplete="username" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="exemple@email.com">
+                            <input id="reg-email" type="email" autocomplete="username" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="exemple@email.com">
                         </div>
                         <!-- Email Validation Feedback -->
                         <div id="email-feedback" class="hidden mt-2 p-2.5 rounded-xl border text-xs font-medium animate-fade-in"></div>
@@ -75,7 +75,7 @@ export function renderRegister() {
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="mail-check" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-email-confirm" type="email" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Confirmez votre email">
+                            <input id="reg-email-confirm" type="email" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Confirmez votre email">
                         </div>
                     </div>
 
@@ -85,25 +85,25 @@ export function renderRegister() {
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="phone" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-phone" type="tel" inputmode="tel" pattern="[0-9+\s\-]*" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="+33 6 12 34 56 78">
+                            <input id="reg-phone" type="tel" inputmode="tel" pattern="[0-9+\s\-]*" required class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="+33 6 12 34 56 78">
                         </div>
                     </div>
 
                     <div class="space-y-4">
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Mot de passe</label>
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Mot de passe</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="lock" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                                <input id="reg-pass" type="password" autocomplete="new-password" required class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
                                 <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
                                     <i data-lucide="eye" class="w-5 h-5"></i>
                                 </button>
                             </div>
                             
                             <!-- Password Strength Indicator -->
-                            <div id="password-strength-container" class="hidden mt-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 space-y-2.5 animate-fade-in">
+                            <div id="password-strength-container" class="hidden mt-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600 space-y-2.5 animate-fade-in">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Force du mot de passe</span>
                                     <span id="password-strength-label" class="text-[10px] font-bold uppercase tracking-wide text-slate-400">—</span>
@@ -132,12 +132,12 @@ export function renderRegister() {
                             </div>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Confirmer</label>
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Confirmer</label>
                             <div class="relative group">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                     <i data-lucide="lock" class="w-5 h-5"></i>
                                 </div>
-                                <input id="reg-pass-confirm" type="password" autocomplete="new-password" required class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
+                                <input id="reg-pass-confirm" type="password" autocomplete="new-password" required class="w-full pl-12 pr-12 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="••••••••">
                                 <button type="button" id="toggle-reg-password-confirm" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 transition-colors" tabindex="-1">
                                     <i data-lucide="eye" class="w-5 h-5"></i>
                                 </button>
@@ -161,7 +161,7 @@ export function renderRegister() {
                             <i id="school-chevron" data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-transform duration-300 pointer-events-none"></i>
 
                             <!-- Dropdown List -->
-                            <div id="school-dropdown" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-50">
+                            <div id="school-dropdown" class="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden opacity-0 translate-y-2 transition-all duration-200 scrollbar-hide z-50">
                                 <div id="school-list" class="p-1.5 space-y-0.5">
                                     <!-- Options injected via JS -->
                                 </div>
@@ -176,14 +176,14 @@ export function renderRegister() {
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
                                 <i data-lucide="building-2" class="w-5 h-5"></i>
                             </div>
-                            <input id="reg-school-other" type="text" class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl font-semibold text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom de l'établissement">
+                            <input id="reg-school-other" type="text" class="w-full pl-12 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-300" placeholder="Nom de l'établissement">
                         </div>
                     </div>
 
                     <!-- 2. Justificatif (Proof) -->
                     <div class="space-y-2 pt-2">
                         <div class="ml-1 mb-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Justificatif</label>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Justificatif</label>
                             <p class="text-[10px] text-slate-400 leading-tight mt-1">
                                 Acceptés : Carte Étudiant, Certificat de Scolarité, Carte ISIC, Carte d'identité, Certificat d'admission.
                             </p>
@@ -225,9 +225,9 @@ export function renderRegister() {
                     </div>
                     
                     <!-- 3. Permit Checkbox -->
-                    <label class="flex items-center gap-3 p-3 bg-white/50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white transition-all shadow-sm group">
+                    <label class="flex items-center gap-3 p-3 bg-white/50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-slate-700/50 transition-all shadow-sm group">
                         <input type="checkbox" id="reg-permit" class="w-5 h-5 text-brand-600 rounded border-slate-300 focus:ring-brand-500 transition-all">
-                        <span class="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">J'ai le Permis B 🚗</span>
+                        <span class="text-sm font-semibold text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-white transition-colors">J'ai le Permis B 🚗</span>
                     </label>
 
                     <!-- 4. Mandatory Hours Checkbox -->
@@ -241,7 +241,7 @@ export function renderRegister() {
                     </label>
 
                     <!-- 5. CGU & Privacy Consent Checkbox (New) -->
-                    <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white transition-all shadow-sm group">
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-slate-700/50 transition-all shadow-sm group">
                         <input type="checkbox" id="reg-cgu" required class="w-5 h-5 text-brand-600 rounded border-slate-300 focus:ring-brand-500 transition-all mt-0.5">
                         <div class="text-xs text-slate-600 leading-snug">
                             Je certifie avoir lu et accepté les <button type="button" data-link="/legal/cgu" class="text-brand-600 font-bold hover:underline">CGU</button> ainsi que la <button type="button" data-link="/legal/privacy" class="text-brand-600 font-bold hover:underline">Politique de Confidentialité</button>.

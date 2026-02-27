@@ -40,7 +40,7 @@ export function showToast(msg, type = 'success') {
     const s = styles[type] || styles.success;
 
     const el = document.createElement('div');
-    el.className = `toast ${s.bg} ${s.text} border-l-4 ${s.border} p-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-y-[-20px] opacity-0 mb-3 min-w-[300px] pointer-events-auto`;
+    el.className = `toast ${s.bg} dark:bg-slate-800 ${s.text} dark:text-slate-200 border-l-4 ${s.border} p-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-y-[-20px] opacity-0 mb-3 min-w-[300px] pointer-events-auto`;
 
     el.innerHTML = `
         <i data-lucide="${s.icon}" class="w-6 h-6 ${s.iconColor} flex-shrink-0"></i>
@@ -202,7 +202,7 @@ export function showConfirm(message, onConfirm, options = {}) {
     el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in';
 
     el.innerHTML = `
-        <div class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
+        <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
             <!-- Header -->
             <div class="bg-gradient-to-r ${headerGradient} p-5 relative">
                 <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
@@ -215,13 +215,13 @@ export function showConfirm(message, onConfirm, options = {}) {
             </div>
             
             <!-- Content -->
-            <div class="p-5 bg-slate-50">
-                <p class="text-slate-600 text-sm font-medium">${message}</p>
+            <div class="p-5 bg-slate-50 dark:bg-slate-700/50">
+                <p class="text-slate-600 dark:text-slate-300 text-sm font-medium">${message}</p>
             </div>
             
             <!-- Footer -->
-            <div class="flex gap-3 p-4 bg-white border-t border-slate-100">
-                <button id="confirm-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-sm transition">
+            <div class="flex gap-3 p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                <button id="confirm-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl font-bold text-sm transition">
                     ${cancelText}
                 </button>
                 <button id="confirm-ok-btn" class="flex-1 px-4 py-3 text-white ${confirmBtnClass} rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
@@ -284,7 +284,7 @@ export function showPrompt(message, onConfirm, options = {}) {
     el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in';
 
     el.innerHTML = `
-        <div class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
+        <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden animate-scale-in">
             <!-- Header -->
             <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 relative">
                 <div class="absolute inset-0 bg-grid-white/5 bg-[length:20px_20px] pointer-events-none"></div>
@@ -297,16 +297,16 @@ export function showPrompt(message, onConfirm, options = {}) {
             </div>
             
             <!-- Content -->
-            <div class="p-5 bg-slate-50 space-y-4">
-                <p class="text-slate-600 text-sm font-medium">${message}</p>
+            <div class="p-5 bg-slate-50 dark:bg-slate-700/50 space-y-4">
+                <p class="text-slate-600 dark:text-slate-300 text-sm font-medium">${message}</p>
                 <input type="${inputType}" id="prompt-input" value="${escapeHtml(defaultValue)}" 
-                    class="w-full p-4 bg-white rounded-2xl border-2 border-slate-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none font-semibold text-slate-900 transition-all" 
+                    class="w-full p-4 bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-100 dark:border-slate-600 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 outline-none font-semibold text-slate-900 dark:text-white transition-all" 
                     placeholder="${placeholder}">
             </div>
             
             <!-- Footer -->
-            <div class="flex gap-3 p-4 bg-white border-t border-slate-100">
-                <button id="prompt-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-sm transition">
+            <div class="flex gap-3 p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                <button id="prompt-cancel-btn" class="flex-1 px-4 py-3 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl font-bold text-sm transition">
                     ${cancelText}
                 </button>
                 <button id="prompt-ok-btn" class="flex-1 px-4 py-3 text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2">

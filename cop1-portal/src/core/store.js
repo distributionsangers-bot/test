@@ -293,6 +293,7 @@ const initialState = {
     // ============================================================
     // ÉTAT UI
     // ============================================================
+    theme: 'system',         // Thème : 'light', 'dark', ou 'system'
     dashboard: {
         totalVolunteers: 0,
         totalHours: 0,
@@ -338,6 +339,12 @@ export function restorePersistedState() {
             store.state.view = lastView;
         }
 
+        // Restaure le thème
+        const savedTheme = localStorage.getItem('cop1_theme');
+        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+            store.state.theme = savedTheme;
+        }
+
     } catch (error) {
         console.error('❌ Erreur lors de la restauration de l\'état persisté:', error);
     }
@@ -358,6 +365,11 @@ export function setupAutoPersist() {
         if (value && value !== 'login' && value !== 'register') {
             localStorage.setItem('cop1_last_view', value);
         }
+    });
+
+    // Auto-persist du thème
+    store.subscribe('theme', (value) => {
+        localStorage.setItem('cop1_theme', value);
     });
 }
 

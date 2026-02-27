@@ -12,7 +12,7 @@ export const CookieConsent = {
 
         const b = document.createElement('div');
         b.id = 'cookie-banner';
-        b.className = 'fixed bottom-0 w-full bg-white p-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[100] animate-slide-up flex flex-col md:flex-row gap-4 items-center justify-between';
+        b.className = 'fixed bottom-0 w-full bg-white dark:bg-slate-800 p-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[100] animate-slide-up flex flex-col md:flex-row gap-4 items-center justify-between';
 
         b.innerHTML = `
             <div class="flex items-center gap-3">

@@ -15,6 +15,7 @@ import { router } from '../../core/router.js';
 import { createIcons, icons } from 'lucide';
 import { supabase } from '../../services/supabase.js';
 import { showConfirm, showToast, escapeHtml } from '../../services/utils.js';
+import { getTheme, setTheme } from '../../services/theme.js';
 
 const MOBILE_NAV_ITEMS = {
     admin: [
@@ -53,7 +54,7 @@ export function renderMobileNav(profile, currentView, adminMode) {
     return `
         <nav 
             id="mobile-nav" 
-            class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/50 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
+            class="md:hidden fixed bottom-0 left-0 right-0 w-full bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.3)]"
             role="navigation"
             style="padding-bottom: max(env(safe-area-inset-bottom), 8px);"
         >
@@ -100,7 +101,7 @@ function renderNavItem(item, isActive, isMenu) {
             <!-- Animated Pill Indicator -->
             <div class="active-pill absolute top-0 w-10 h-1 bg-brand-600 rounded-full transition-all duration-300 ease-out origin-center ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}"></div>
             
-            <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50' : 'bg-transparent'}">
+            <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50 dark:bg-brand-900/30' : 'bg-transparent'}">
                 <i data-lucide="${item.icon}" class="w-6 h-6 transition-all duration-200 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}"></i>
                 ${item.badgeType ? `<span id="mobile-badge-${item.badgeType}" class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-0.5 leading-none"></span>` : ''}
             </div>
@@ -196,25 +197,27 @@ function openMobileMenu() {
         if (e.target === modal) closeMobileMenu();
     });
 
+    const currentTheme = getTheme();
+
     modal.innerHTML = `
-        <div class="bg-white rounded-t-[2rem] shadow-2xl animate-slide-up" style="max-height: 85vh; overflow-y: auto; padding-bottom: max(env(safe-area-inset-bottom), 16px);">
+        <div class="bg-white dark:bg-slate-800 rounded-t-[2rem] shadow-2xl animate-slide-up" style="max-height: 85vh; overflow-y: auto; padding-bottom: max(env(safe-area-inset-bottom), 16px);">
             <!-- Handle Bar -->
             <div class="flex justify-center pt-3 pb-1">
-                <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+                <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full"></div>
             </div>
             
             <!-- User Card -->
             <div class="px-5 py-4">
-                <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-50 via-white to-slate-50 border border-slate-100">
+                <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-700/50 dark:via-slate-800 dark:to-slate-700/50 border border-slate-100 dark:border-slate-700">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-900 to-brand-700 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-800/30">
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="font-bold text-slate-900 text-lg truncate">${escapeHtml(firstName)} ${escapeHtml(lastName)}</div>
+                        <div class="font-bold text-slate-900 dark:text-white text-lg truncate">${escapeHtml(firstName)} ${escapeHtml(lastName)}</div>
                         <div class="text-sm text-slate-400 truncate">${escapeHtml(email)}</div>
                     </div>
                     ${profile?.is_admin ? `
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400'}">
                             ${isAdmin ? 'Admin' : 'Volontaire'}
                         </span>
                     ` : ''}
@@ -224,62 +227,84 @@ function openMobileMenu() {
             <!-- Menu Grid -->
             <div class="px-5 pb-4">
                 <div class="grid grid-cols-3 gap-3">
-                    <button data-menu-action="navigate" data-menu-path="/profile" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                    <button data-menu-action="navigate" data-menu-path="/profile" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </div>
-                        <span class="text-xs font-semibold text-slate-700">Profil</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Profil</span>
                     </button>
                     
-                    <button data-menu-action="navigate" data-menu-path="/poles" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                    <button data-menu-action="navigate" data-menu-path="/poles" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
                         <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25">
                             <i data-lucide="network" class="w-5 h-5"></i>
-                            <span id="mobile-badge-poles" class="hidden absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-0.5 leading-none"></span>
+                            <span id="mobile-badge-poles" class="hidden absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white dark:ring-slate-800 flex items-center justify-center px-0.5 leading-none"></span>
                         </div>
-                        <span class="text-xs font-semibold text-slate-700">Pôles</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Pôles</span>
                     </button>
                     
                     ${isAdmin ? `
-                        <button data-menu-action="navigate" data-menu-path="/admin_users" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                        <button data-menu-action="navigate" data-menu-path="/admin_users" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/25">
                                 <i data-lucide="users" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-xs font-semibold text-slate-700">Annuaire</span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Annuaire</span>
                         </button>
                     ` : `
-                        <button data-menu-action="navigate" data-menu-path="/events" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition-all">
+                        <button data-menu-action="navigate" data-menu-path="/events" class="menu-card flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
                                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-xs font-semibold text-slate-700">Missions</span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Missions</span>
                         </button>
                     `}
+                </div>
+            </div>
+
+            <!-- Apparence (Theme Toggle) -->
+            <div class="px-5 pb-4">
+                <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-1">Apparence</div>
+                <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-700/50">
+                    <button data-menu-action="set-theme" data-theme="light" aria-label="Thème clair"
+                        class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 ${currentTheme === 'light' ? 'bg-white dark:bg-slate-600 text-amber-600 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <i data-lucide="sun" class="w-4 h-4"></i>
+                        <span>Clair</span>
+                    </button>
+                    <button data-menu-action="set-theme" data-theme="dark" aria-label="Thème sombre"
+                        class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 ${currentTheme === 'dark' ? 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <i data-lucide="moon" class="w-4 h-4"></i>
+                        <span>Sombre</span>
+                    </button>
+                    <button data-menu-action="set-theme" data-theme="system" aria-label="Thème système"
+                        class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 ${currentTheme === 'system' ? 'bg-white dark:bg-slate-600 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">
+                        <i data-lucide="monitor" class="w-4 h-4"></i>
+                        <span>Auto</span>
+                    </button>
                 </div>
             </div>
             
             <!-- Quick Actions -->
             <div class="px-5 pb-4 space-y-2">
                 ${profile?.is_admin ? `
-                    <button data-menu-action="toggle-admin" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r ${isAdmin ? 'from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100' : 'from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100'} transition-all active:scale-[0.98]">
+                    <button data-menu-action="toggle-admin" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r ${isAdmin ? 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-900/30 dark:hover:to-teal-900/30' : 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30'} transition-all active:scale-[0.98]">
                         <div class="w-11 h-11 rounded-xl ${isAdmin ? 'bg-emerald-500' : 'bg-amber-500'} flex items-center justify-center text-white shadow-lg">
                             <i data-lucide="${isAdmin ? 'user' : 'shield'}" class="w-5 h-5"></i>
                         </div>
                         <div class="flex-1 text-left">
-                            <div class="font-bold ${isAdmin ? 'text-emerald-700' : 'text-amber-700'}">${isAdmin ? 'Passer en Vue Bénévole' : 'Passer en Mode Admin'}</div>
-                            <div class="text-xs ${isAdmin ? 'text-emerald-500' : 'text-amber-500'}">Changer de vue</div>
+                            <div class="font-bold ${isAdmin ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">${isAdmin ? 'Passer en Vue Bénévole' : 'Passer en Mode Admin'}</div>
+                            <div class="text-xs ${isAdmin ? 'text-emerald-500 dark:text-emerald-500/70' : 'text-amber-500 dark:text-amber-500/70'}">Changer de vue</div>
                         </div>
                         <i data-lucide="arrow-right" class="w-5 h-5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}"></i>
                     </button>
                 ` : ''}
                 
                 <!-- Déconnexion -->
-                <button data-menu-action="logout" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 transition-all active:scale-[0.98]">
+                <button data-menu-action="logout" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30 transition-all active:scale-[0.98]">
                     <div class="w-11 h-11 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/25">
                         <i data-lucide="log-out" class="w-5 h-5"></i>
                     </div>
                     <div class="flex-1 text-left">
-                        <div class="font-bold text-red-700">Se déconnecter</div>
-                        <div class="text-xs text-red-400">Quitter l'application</div>
+                        <div class="font-bold text-red-700 dark:text-red-400">Se déconnecter</div>
+                        <div class="text-xs text-red-400 dark:text-red-500/70">Quitter l'application</div>
                     </div>
                     <i data-lucide="chevron-right" class="w-5 h-5 text-red-300"></i>
                 </button>
@@ -287,7 +312,7 @@ function openMobileMenu() {
             
             <!-- Close Button -->
             <div class="px-5 pb-2">
-                <button data-menu-action="close" class="w-full py-3.5 bg-slate-100 font-bold text-slate-500 rounded-2xl hover:bg-slate-200 active:scale-[0.98] transition-all text-sm">
+                <button data-menu-action="close" class="w-full py-3.5 bg-slate-100 dark:bg-slate-700 font-bold text-slate-500 dark:text-slate-300 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-[0.98] transition-all text-sm">
                     Fermer
                 </button>
             </div>
@@ -325,6 +350,15 @@ function attachMenuEvents(modal) {
                 await handleLogout();
                 break;
 
+            case 'set-theme': {
+                const theme = btn.dataset.theme;
+                setTheme(theme);
+                store.state.theme = theme;
+                // Update button visuals in the modal
+                updateMobileThemeButtons(modal, theme);
+                break;
+            }
+
             case 'close':
                 closeMobileMenu();
                 break;
@@ -332,11 +366,33 @@ function attachMenuEvents(modal) {
     });
 }
 
+/**
+ * Met à jour visuellement les boutons de thème dans le menu mobile
+ */
+function updateMobileThemeButtons(modal, activeTheme) {
+    const baseClass = 'text-slate-500 dark:text-slate-400';
+    const activeClasses = {
+        light: 'bg-white dark:bg-slate-600 text-amber-600 shadow-sm',
+        dark: 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm',
+        system: 'bg-white dark:bg-slate-600 text-brand-600 dark:text-brand-400 shadow-sm'
+    };
+
+    modal.querySelectorAll('[data-menu-action="set-theme"]').forEach(btn => {
+        const theme = btn.dataset.theme;
+        // Reset classes
+        btn.className = btn.className.replace(/bg-white|dark:bg-slate-600|text-amber-600|text-indigo-600|dark:text-indigo-400|text-brand-600|dark:text-brand-400|shadow-sm|text-slate-500|dark:text-slate-400/g, '').trim();
+        // Apply correct state
+        const classes = theme === activeTheme ? activeClasses[theme] : baseClass;
+        classes.split(' ').forEach(c => btn.classList.add(c));
+    });
+}
+
 function closeMobileMenu() {
     const modal = document.getElementById('mobile-menu-modal');
     if (modal) {
         modal.style.opacity = '0';
-        modal.querySelector('.bg-white')?.classList.add('translate-y-full');
+        const sheet = modal.querySelector('div > div:first-child')?.parentElement;
+        if (sheet) sheet.classList.add('translate-y-full');
         setTimeout(() => modal.remove(), 200);
     }
 }

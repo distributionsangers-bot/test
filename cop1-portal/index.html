@@ -14,6 +14,17 @@
     <title>COP1 Angers - Espace Bénévoles</title>
     <link rel="icon" type="image/png" href="/logo.png">
 
+    <!-- Anti-flash : applique le thème AVANT le rendu -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('cop1_theme') || 'system';
+                var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (dark) document.documentElement.classList.add('dark');
+            } catch (e) { }
+        })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +43,8 @@
     <!-- Icons are handled via Lucide JS import in main.js -->
 </head>
 
-<body class="text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-900 bg-[#F8FAFC]">
+<body
+    class="text-slate-800 dark:text-slate-100 antialiased selection:bg-brand-100 selection:text-brand-900 bg-[#F8FAFC] dark:bg-slate-900">
 
     <!-- Skip Link for Keyboard Users -->
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
@@ -49,8 +61,10 @@
 
     <!-- Global Loader -->
     <div id="global-loader"
-        class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+        class="fixed inset-0 bg-white dark:bg-slate-900 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div
+            class="w-16 h-16 border-4 border-brand-100 dark:border-brand-900 border-t-brand-600 rounded-full animate-spin">
+        </div>
     </div>
 
 

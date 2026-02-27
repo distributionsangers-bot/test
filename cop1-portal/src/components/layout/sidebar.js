@@ -15,6 +15,7 @@ import { APP_CONFIG } from '../../core/constants.js';
 import { AuthService } from '../../services/auth.js';
 import { store, storeActions } from '../../core/store.js';
 import { showConfirm, showToast, formatIdentity } from '../../services/utils.js';
+import { getTheme, setTheme } from '../../services/theme.js';
 
 /**
  * Configuration des menus de navigation
@@ -58,11 +59,11 @@ export function renderSidebar(profile, currentView, adminMode) {
 
         const activeClass = isActive
             ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-brand-500/25`
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
+            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white';
 
         const iconBgClass = isActive
             ? 'bg-white/20'
-            : (item.iconBgLight || 'bg-slate-100') + ' group-hover:bg-white group-hover:shadow-sm';
+            : (item.iconBgLight || 'bg-slate-100') + ' dark:bg-slate-700 group-hover:bg-white dark:group-hover:bg-slate-600 group-hover:shadow-sm';
 
         const iconTextClass = isActive
             ? 'text-white'
@@ -92,12 +93,12 @@ export function renderSidebar(profile, currentView, adminMode) {
                 data-action="toggle-admin"
                 aria-label="${adminMode ? 'Passer en vue bénévole' : 'Passer en vue responsable'}"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${adminMode
-            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+            : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
         }"
             >
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg ${adminMode ? 'bg-amber-100' : 'bg-emerald-100'} flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg ${adminMode ? 'bg-amber-100 dark:bg-amber-800/50' : 'bg-emerald-100 dark:bg-emerald-800/50'} flex items-center justify-center">
                         <i data-lucide="${adminMode ? 'user' : 'shield'}" class="w-4 h-4"></i>
                     </div>
                     <span>${adminMode ? 'Vue Bénévole' : 'Vue Admin'}</span>
@@ -107,30 +108,54 @@ export function renderSidebar(profile, currentView, adminMode) {
         </div>
     ` : '';
 
+    // Theme toggle section
+    const currentTheme = getTheme();
+    const themeToggleHtml = `
+        <div class="px-4 py-2">
+            <div class="flex items-center gap-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-700/50">
+                <button data-action="set-theme" data-theme="light" aria-label="Thème clair"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${currentTheme === 'light' ? 'bg-white dark:bg-slate-600 text-amber-600 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}">
+                    <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+                    <span>Clair</span>
+                </button>
+                <button data-action="set-theme" data-theme="dark" aria-label="Thème sombre"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${currentTheme === 'dark' ? 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}">
+                    <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+                    <span>Sombre</span>
+                </button>
+                <button data-action="set-theme" data-theme="system" aria-label="Thème système"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200 ${currentTheme === 'system' ? 'bg-white dark:bg-slate-600 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}">
+                    <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+                    <span>Auto</span>
+                </button>
+            </div>
+        </div>
+    `;
+
     return `
-        <aside class="hidden md:flex w-72 flex-col bg-white/80 backdrop-blur-xl border-r border-slate-200/50 z-50 flex-shrink-0 h-full shadow-xl shadow-slate-200/50">
+        <aside class="hidden md:flex w-72 flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 z-50 flex-shrink-0 h-full shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50">
             <!-- Header avec Logo -->
-            <div class="h-20 flex items-center gap-3 px-6 flex-shrink-0 border-b border-slate-100/50">
+            <div class="h-20 flex items-center gap-3 px-6 flex-shrink-0 border-b border-slate-100/50 dark:border-slate-700/50">
                 <div class="h-10 flex items-center justify-center">
                     <img src="${LOGO_URL}" class="h-8 w-auto object-contain" alt="Logo COP1">
                 </div>
                 <div>
-                    <span class="font-extrabold text-xl text-slate-900">COP1</span>
-                    <span class="font-bold text-xl text-brand-600"> Angers</span>
+                    <span class="font-extrabold text-xl text-slate-900 dark:text-white">COP1</span>
+                    <span class="font-bold text-xl text-brand-600 dark:text-brand-400"> Angers</span>
                 </div>
             </div>
             
             <!--User Card-->
-            <div class="px-4 py-4 border-b border-slate-100/50">
-                <div class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/50">
+            <div class="px-4 py-4 border-b border-slate-100/50 dark:border-slate-700/50">
+                <div class="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-700/50 dark:to-slate-700/30">
                     <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brand-500/25">
                         ${initial}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="font-bold text-slate-900 text-sm truncate">${formatIdentity(firstName, lastName)}</div>
+                        <div class="font-bold text-slate-900 dark:text-white text-sm truncate">${formatIdentity(firstName, lastName)}</div>
                         <div class="text-xs text-slate-400 truncate">${email}</div>
                     </div>
-                    ${isEffectiveAdmin ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-lg">Admin</span>' : ''}
+                    ${isEffectiveAdmin ? '<span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 px-2 py-1 rounded-lg">Admin</span>' : ''}
                 </div>
             </div>
             
@@ -146,15 +171,18 @@ export function renderSidebar(profile, currentView, adminMode) {
             
             <!--Admin Toggle-->
             ${adminToggleHtml}
+
+            <!-- Theme Toggle -->
+            ${themeToggleHtml}
             
             <!--Footer avec Déconnexion-->
-            <div class="p-4 flex-shrink-0 border-t border-slate-100/50">
+            <div class="p-4 flex-shrink-0 border-t border-slate-100/50 dark:border-slate-700/50">
             <button
                 data-action="logout"
                 aria-label="Se déconnecter"
-                class="group flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 w-full p-3 rounded-xl transition-all duration-200"
+                class="group flex items-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 w-full p-3 rounded-xl transition-all duration-200"
             >
-                <div class="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                <div class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 flex items-center justify-center transition-colors">
                     <i data-lucide="log-out" class="w-4 h-4 group-hover:text-red-500 transition-colors"></i>
                 </div>
                 <span>Déconnexion</span>
@@ -275,6 +303,17 @@ export function initSidebar() {
     if (btnToggle) {
         btnToggle.addEventListener('click', handleToggleAdmin);
     }
+
+    // Theme toggle buttons
+    document.querySelectorAll('aside [data-action="set-theme"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            setTheme(theme);
+            store.state.theme = theme;
+            // Update active states visually
+            updateThemeButtons();
+        });
+    });
 }
 
 /**
@@ -307,6 +346,28 @@ function handleToggleAdmin() {
 /**
  * Cleanup
  */
+/**
+ * Met à jour visuellement les boutons de thème dans la sidebar
+ */
+function updateThemeButtons() {
+    const currentTheme = getTheme();
+    const baseClass = 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200';
+    const activeClasses = {
+        light: 'bg-white dark:bg-slate-600 text-amber-600 shadow-sm',
+        dark: 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm',
+        system: 'bg-white dark:bg-slate-600 text-brand-600 dark:text-brand-400 shadow-sm'
+    };
+
+    document.querySelectorAll('aside [data-action="set-theme"]').forEach(btn => {
+        const theme = btn.dataset.theme;
+        // Reset all classes related to active/inactive
+        btn.className = btn.className.replace(/bg-white|dark:bg-slate-600|text-amber-600|text-indigo-600|dark:text-indigo-400|text-brand-600|dark:text-brand-400|shadow-sm|text-slate-500|dark:text-slate-400|hover:text-slate-700|dark:hover:text-slate-200/g, '').trim();
+        // Apply correct state
+        const classes = theme === currentTheme ? activeClasses[theme] : baseClass;
+        classes.split(' ').forEach(c => btn.classList.add(c));
+    });
+}
+
 export function cleanupSidebar() {
     const btnLogout = document.querySelector('aside [data-action="logout"]');
     if (btnLogout) {

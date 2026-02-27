@@ -996,6 +996,553 @@ body {
     --tw-ring-color: #1e293b !important;
 }
 
+/* =========================================
+   ANNUAIRE / DIRECTORY - Dark Mode  
+   ========================================= */
+
+/* User card container */
+.dark .user-row {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark .user-row:hover {
+    border-color: #475569 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* User name */
+.dark .user-row .text-slate-900 {
+    color: #f1f5f9 !important;
+}
+
+/* Status badges */
+.dark .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark .border-emerald-200 {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.dark .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.dark .border-amber-200 {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Role badge (Admin - rose) */
+.dark .bg-rose-50 {
+    background-color: rgba(244, 63, 94, 0.15) !important;
+}
+
+.dark .text-rose-600 {
+    color: #fb7185 !important;
+}
+
+.dark .border-rose-200 {
+    border-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+/* Info badges */
+.dark .bg-indigo-50 {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.dark .text-indigo-500 {
+    color: #a5b4fc !important;
+}
+
+.dark .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .border-blue-200 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Filter pills (inactive) */
+.dark .filter-btn:not(.active) {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+}
+
+.dark .filter-btn:not(.active):hover {
+    background-color: rgba(51, 65, 85, 0.8) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Filter pills (active) */
+.dark .filter-btn.active {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+/* Action buttons */
+.dark .user-row .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.dark .hover\:bg-emerald-100:hover {
+    background-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.dark .bg-rose-50 {
+    background-color: rgba(244, 63, 94, 0.15) !important;
+}
+
+.dark .hover\:bg-rose-100:hover {
+    background-color: rgba(244, 63, 94, 0.25) !important;
+}
+
+.dark .hover\:bg-red-50:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Hours badge text */
+.dark .text-emerald-700 {
+    color: #34d399 !important;
+}
+
+.dark .text-amber-700 {
+    color: #fbbf24 !important;
+}
+
+.dark .text-red-700 {
+    color: #f87171 !important;
+}
+
+/* User detail modal */
+.dark #user-details-modal>div {
+    background-color: #0f172a !important;
+}
+
+.dark #user-details-modal .bg-white {
+    background-color: #1e293b !important;
+}
+
+.dark #user-details-modal .border-slate-100 {
+    border-color: #334155 !important;
+}
+
+.dark #user-details-modal .bg-slate-50 {
+    background-color: #0f172a !important;
+}
+
+.dark #user-details-modal .text-slate-700 {
+    color: #e2e8f0 !important;
+}
+
+.dark #user-details-modal .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+/* Detail modal: amber admin notes section */
+.dark .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.dark .border-amber-200\/50 {
+    border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.dark .text-amber-700 {
+    color: #fbbf24 !important;
+}
+
+.dark .bg-amber-400 {
+    background-color: rgba(245, 158, 11, 0.8) !important;
+}
+
+.dark .text-amber-900 {
+    color: #1e293b !important;
+}
+
+/* Amber note textarea */
+.dark .bg-white\/50 {
+    background-color: rgba(30, 41, 59, 0.5) !important;
+}
+
+.dark .border-amber-200 {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Emerald hours section header */
+.dark .text-emerald-800 {
+    color: #34d399 !important;
+}
+
+/* Red adjust buttons */
+.dark .border-red-100 {
+    border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .border-emerald-100 {
+    border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Detail modal tabs */
+.dark #user-details-modal .border-b.border-slate-100.bg-white {
+    background-color: #0f172a !important;
+}
+
+.dark .border-brand-600 {
+    border-color: #60a5fa !important;
+}
+
+/* Brand-related text colors */
+.dark .text-brand-700 {
+    color: #93c5fd !important;
+}
+
+.dark .border-brand-200 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .border-indigo-200 {
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .text-indigo-700 {
+    color: #a5b4fc !important;
+}
+
+/* School edit dropdown */
+.dark #edit-school-dropdown {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* =========================================
+   PÔLES MODALS - Dark Mode
+   ========================================= */
+
+/* --- Candidates Modal --- */
+/* Modal container */
+.dark [data-modal="pole-detail"],
+.dark [data-modal="upsert-pole"],
+.dark [data-modal="create-antenne"] {
+    background-color: #0f172a !important;
+}
+
+/* Candidate card rows */
+.dark #candidate-row-card,
+.dark [id^="candidate-row-"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark [id^="candidate-row-"]:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark [id^="candidate-row-"] .text-slate-900 {
+    color: #f1f5f9 !important;
+}
+
+/* Candidates modal main container (the bg-white outer shell) */
+.dark .animate-scale-in.bg-white {
+    background-color: #0f172a !important;
+}
+
+/* Candidates modal header gradient */
+.dark .from-brand-50\/80 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .to-indigo-50\/50 {
+    --tw-gradient-to: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* From indigo-50/80 */
+.dark .from-indigo-50\/80 {
+    --tw-gradient-from: rgba(99, 102, 241, 0.15) !important;
+}
+
+.dark .to-purple-50\/50 {
+    --tw-gradient-to: rgba(168, 85, 247, 0.1) !important;
+}
+
+/* Recrutement badge */
+.dark .bg-brand-100\/50 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .border-brand-200\/30 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Close button in modals */
+.dark .bg-white\/80 {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+.dark .border-slate-100\/50 {
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* Avatar bg in candidate list */
+.dark [id^="candidate-row-"] .bg-slate-100 {
+    background-color: #334155 !important;
+}
+
+/* Date badge */
+.dark .bg-slate-100.text-slate-500 {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+    color: #94a3b8 !important;
+}
+
+/* Action buttons in candidates */
+.dark .bg-blue-50.text-blue-600 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .hover\:bg-blue-100:hover {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .bg-red-50.text-red-500 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .hover\:bg-red-100:hover {
+    background-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Footer of candidates modal */
+.dark .bg-slate-50.border-t {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    border-color: #334155 !important;
+}
+
+/* --- Pole Detail Modal --- */
+/* Icon box white background */
+.dark [data-modal="pole-detail"] .bg-white.shadow-lg {
+    background-color: #1e293b !important;
+}
+
+/* Description box */
+.dark [data-modal="pole-detail"] .bg-slate-50.rounded-2xl {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* Leader cards in detail */
+.dark [data-modal="pole-detail"] .bg-slate-50.border.border-slate-100 {
+    background-color: rgba(30, 41, 59, 0.5) !important;
+    border-color: #334155 !important;
+}
+
+/* Leader avatar placeholder */
+.dark .from-brand-100.to-indigo-100 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.2) !important;
+    --tw-gradient-to: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Footer join button container */
+.dark .bg-slate-50\/80.border-t {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* --- Upsert/Create Modals --- */
+/* Header gradient */
+.dark .from-brand-50\/80.to-indigo-50\/50 {
+    background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1)) !important;
+}
+
+/* Close button white circle */
+.dark [data-modal="upsert-pole"] .bg-white.rounded-full,
+.dark [data-modal="create-antenne"] .bg-white.rounded-full {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Form inputs */
+.dark [data-modal="upsert-pole"] .bg-slate-50,
+.dark [data-modal="create-antenne"] .bg-slate-50 {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+.dark [data-modal="upsert-pole"] .text-slate-800,
+.dark [data-modal="create-antenne"] .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+/* Footer */
+.dark [data-modal="upsert-pole"] .bg-slate-50.border-t,
+.dark [data-modal="create-antenne"] .bg-slate-50.border-t {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* Leader cards in edit form */
+.dark [data-modal="upsert-pole"] .border.border-slate-200 {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Search results dropdown */
+.dark #search-results {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark #search-results [data-add-leader]:hover {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark #search-results .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+/* Brand-100/30 search input */
+.dark .bg-brand-100\/30 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark .border-brand-300 {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Parent direction section */
+.dark .bg-brand-50\/30 {
+    background-color: rgba(59, 130, 246, 0.08) !important;
+}
+
+.dark .border-brand-100 {
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Info box (blue) */
+.dark .bg-blue-50.text-blue-700 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #93c5fd !important;
+}
+
+/* --- Leader Role Title Modal --- */
+.dark .bg-white.max-w-sm.rounded-3xl {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.dark .bg-brand-100.text-brand-600 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #60a5fa !important;
+}
+
+/* Cancel button in modals */
+.dark .bg-slate-100.text-slate-600 {
+    background-color: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+.dark .hover\:bg-slate-200:hover {
+    background-color: #334155 !important;
+}
+
+/* =========================================
+   MISSIONS / EVENTS TAB - Dark Mode
+   Toning down harsh greens for comfort
+   ========================================= */
+
+/* Event cards handled by global .dark .bg-white override */
+
+/* Registered card ring - Soften emerald to muted teal */
+.dark .ring-emerald-400 {
+    --tw-ring-color: rgba(45, 212, 191, 0.4) !important;
+}
+
+/* Header shadow - reduce green glow */
+.dark .shadow-emerald-500\/20 {
+    --tw-shadow-color: rgba(20, 184, 166, 0.08) !important;
+}
+
+/* --- S'inscrire Button --- */
+/* Main green button: softer teal instead of bright emerald */
+.dark .bg-emerald-500 {
+    background-color: #0d9488 !important;
+}
+
+.dark .hover\:bg-emerald-600:hover {
+    background-color: #0f766e !important;
+}
+
+.dark .shadow-emerald-500\/30 {
+    --tw-shadow-color: rgba(13, 148, 136, 0.15) !important;
+}
+
+.dark .shadow-emerald-500\/25 {
+    --tw-shadow-color: rgba(13, 148, 136, 0.1) !important;
+}
+
+/* --- Status Badges (places) --- */
+/* Emerald badges → muted teal */
+.dark .text-emerald-600.bg-emerald-50,
+.dark .text-emerald-600 {
+    color: #5eead4 !important;
+}
+
+/* Amber badges - slight soften */
+.dark .text-amber-600.bg-amber-50 {
+    color: #fcd34d !important;
+}
+
+.dark .text-amber-600 {
+    color: #fcd34d !important;
+}
+
+/* --- "Inscrit" Badge --- */
+.dark .border-emerald-200 {
+    border-color: rgba(45, 212, 191, 0.25) !important;
+}
+
+/* --- Shift Cards --- */
+/* Shift hover border - muted */
+.dark .hover\:border-emerald-200:hover {
+    border-color: rgba(45, 212, 191, 0.25) !important;
+}
+
+/* --- Annuler Button --- */
+.dark .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .text-red-600 {
+    color: #fca5a5 !important;
+}
+
+.dark .hover\:bg-red-200:hover {
+    background-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* --- Complet disabled button --- */
+.dark .bg-slate-100.text-slate-400.cursor-not-allowed {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+    color: #64748b !important;
+}
+
+/* --- "Bientôt" badge --- */
+.dark .text-amber-600.bg-amber-50.border-amber-200 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    color: #fcd34d !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* --- Header gradient muted in dark --- */
+.dark #events-view-container>.from-emerald-500 {
+    background: linear-gradient(to bottom right, #065f46, #0f766e, #155e75) !important;
+}
+
 /* Glass Effect for Header */
 .glass-header {
     background: rgba(255, 255, 255, 0.9);

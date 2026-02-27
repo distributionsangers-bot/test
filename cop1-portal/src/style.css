@@ -581,6 +581,201 @@ body {
     border-color: #334155 !important;
 }
 
+/* =========================================
+   BRAND / PURPLE TEXT → WHITE IN DARK MODE
+   User requested: all purple/brand text should
+   become white/light when in dark mode
+   ========================================= */
+.dark .text-brand-600 {
+    color: #93c5fd !important;
+}
+
+.dark .text-brand-500 {
+    color: #93c5fd !important;
+}
+
+.dark .text-brand-400 {
+    color: #bfdbfe !important;
+}
+
+.dark .text-purple-600 {
+    color: #c4b5fd !important;
+}
+
+.dark .text-purple-500 {
+    color: #c4b5fd !important;
+}
+
+.dark .text-purple-400 {
+    color: #ddd6fe !important;
+}
+
+.dark .text-indigo-600 {
+    color: #a5b4fc !important;
+}
+
+.dark .text-indigo-500 {
+    color: #a5b4fc !important;
+}
+
+/* --- Gradient text fix (clip-text titles become invisible in dark) --- */
+.dark .bg-gradient-to-r.from-slate-800.to-slate-600.bg-clip-text {
+    --tw-gradient-from: #f1f5f9 !important;
+    --tw-gradient-to: #cbd5e1 !important;
+}
+
+/* Also fix general gradient clip text patterns */
+.dark .bg-clip-text.text-transparent {
+    --tw-gradient-from: #f1f5f9 !important;
+    --tw-gradient-to: #94a3b8 !important;
+}
+
+/* =========================================
+   CHAT-SPECIFIC DARK MODE OVERRIDES
+   ========================================= */
+
+/* Left panel (conversation list) */
+.dark #chat-list-panel {
+    background-color: #0f172a !important;
+}
+
+/* Right panel (conversation content) */
+.dark #chat-content-panel {
+    background-color: #0f172a !important;
+}
+
+/* Chat header bar */
+.dark #chat-active .border-b.border-slate-100.bg-white\/50 {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* Messages area */
+.dark #messages-list {
+    background-color: #0f172a !important;
+}
+
+/* Chat input container */
+.dark #chat-form {
+    background-color: #0f172a !important;
+}
+
+.dark #chat-form .bg-white,
+.dark #chat-form .bg-slate-100 {
+    background-color: #1e293b !important;
+}
+
+.dark #chat-form .border-slate-200 {
+    border-color: #334155 !important;
+}
+
+.dark #chat-form .shadow-lg.shadow-slate-200\/50 {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Chat input textarea */
+.dark #msg-input {
+    color: #f1f5f9 !important;
+}
+
+/* Search input */
+.dark #search-input {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+/* Emoji picker */
+.dark #emoji-picker {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Context menu (right-click) */
+.dark .context-menu {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark .context-menu button {
+    color: #e2e8f0 !important;
+}
+
+.dark .context-menu button:hover {
+    background-color: #334155 !important;
+}
+
+.dark .context-menu .text-red-600 {
+    color: #f87171 !important;
+}
+
+.dark .context-menu .text-red-600:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Active ticket in list */
+.dark .ticket-btn.bg-white.shadow-md {
+    background-color: #1e293b !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .ticket-btn.ring-1.ring-slate-100 {
+    --tw-ring-color: #334155 !important;
+}
+
+/* Announcement card in dark mode */
+.dark .from-amber-50 {
+    --tw-gradient-from: rgba(245, 158, 11, 0.15) !important;
+}
+
+.dark .to-orange-50 {
+    --tw-gradient-to: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .border-amber-200\/60 {
+    border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .border-amber-200\/40 {
+    border-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.dark .border-amber-200\/30 {
+    border-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Chat "new" button - bg-slate-900 should be lighter in dark */
+.dark .bg-slate-900 {
+    background-color: #475569 !important;
+}
+
+.dark .shadow-slate-900\/20 {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Glassmorphism panels overrides for dark */
+@media (min-width: 1280px) {
+    .dark #chat-list-panel {
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        border-color: rgba(51, 65, 85, 0.5) !important;
+    }
+
+    .dark #chat-content-panel {
+        background-color: rgba(15, 23, 42, 0.8) !important;
+        border-color: rgba(51, 65, 85, 0.5) !important;
+    }
+}
+
+/* Reply context bar */
+.dark #reply-context {
+    background-color: #1e293b !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* --- Received message bubble (not me) - bg-white in dark --- */
+.dark .msg-bubble.bg-white {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
 /* Glass Effect for Header */
 .glass-header {
     background: rgba(255, 255, 255, 0.9);

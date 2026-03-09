@@ -2267,3 +2267,159 @@ input:-webkit-autofill:active {
 .dark ::-webkit-scrollbar-thumb:hover {
     background: #64748b !important;
 }
+
+/* =========================================
+   SURALIMENTATION GLOBALE (PHASE 3)
+   ========================================= */
+
+/* --- 1. Backgrounds --- */
+.dark .bg-white {
+    background-color: #1e293b !important;
+}
+
+/* slate-800 */
+.dark .bg-slate-50 {
+    background-color: #0f172a !important;
+}
+
+/* slate-900 */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .bg-slate-100 {
+    background-color: #334155 !important;
+}
+
+/* slate-700 */
+.dark .bg-slate-200 {
+    background-color: #475569 !important;
+}
+
+/* slate-600 */
+.dark .bg-slate-900 {
+    background-color: #3b82f6 !important;
+}
+
+/* brand-500 pour tabs actifs */
+
+/* --- 2. Borders --- */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .divide-slate-100> :not([hidden])~ :not([hidden]) {
+    border-color: #334155 !important;
+}
+
+/* slate-700 */
+.dark .border-slate-300 {
+    border-color: #475569 !important;
+}
+
+/* slate-600 */
+
+/* --- 3. Typography --- */
+.dark .text-slate-900,
+.dark .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+/* slate-100 */
+.dark .text-slate-700 {
+    color: #e2e8f0 !important;
+}
+
+/* slate-200 */
+.dark .text-slate-600,
+.dark .text-slate-500 {
+    color: #cbd5e1 !important;
+}
+
+/* slate-300 */
+.dark .hover\:text-slate-600:hover {
+    color: #f1f5f9 !important;
+}
+
+/* slate-100 */
+
+/* --- 4. Pastel Badges & Focus (Opacité vs Couleur pleine) --- */
+.dark .bg-emerald-50 {
+    background-color: rgba(52, 211, 153, 0.15) !important;
+    border-color: rgba(52, 211, 153, 0.2) !important;
+}
+
+.dark .text-emerald-700,
+.dark .text-emerald-600 {
+    color: #34d399 !important;
+}
+
+/* emerald-400 */
+
+.dark .bg-amber-50 {
+    background-color: rgba(251, 191, 36, 0.15) !important;
+    border-color: rgba(251, 191, 36, 0.2) !important;
+}
+
+.dark .text-amber-700,
+.dark .text-amber-600 {
+    color: #fbbf24 !important;
+}
+
+/* amber-400 */
+
+.dark .bg-red-50 {
+    background-color: rgba(248, 113, 113, 0.15) !important;
+    border-color: rgba(248, 113, 113, 0.2) !important;
+}
+
+.dark .text-red-700,
+.dark .text-red-600 {
+    color: #f87171 !important;
+}
+
+/* red-400 */
+
+.dark .bg-blue-50 {
+    background-color: rgba(96, 165, 250, 0.15) !important;
+    border-color: rgba(96, 165, 250, 0.2) !important;
+}
+
+.dark .text-blue-700,
+.dark .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+/* blue-400 */
+
+.dark .bg-indigo-50 {
+    background-color: rgba(129, 140, 248, 0.15) !important;
+    border-color: rgba(129, 140, 248, 0.2) !important;
+}
+
+.dark .text-indigo-700,
+.dark .text-indigo-600 {
+    color: #818cf8 !important;
+}
+
+/* indigo-400 */
+
+.dark .bg-purple-50 {
+    background-color: rgba(167, 139, 250, 0.15) !important;
+    border-color: rgba(167, 139, 250, 0.2) !important;
+}
+
+.dark .text-purple-700,
+.dark .text-purple-600 {
+    color: #a78bfa !important;
+}
+
+/* purple-400 */
+
+.dark .bg-rose-50 {
+    background-color: rgba(251, 113, 133, 0.15) !important;
+    border-color: rgba(251, 113, 133, 0.2) !important;
+}
+
+.dark .text-rose-700,
+.dark .text-rose-600 {
+    color: #fb7185 !important;
+}
+
+/* rose-400 */

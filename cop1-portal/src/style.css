@@ -610,7 +610,8 @@ body {
 }
 
 .dark .placeholder\:text-slate-400::placeholder {
-    color: #3a3f44 !important;
+    color: #64748b !important;
+    opacity: 1 !important;
 }
 
 .dark .placeholder\:text-indigo-300::placeholder {
@@ -2175,4 +2176,94 @@ input:-webkit-autofill:active {
 
 .dark .hover\:shadow-sm:hover {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* =========================================
+   AUDIT QA/UX FINAL (LOADERS, FORMS, EDGE CASES)
+   ========================================= */
+
+/* --- 1. Loaders & Spinners (Visibilité totale) --- */
+/* Loader Global (index.html) */
+.dark .dark\:border-brand-900 {
+    border-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .border-t-brand-600 {
+    border-top-color: #60a5fa !important;
+}
+
+/* brand-400 pour bien flasher */
+/* Loaders internes et boutons (slate-300 et transparent) */
+.dark .animate-spin.border-slate-300 {
+    border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+.dark .animate-spin.border-t-transparent {
+    border-top-color: transparent !important;
+}
+
+.dark .border-brand-100 {
+    border-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* --- 2. Focus Rings (Mise en évidence des inputs) --- */
+/* En mode clair, ring-500/10 suffit, mais en mode sombre, 10% d'opacité bleu sur fond noir disparaît. On passe à 30-40% */
+.dark .focus\:ring-brand-500\/10:focus {
+    --tw-ring-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+.dark .focus\:ring-brand-500\/20:focus {
+    --tw-ring-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.dark .focus\:ring-emerald-500:focus {
+    --tw-ring-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+/* Focus textarea modale event */
+.dark .focus\:ring-brand-500:focus {
+    --tw-ring-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* --- 3. Disabled States (Feedback clair de l'inactivité) --- */
+/* Désaturation additionnelle pour "éteindre" visuellement le bouton */
+.dark *:disabled,
+.dark .disabled\:opacity-50:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(0.6) !important;
+    border-color: #2d333b !important;
+}
+
+/* --- 4. Toasts / Notifications (Détachement Premium) --- */
+/* L'ombre seule ne suffit pas en mode sombre. On ajoute un "glow" subpixellaire (ring blanc 5%) */
+.dark .toast {
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* --- 5. Empty States & Scrollbars (Lisibilité) --- */
+/* Icônes géantes décoratives */
+.dark .text-slate-200 {
+    color: #2d333b !important;
+}
+
+/* Moins agressif que le texte normal */
+.dark .text-slate-300 {
+    color: #3a3f44 !important;
+}
+
+.dark .text-slate-400 {
+    color: #64748b !important;
+}
+
+/* Placeholder override */
+
+/* Amélioration Scrollbars (Contraste thumb/track) */
+.dark ::-webkit-scrollbar-thumb {
+    background: #47515b !important;
+    /* Éclairci par rapport à ton #2e3338 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b !important;
 }

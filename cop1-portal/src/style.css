@@ -2082,3 +2082,97 @@ input:-webkit-autofill:active {
 #main-slot {
     -webkit-overflow-scrolling: touch;
 }
+
+/* =========================================
+   COMPLÉMENTS DARK MODE (AUDIT COMPOSANTS)
+   ========================================= */
+
+/* --- 1. event-modal.view.js (Modèles & Dégradés) --- */
+.dark .from-brand-500\/10 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.05) !important;
+}
+
+.dark .to-indigo-500\/10 {
+    --tw-gradient-to: rgba(99, 102, 241, 0.05) !important;
+}
+
+/* --- 2. reset-password.view.js (Taches lumineuses & Force Mdp) --- */
+/* Diminution drastique de l'opacité des "blobs" de fond pour ne pas éblouir */
+.dark .bg-emerald-400\/20 {
+    background-color: rgba(52, 211, 153, 0.05) !important;
+}
+
+.dark .bg-brand-400\/20 {
+    background-color: rgba(96, 165, 250, 0.05) !important;
+}
+
+/* Couleurs de la jauge de mot de passe assombries pour correspondre au fond dark */
+.dark .bg-slate-300 {
+    background-color: #3a3f44 !important;
+}
+
+.dark .bg-red-500 {
+    background-color: #b91c1c !important;
+}
+
+/* red-700 */
+.dark .bg-orange-500 {
+    background-color: #c2410c !important;
+}
+
+/* orange-700 */
+.dark .bg-yellow-500 {
+    background-color: #a16207 !important;
+}
+
+/* yellow-700 */
+.dark .bg-green-500 {
+    background-color: #15803d !important;
+}
+
+/* green-700 */
+
+/* Ombres spécifiques de la page (Bouton Submit) */
+.dark .shadow-emerald-500\/30 {
+    --tw-shadow-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.dark .hover\:shadow-emerald-500\/40:hover {
+    --tw-shadow-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+/* --- 3. chat.view.js (Modifications input et drop-shadow) --- */
+.dark .shadow-slate-200\/50 {
+    --tw-shadow-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* --- 4. poles.view.js (Bannière Antenne & Ombres Hover) --- */
+/* Assombrissement de la bannière principale sans perdre le dégradé "wow" */
+.dark .from-indigo-600 {
+    --tw-gradient-from: #312e81 !important;
+    /* indigo-900 */
+}
+
+.dark .via-purple-600 {
+    --tw-gradient-via: #581c87 !important;
+    /* purple-900 */
+}
+
+.dark .to-pink-500 {
+    --tw-gradient-to: #831843 !important;
+    /* pink-900 */
+}
+
+/* --- 5. Profondeur globale (Ombres Hover) --- */
+/* En mode sombre, l'élévation se fait par la clarté (déjà faite) et par l'opacité absolue de l'ombre noire */
+.dark .hover\:shadow-xl:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .hover\:shadow-sm:hover {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}

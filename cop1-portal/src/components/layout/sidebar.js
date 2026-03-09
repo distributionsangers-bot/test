@@ -234,12 +234,12 @@ export function updateActiveNavLink(path) {
         btn.classList.remove('bg-gradient-to-r', 'text-white', 'shadow-lg', 'shadow-brand-500/25');
         btn.classList.remove(...colors);
 
-        btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
+        btn.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-50', 'dark:hover:bg-slate-700/50', 'hover:text-slate-900', 'dark:hover:text-white');
         btn.setAttribute('aria-current', 'false');
 
         const iconContainer = btn.querySelector('div');
         if (iconContainer) {
-            iconContainer.className = `relative flex items-center justify-center w-9 h-9 rounded-lg ${navItem.iconBgLight || 'bg-slate-100'} group-hover:bg-white group-hover:shadow-sm transition-all duration-200`;
+            iconContainer.className = `relative flex items-center justify-center w-9 h-9 rounded-lg ${navItem.iconBgLight || 'bg-slate-100'} dark:bg-slate-700 group-hover:bg-white dark:group-hover:bg-slate-600 group-hover:shadow-sm transition-all duration-200`;
         }
 
         const icon = btn.querySelector('i, svg');
@@ -258,7 +258,7 @@ export function updateActiveNavLink(path) {
 
         // --- 2. Apply Active State ---
         if (isActive) {
-            btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900');
+            btn.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-50', 'dark:hover:bg-slate-700/50', 'hover:text-slate-900', 'dark:hover:text-white');
             btn.classList.add('bg-gradient-to-r', 'text-white', 'shadow-lg', 'shadow-brand-500/25');
             btn.classList.add(...colors);
 

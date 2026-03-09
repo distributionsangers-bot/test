@@ -103,7 +103,7 @@ function renderNavItem(item, isActive, isMenu) {
             
             <div class="icon-container relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-50 dark:bg-brand-900/30' : 'bg-transparent'}">
                 <i data-lucide="${item.icon}" class="w-6 h-6 transition-all duration-200 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}"></i>
-                ${item.badgeType ? `<span id="mobile-badge-${item.badgeType}" class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white flex items-center justify-center px-0.5 leading-none"></span>` : ''}
+                ${item.badgeType ? `<span id="mobile-badge-${item.badgeType}" class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full ring-2 ring-white dark:ring-slate-800 flex items-center justify-center px-0.5 leading-none"></span>` : ''}
             </div>
             
             <span class="text-[10px] font-semibold transition-colors duration-200">${item.label}</span>
@@ -158,9 +158,9 @@ export function updateActiveNavLink(path) {
         if (iconContainer) {
             if (isActive) {
                 iconContainer.classList.remove('bg-transparent');
-                iconContainer.classList.add('bg-brand-50');
+                iconContainer.classList.add('bg-brand-50', 'dark:bg-brand-900/30');
             } else {
-                iconContainer.classList.remove('bg-brand-50');
+                iconContainer.classList.remove('bg-brand-50', 'dark:bg-brand-900/30');
                 iconContainer.classList.add('bg-transparent');
             }
 

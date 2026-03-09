@@ -299,11 +299,13 @@ body {
 
 /* --- More text colors --- */
 .dark .text-slate-300 {
-    color: #94a3b8 !important;
+    color: #cbd5e1 !important;
+    /* slate-300 → higher contrast for dark backgrounds */
 }
 
 .dark .text-slate-400 {
-    color: #64748b !important;
+    color: #94a3b8 !important;
+    /* slate-400 → bumped from #64748b for WCAG AA compliance */
 }
 
 .dark .text-blue-800 {

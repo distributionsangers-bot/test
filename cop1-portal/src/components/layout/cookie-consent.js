@@ -17,7 +17,7 @@ export const CookieConsent = {
         b.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-2xl">🍪</span>
-                <div class="text-sm text-slate-500 font-medium">
+                <div class="text-sm text-slate-500 dark:text-slate-300 font-medium">
                     Nous utilisons des cookies essentiels pour l'authentification.
                 </div>
             </div>

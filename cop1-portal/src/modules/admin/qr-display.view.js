@@ -97,7 +97,7 @@ export const QRDisplayView = {
                         width: 200,
                         margin: 2,
                         color: {
-                            dark: "#0f172a",
+                            dark: "#0c0f14",
                             light: "#ffffff"
                         },
                         errorCorrectionLevel: 'H' // Haute correction d'erreur (permet le logo central)
@@ -178,7 +178,7 @@ export const QRDisplayView = {
                 width: 400,
                 margin: 2,
                 color: {
-                    dark: "#0f172a",
+                    dark: "#0c0f14",
                     light: "#ffffff"
                 },
                 errorCorrectionLevel: 'H'

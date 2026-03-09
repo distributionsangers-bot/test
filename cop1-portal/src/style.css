@@ -18,8 +18,104 @@ body {
 
 /* Dark mode body */
 .dark body {
-    background-color: #0f172a;
+    background-color: #0c0f14;
     color: #e2e8f0;
+}
+
+/* =========================================
+   INLINE DARK TAILWIND OVERRIDES
+   Redirects dark:bg-slate-*, dark:border-slate-*
+   from blue-slate → neutral dark palette
+   ========================================= */
+
+/* --- Backgrounds --- */
+.dark .dark\:bg-slate-900 {
+    background-color: #0c0f14 !important;
+}
+
+.dark .dark\:bg-slate-800 {
+    background-color: #161a1e !important;
+}
+
+.dark .dark\:bg-slate-800\/80 {
+    background-color: rgba(22, 26, 30, 0.8) !important;
+}
+
+.dark .dark\:bg-slate-800\/90 {
+    background-color: rgba(22, 26, 30, 0.9) !important;
+}
+
+.dark .dark\:bg-slate-800\/95 {
+    background-color: rgba(22, 26, 30, 0.95) !important;
+}
+
+.dark .dark\:bg-slate-700 {
+    background-color: #22272c !important;
+}
+
+.dark .dark\:bg-slate-700\/50 {
+    background-color: rgba(34, 39, 44, 0.5) !important;
+}
+
+.dark .dark\:bg-slate-700\/30 {
+    background-color: rgba(34, 39, 44, 0.3) !important;
+}
+
+.dark .dark\:bg-slate-600 {
+    background-color: #2e3338 !important;
+}
+
+/* --- Borders --- */
+.dark .dark\:border-slate-700\/50 {
+    border-color: rgba(34, 39, 44, 0.5) !important;
+}
+
+.dark .dark\:border-slate-700 {
+    border-color: #22272c !important;
+}
+
+.dark .dark\:border-slate-600 {
+    border-color: #2e3338 !important;
+}
+
+/* --- Shadows --- */
+.dark .dark\:shadow-slate-900\/50 {
+    --tw-shadow-color: rgba(12, 15, 20, 0.5) !important;
+}
+
+/* --- Gradients --- */
+.dark .dark\:from-slate-700\/50 {
+    --tw-gradient-from: rgba(34, 39, 44, 0.5) !important;
+}
+
+.dark .dark\:to-slate-700\/50 {
+    --tw-gradient-to: rgba(34, 39, 44, 0.5) !important;
+}
+
+.dark .dark\:to-slate-700\/30 {
+    --tw-gradient-to: rgba(34, 39, 44, 0.3) !important;
+}
+
+.dark .dark\:via-slate-800 {
+    --tw-gradient-via: #161a1e !important;
+}
+
+/* --- Rings --- */
+.dark .dark\:ring-slate-800 {
+    --tw-ring-color: #161a1e !important;
+}
+
+/* --- Hover states --- */
+.dark .dark\:hover\:bg-slate-700\/50:hover {
+    background-color: rgba(34, 39, 44, 0.5) !important;
+}
+
+.dark .dark\:hover\:bg-slate-700:hover {
+    background-color: #22272c !important;
+}
+
+.dark .dark\:hover\:bg-slate-600:hover {
+    background-color: #2e3338 !important;
 }
 
 /* =========================================
@@ -30,17 +126,17 @@ body {
 
 /* --- Backgrounds --- */
 .dark .bg-white {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     /* slate-800 (Cards & Primary Surfaces) */
 }
 
 .dark .bg-slate-50 {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
     /* slate-700 (Elevated surfaces, nested frames, buttons) */
 }
 
 .dark .bg-slate-100 {
-    background-color: #475569 !important;
+    background-color: #2e3338 !important;
     /* slate-600 (Higher elevated surfaces, active states) */
 }
 
@@ -72,49 +168,49 @@ body {
 
 /* --- Borders --- */
 .dark .border-slate-100 {
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
     /* slate-600 (to be visible against slate-700 backgrounds) */
 }
 
 .dark .border-slate-200 {
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
 }
 
 .dark .border-slate-300 {
-    border-color: #64748b !important;
+    border-color: #3a3f44 !important;
     /* slate-500 */
 }
 
 /* --- Dividers --- */
 .dark .divide-slate-50>*+* {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 .dark .divide-slate-100>*+* {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 /* --- Form Inputs in dark mode --- */
 .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     color: #f1f5f9 !important;
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
 }
 
 .dark input:focus:not([type="checkbox"]):not([type="radio"]) {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark select {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     color: #f1f5f9 !important;
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
 }
 
 .dark textarea {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     color: #f1f5f9 !important;
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
 }
 
 /* --- Status badge backgrounds (keep readable) --- */
@@ -152,69 +248,69 @@ body {
 
 /* --- Hover states --- */
 .dark .hover\:bg-slate-50:hover {
-    background-color: #475569 !important;
+    background-color: #2e3338 !important;
     /* slate-600 */
 }
 
 .dark .hover\:bg-slate-100:hover {
-    background-color: #64748b !important;
+    background-color: #3a3f44 !important;
     /* slate-500 */
 }
 
 .dark .hover\:bg-white:hover {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
     /* slate-700 */
 }
 
 .dark .hover\:bg-slate-200:hover {
-    background-color: #64748b !important;
+    background-color: #3a3f44 !important;
 }
 
 /* --- Gradient overrides (from-slate-50 / to-slate-100 section headers) --- */
 .dark .from-slate-50 {
-    --tw-gradient-from: #1e293b !important;
+    --tw-gradient-from: #161a1e !important;
 }
 
 .dark .to-slate-100 {
-    --tw-gradient-to: #334155 !important;
+    --tw-gradient-to: #22272c !important;
 }
 
 /* --- Background with opacity patterns --- */
 .dark .bg-white\/80 {
-    background-color: rgba(30, 41, 59, 0.8) !important;
+    background-color: rgba(22, 26, 30, 0.8) !important;
 }
 
 .dark .bg-white\/90 {
-    background-color: rgba(30, 41, 59, 0.9) !important;
+    background-color: rgba(22, 26, 30, 0.9) !important;
 }
 
 .dark .bg-white\/50 {
-    background-color: rgba(30, 41, 59, 0.5) !important;
+    background-color: rgba(22, 26, 30, 0.5) !important;
 }
 
 .dark .bg-slate-50\/50 {
-    background-color: rgba(15, 23, 42, 0.5) !important;
+    background-color: rgba(12, 15, 20, 0.5) !important;
 }
 
 .dark .bg-slate-50\/80 {
-    background-color: rgba(15, 23, 42, 0.8) !important;
+    background-color: rgba(12, 15, 20, 0.8) !important;
 }
 
 .dark .bg-slate-100\/80 {
-    background-color: rgba(30, 41, 59, 0.8) !important;
+    background-color: rgba(22, 26, 30, 0.8) !important;
 }
 
 /* --- Border with opacity patterns --- */
 .dark .border-white\/50 {
-    border-color: rgba(51, 65, 85, 0.5) !important;
+    border-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 .dark .border-slate-200\/50 {
-    border-color: rgba(51, 65, 85, 0.5) !important;
+    border-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 .dark .border-slate-100\/50 {
-    border-color: rgba(51, 65, 85, 0.5) !important;
+    border-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 /* --- Shadow adjustments (deeper in dark) --- */
@@ -305,7 +401,7 @@ body {
 
 .dark .text-slate-400 {
     color: #94a3b8 !important;
-    /* slate-400 → bumped from #64748b for WCAG AA compliance */
+    /* slate-400 → bumped from #3a3f44 for WCAG AA compliance */
 }
 
 .dark .text-blue-800 {
@@ -359,7 +455,7 @@ body {
 
 /* --- Modal content area --- */
 .dark .bg-slate-50\/30 {
-    background-color: rgba(15, 23, 42, 0.3) !important;
+    background-color: rgba(12, 15, 20, 0.3) !important;
 }
 
 /* --- Border accents --- */
@@ -410,7 +506,7 @@ body {
 
 /* --- Ring white (legal page icon) --- */
 .dark .ring-white\/5 {
-    --tw-ring-color: rgba(51, 65, 85, 0.3) !important;
+    --tw-ring-color: rgba(34, 39, 44, 0.3) !important;
 }
 
 /* --- Hover accent states --- */
@@ -419,7 +515,7 @@ body {
 }
 
 .dark .hover\:bg-slate-100:hover {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 .dark .hover\:bg-indigo-200:hover {
@@ -440,12 +536,12 @@ body {
 
 /* --- Table / directory / participants --- */
 .dark .even\:bg-slate-50:nth-child(even) {
-    background-color: rgba(15, 23, 42, 0.5) !important;
+    background-color: rgba(12, 15, 20, 0.5) !important;
 }
 
 /* --- Specific hover border states for inputs --- */
 .dark .hover\:border-slate-300:hover {
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
 }
 
 /* --- Chat specific --- */
@@ -454,7 +550,7 @@ body {
 }
 
 .dark .bg-slate-200 {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 /* --- Gradient separator lines --- */
@@ -514,7 +610,7 @@ body {
 }
 
 .dark .placeholder\:text-slate-400::placeholder {
-    color: #64748b !important;
+    color: #3a3f44 !important;
 }
 
 .dark .placeholder\:text-indigo-300::placeholder {
@@ -532,12 +628,12 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-    background: #475569;
+    background: #2e3338;
     border-radius: 10px;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+    background: #3a3f44;
 }
 
 /* --- Gradient from-emerald-50 (reset password icon) --- */
@@ -546,7 +642,7 @@ body {
 }
 
 .dark .to-white {
-    --tw-gradient-to: #1e293b !important;
+    --tw-gradient-to: #161a1e !important;
 }
 
 .dark .from-teal-50 {
@@ -559,7 +655,7 @@ body {
 
 /* --- Border width + white (registration modal date badge) --- */
 .dark .border-white {
-    border-color: #1e293b !important;
+    border-color: #161a1e !important;
 }
 
 .dark .border-emerald-100\/50 {
@@ -568,11 +664,11 @@ body {
 
 /* --- QR display page --- */
 .dark .bg-gray-50 {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 .dark .bg-gray-100 {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark .text-gray-800 {
@@ -588,7 +684,7 @@ body {
 }
 
 .dark .border-gray-200 {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 /* =========================================
@@ -646,36 +742,36 @@ body {
 
 /* Left panel (conversation list) */
 .dark #chat-list-panel {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 /* Right panel (conversation content) */
 .dark #chat-content-panel {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 /* Chat header bar */
 .dark #chat-active .border-b.border-slate-100.bg-white\/50 {
-    background-color: rgba(15, 23, 42, 0.5) !important;
+    background-color: rgba(12, 15, 20, 0.5) !important;
 }
 
 /* Messages area */
 .dark #messages-list {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 /* Chat input container */
 .dark #chat-form {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 .dark #chat-form .bg-white,
 .dark #chat-form .bg-slate-100 {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark #chat-form .border-slate-200 {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 .dark #chat-form .shadow-lg.shadow-slate-200\/50 {
@@ -689,20 +785,20 @@ body {
 
 /* Search input */
 .dark #search-input {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     color: #f1f5f9 !important;
 }
 
 /* Emoji picker */
 .dark #emoji-picker {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 /* Context menu (right-click) */
 .dark .context-menu {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 .dark .context-menu button {
@@ -710,7 +806,7 @@ body {
 }
 
 .dark .context-menu button:hover {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 .dark .context-menu .text-red-600 {
@@ -723,12 +819,12 @@ body {
 
 /* Active ticket in list */
 .dark .ticket-btn.bg-white.shadow-md {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
 }
 
 .dark .ticket-btn.ring-1.ring-slate-100 {
-    --tw-ring-color: #334155 !important;
+    --tw-ring-color: #22272c !important;
 }
 
 /* Announcement card in dark mode */
@@ -754,7 +850,7 @@ body {
 
 /* Chat "new" button - bg-slate-900 should be lighter in dark */
 .dark .bg-slate-900 {
-    background-color: #475569 !important;
+    background-color: #2e3338 !important;
 }
 
 .dark .shadow-slate-900\/20 {
@@ -764,40 +860,40 @@ body {
 /* Glassmorphism panels overrides for dark */
 @media (min-width: 1280px) {
     .dark #chat-list-panel {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        border-color: rgba(51, 65, 85, 0.5) !important;
+        background-color: rgba(12, 15, 20, 0.8) !important;
+        border-color: rgba(34, 39, 44, 0.5) !important;
     }
 
     .dark #chat-content-panel {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        border-color: rgba(51, 65, 85, 0.5) !important;
+        background-color: rgba(12, 15, 20, 0.8) !important;
+        border-color: rgba(34, 39, 44, 0.5) !important;
     }
 }
 
 /* Reply context bar */
 .dark #reply-context {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
 .dark .msg-bubble.bg-white {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 /* =========================================
    PLANNING / ADMIN ACTION MENU (Bottom Sheet)
    ========================================= */
 .dark #event-actions-menu>div {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark #event-actions-menu .border-b.border-slate-100 {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 .dark #event-actions-menu .bg-slate-200 {
-    background-color: #475569 !important;
+    background-color: #2e3338 !important;
 }
 
 .dark #event-actions-menu button {
@@ -805,7 +901,7 @@ body {
 }
 
 .dark #event-actions-menu button:hover {
-    background-color: rgba(51, 65, 85, 0.5) !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 .dark #event-actions-menu .text-slate-700 {
@@ -833,7 +929,7 @@ body {
 }
 
 .dark #event-actions-menu .h-px.bg-slate-100 {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 .dark #event-actions-menu button:last-child:hover {
@@ -843,7 +939,7 @@ body {
 /* Annuler button in action menu */
 .dark #event-actions-menu+div,
 .dark #event-actions-menu .bg-white.rounded-2xl+div {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 /* =========================================
@@ -900,43 +996,43 @@ body {
 
 /* Planning toolbar (white card) */
 .dark #admin-planning-container .bg-white {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark #admin-planning-container .border-slate-100 {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 /* Tab active state - bg-slate-900 should stand out in dark */
 .dark .tab-btn.active {
     background-color: #e2e8f0 !important;
-    color: #0f172a !important;
+    color: #0c0f14 !important;
 }
 
 .dark .tab-btn:not(.active) {
-    background-color: rgba(51, 65, 85, 0.5) !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
     color: #94a3b8 !important;
 }
 
 .dark .tab-btn:not(.active):hover {
-    background-color: rgba(51, 65, 85, 0.8) !important;
+    background-color: rgba(34, 39, 44, 0.8) !important;
     color: #e2e8f0 !important;
 }
 
 /* Event card SVG circle bg */
 .dark circle[stroke="#f1f5f9"] {
-    stroke: #334155 !important;
+    stroke: #22272c !important;
 }
 
 /* Progress bar track */
 .dark [data-progress-bar]+.bg-slate-200,
 .dark .h-2.bg-slate-200 {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 /* Shift area bg */
 .dark .bg-slate-50\/50 {
-    background-color: rgba(15, 23, 42, 0.5) !important;
+    background-color: rgba(12, 15, 20, 0.5) !important;
 }
 
 /* Template card icon */
@@ -1003,7 +1099,7 @@ body {
 
 /* Badge ring in dark */
 .dark .ring-white {
-    --tw-ring-color: #1e293b !important;
+    --tw-ring-color: #161a1e !important;
 }
 
 /* =========================================
@@ -1012,12 +1108,12 @@ body {
 
 /* User card container */
 .dark .user-row {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 .dark .user-row:hover {
-    border-color: #475569 !important;
+    border-color: #2e3338 !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -1083,20 +1179,20 @@ body {
 
 /* Filter pills (inactive) */
 .dark .filter-btn:not(.active) {
-    background-color: rgba(51, 65, 85, 0.5) !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
     color: #94a3b8 !important;
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 .dark .filter-btn:not(.active):hover {
-    background-color: rgba(51, 65, 85, 0.8) !important;
+    background-color: rgba(34, 39, 44, 0.8) !important;
     color: #e2e8f0 !important;
 }
 
 /* Filter pills (active) */
 .dark .filter-btn.active {
     background-color: #e2e8f0 !important;
-    color: #0f172a !important;
+    color: #0c0f14 !important;
 }
 
 /* Action buttons */
@@ -1135,15 +1231,15 @@ body {
 
 /* User detail modal */
 .dark #user-details-modal>div {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 .dark #user-details-modal .bg-white {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 .dark #user-details-modal .border-slate-100 {
-    border-color: #334155 !important;
+    border-color: #22272c !important;
 }
 
 .dark #user-details-modal .text-slate-700 {
@@ -1172,12 +1268,12 @@ body {
 }
 
 .dark .text-amber-900 {
-    color: #1e293b !important;
+    color: #161a1e !important;
 }
 
 /* Amber note textarea */
 .dark .bg-white\/50 {
-    background-color: rgba(30, 41, 59, 0.5) !important;
+    background-color: rgba(22, 26, 30, 0.5) !important;
 }
 
 .dark .border-amber-200 {
@@ -1200,7 +1296,7 @@ body {
 
 /* Detail modal tabs */
 .dark #user-details-modal .border-b.border-slate-100.bg-white {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 .dark .border-brand-600 {
@@ -1226,8 +1322,8 @@ body {
 
 /* School edit dropdown */
 .dark #edit-school-dropdown {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 /* =========================================
@@ -1239,14 +1335,14 @@ body {
 .dark [data-modal="pole-detail"],
 .dark [data-modal="upsert-pole"],
 .dark [data-modal="create-antenne"] {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 /* Candidate card rows */
 .dark #candidate-row-card,
 .dark [id^="candidate-row-"] {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 .dark [id^="candidate-row-"]:hover {
@@ -1259,7 +1355,7 @@ body {
 
 /* Candidates modal main container (the bg-white outer shell) */
 .dark .animate-scale-in.bg-white {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
 }
 
 /* Candidates modal header gradient */
@@ -1291,21 +1387,21 @@ body {
 
 /* Close button in modals */
 .dark .bg-white\/80 {
-    background-color: rgba(30, 41, 59, 0.8) !important;
+    background-color: rgba(22, 26, 30, 0.8) !important;
 }
 
 .dark .border-slate-100\/50 {
-    border-color: rgba(51, 65, 85, 0.5) !important;
+    border-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 /* Avatar bg in candidate list */
 .dark [id^="candidate-row-"] .bg-slate-100 {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 /* Date badge */
 .dark .bg-slate-100.text-slate-500 {
-    background-color: rgba(51, 65, 85, 0.5) !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
     color: #94a3b8 !important;
 }
 
@@ -1328,25 +1424,25 @@ body {
 
 /* Footer of candidates modal */
 .dark .bg-slate-50.border-t {
-    background-color: rgba(15, 23, 42, 0.8) !important;
-    border-color: #334155 !important;
+    background-color: rgba(12, 15, 20, 0.8) !important;
+    border-color: #22272c !important;
 }
 
 /* --- Pole Detail Modal --- */
 /* Icon box white background */
 .dark [data-modal="pole-detail"] .bg-white.shadow-lg {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
 }
 
 /* Description box */
 .dark [data-modal="pole-detail"] .bg-slate-50.rounded-2xl {
-    background-color: rgba(15, 23, 42, 0.5) !important;
+    background-color: rgba(12, 15, 20, 0.5) !important;
 }
 
 /* Leader cards in detail */
 .dark [data-modal="pole-detail"] .bg-slate-50.border.border-slate-100 {
-    background-color: rgba(30, 41, 59, 0.5) !important;
-    border-color: #334155 !important;
+    background-color: rgba(22, 26, 30, 0.5) !important;
+    border-color: #22272c !important;
 }
 
 /* Leader avatar placeholder */
@@ -1357,7 +1453,7 @@ body {
 
 /* Footer join button container */
 .dark .bg-slate-50\/80.border-t {
-    background-color: rgba(15, 23, 42, 0.8) !important;
+    background-color: rgba(12, 15, 20, 0.8) !important;
 }
 
 /* --- Upsert/Create Modals --- */
@@ -1369,14 +1465,14 @@ body {
 /* Close button white circle */
 .dark [data-modal="upsert-pole"] .bg-white.rounded-full,
 .dark [data-modal="create-antenne"] .bg-white.rounded-full {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 /* Form inputs */
 .dark [data-modal="upsert-pole"] .bg-slate-50,
 .dark [data-modal="create-antenne"] .bg-slate-50 {
-    background-color: #0f172a !important;
+    background-color: #0c0f14 !important;
     color: #e2e8f0 !important;
 }
 
@@ -1388,23 +1484,23 @@ body {
 /* Footer */
 .dark [data-modal="upsert-pole"] .bg-slate-50.border-t,
 .dark [data-modal="create-antenne"] .bg-slate-50.border-t {
-    background-color: rgba(15, 23, 42, 0.8) !important;
+    background-color: rgba(12, 15, 20, 0.8) !important;
 }
 
 /* Leader cards in edit form */
 .dark [data-modal="upsert-pole"] .border.border-slate-200 {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 /* Search results dropdown */
 .dark #search-results {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
+    background-color: #161a1e !important;
+    border-color: #22272c !important;
 }
 
 .dark #search-results [data-add-leader]:hover {
-    background-color: rgba(51, 65, 85, 0.5) !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
 }
 
 .dark #search-results .text-slate-800 {
@@ -1437,8 +1533,8 @@ body {
 
 /* --- Leader Role Title Modal --- */
 .dark .bg-white.max-w-sm.rounded-3xl {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
+    background-color: #0c0f14 !important;
+    border-color: #22272c !important;
 }
 
 .dark .bg-brand-100.text-brand-600 {
@@ -1448,12 +1544,12 @@ body {
 
 /* Cancel button in modals */
 .dark .bg-slate-100.text-slate-600 {
-    background-color: #1e293b !important;
+    background-color: #161a1e !important;
     color: #94a3b8 !important;
 }
 
 .dark .hover\:bg-slate-200:hover {
-    background-color: #334155 !important;
+    background-color: #22272c !important;
 }
 
 /* =========================================
@@ -1533,8 +1629,8 @@ body {
 
 /* --- Complet disabled button --- */
 .dark .bg-slate-100.text-slate-400.cursor-not-allowed {
-    background-color: rgba(51, 65, 85, 0.5) !important;
-    color: #64748b !important;
+    background-color: rgba(34, 39, 44, 0.5) !important;
+    color: #3a3f44 !important;
 }
 
 /* --- "Bientôt" badge --- */
@@ -1557,7 +1653,7 @@ body {
 }
 
 .dark .glass-header {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(12, 15, 20, 0.9);
 }
 
 /* =========================================
@@ -1582,7 +1678,7 @@ body {
 }
 
 .dark .toast {
-    background: #1e293b;
+    background: #161a1e;
     color: #e2e8f0;
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
 }
@@ -1592,11 +1688,11 @@ body {
 }
 
 .dark .toast.bg-white {
-    background-color: #1e293b;
+    background-color: #161a1e;
 }
 
 .toast.text-slate-800 {
-    color: #1e293b;
+    color: #161a1e;
 }
 
 .dark .toast.text-slate-800 {
@@ -1901,7 +1997,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-background-clip: text;
-    -webkit-text-fill-color: #1e293b;
+    -webkit-text-fill-color: #161a1e;
     transition: background-color 5000s ease-in-out 0s;
     box-shadow: inset 0 0 20px 20px #f8fafc;
 }
@@ -1911,7 +2007,7 @@ input:-webkit-autofill:active {
 .dark input:-webkit-autofill:focus,
 .dark input:-webkit-autofill:active {
     -webkit-text-fill-color: #e2e8f0;
-    box-shadow: inset 0 0 20px 20px #1e293b;
+    box-shadow: inset 0 0 20px 20px #161a1e;
 }
 
 @keyframes slide-up-subtle {

@@ -145,7 +145,7 @@ function updateMetaThemeColor(resolved) {
         meta.setAttribute('name', 'theme-color');
         document.head.appendChild(meta);
     }
-    meta.setAttribute('content', resolved === 'dark' ? '#0f172a' : '#F8FAFC');
+    meta.setAttribute('content', resolved === 'dark' ? '#0c0f14' : '#F8FAFC');
 }
 
 /**

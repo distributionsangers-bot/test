@@ -930,7 +930,7 @@ function injectCreateModal() {
 
     // CSS Fix: max-h-[85vh] and flex-col for responsiveness
     modal.innerHTML = `
-        <div class="bg-gradient-to-br from-white to-slate-50 w-full max-w-2xl rounded-3xl shadow-2xl relative animate-scale-in flex flex-col max-h-[85vh]">
+        <div class="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl relative animate-scale-in flex flex-col max-h-[85vh]">
             <!-- Decorative Gradient -->
             <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
                 <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
@@ -938,15 +938,15 @@ function injectCreateModal() {
             </div>
 
             <!-- Header (Fixed) -->
-            <div class="relative z-10 border-b border-slate-100/50 bg-gradient-to-r from-white to-slate-50/50 p-6 flex-shrink-0 rounded-t-3xl">
+            <div class="relative z-10 border-b border-slate-100/50 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-900/50 p-6 flex-shrink-0 rounded-t-3xl">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
                             ✨ Nouveau Message
                         </h2>
                         <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Créer et envoyer un message</p>
                     </div>
-                    <button id="close-modal" class="w-10 h-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-all duration-200 active:scale-95">
+                    <button id="close-modal" class="w-10 h-10 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all duration-200 active:scale-95">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -961,10 +961,10 @@ function injectCreateModal() {
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <label class="type-option relative cursor-pointer group">
                             <input type="radio" name="type" value="support" class="sr-only peer" checked>
-                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg peer-checked:shadow-blue-500/20 group-hover:border-slate-300">
-                                <i data-lucide="message-circle" class="w-6 h-6 text-slate-600 mb-2"></i>
-                                <p class="font-semibold text-sm text-slate-800">Support</p>
-                                <p class="text-xs text-slate-500 mt-1">
+                            <div class="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 transition-all duration-200 peer-checked:border-blue-500 dark:peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/30 peer-checked:shadow-lg peer-checked:shadow-blue-500/20 dark:peer-checked:shadow-blue-900/20 group-hover:border-slate-300 dark:group-hover:border-slate-600">
+                                <i data-lucide="message-circle" class="w-6 h-6 text-slate-600 dark:text-slate-300 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800 dark:text-slate-100">Support</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                     ${isAdmin ? 'Demande d\'aide' : 'Message aux Admins'}
                                 </p>
                             </div>
@@ -972,19 +972,19 @@ function injectCreateModal() {
                         ${isAdmin ? `
                         <label class="type-option relative cursor-pointer group">
                             <input type="radio" name="type" value="announcement" class="sr-only peer">
-                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:shadow-lg peer-checked:shadow-amber-500/20 group-hover:border-slate-300">
-                                <i data-lucide="megaphone" class="w-6 h-6 text-slate-600 mb-2"></i>
-                                <p class="font-semibold text-sm text-slate-800">Annonce</p>
-                                <p class="text-xs text-slate-500 mt-1">À tous</p>
+                            <div class="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 transition-all duration-200 peer-checked:border-amber-500 dark:peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/30 peer-checked:shadow-lg peer-checked:shadow-amber-500/20 dark:peer-checked:shadow-amber-900/20 group-hover:border-slate-300 dark:group-hover:border-slate-600">
+                                <i data-lucide="megaphone" class="w-6 h-6 text-slate-600 dark:text-slate-300 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800 dark:text-slate-100">Annonce</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">À tous</p>
                             </div>
                         </label>
                         ` : ''}
                         <label class="type-option relative cursor-pointer group">
                             <input type="radio" name="type" value="direct" class="sr-only peer">
-                            <div class="p-4 rounded-xl border-2 border-slate-200 bg-white transition-all duration-200 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:shadow-lg peer-checked:shadow-brand-500/20 group-hover:border-slate-300">
-                                <i data-lucide="send" class="w-6 h-6 text-slate-600 mb-2"></i>
-                                <p class="font-semibold text-sm text-slate-800">Direct</p>
-                                <p class="text-xs text-slate-500 mt-1">
+                            <div class="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 transition-all duration-200 peer-checked:border-brand-500 dark:peer-checked:border-brand-500 peer-checked:bg-brand-50 dark:peer-checked:bg-brand-900/30 peer-checked:shadow-lg peer-checked:shadow-brand-500/20 dark:peer-checked:shadow-brand-900/20 group-hover:border-slate-300 dark:group-hover:border-slate-600">
+                                <i data-lucide="send" class="w-6 h-6 text-slate-600 dark:text-slate-300 mb-2"></i>
+                                <p class="font-semibold text-sm text-slate-800 dark:text-slate-100">Direct</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                     ${isAdmin ? 'Personnel' : 'À un administrateur'}
                                 </p>
                             </div>
@@ -994,18 +994,18 @@ function injectCreateModal() {
 
                 <!-- Search User (for Direct Messages) -->
                 <div id="target-user-container" class="hidden animate-slide-down">
-                    <label class="text-sm font-bold text-slate-700 mb-3 block uppercase tracking-wide">
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 block uppercase tracking-wide">
                         ${isAdmin ? 'Destinataire (Bénévole)' : 'Destinataire (Administrateur)'}
                     </label>
                     
                     <!-- Search Bar -->
                     <div class="relative group mb-3">
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-colors group-focus-within:text-brand-500"></i>
-                        <input id="search-user" type="text" placeholder="${isAdmin ? 'Rechercher un bénévole...' : 'Rechercher un administrateur...'}" class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border-2 border-slate-200 rounded-xl text-sm focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400">
+                        <input id="search-user" type="text" placeholder="${isAdmin ? 'Rechercher un bénévole...' : 'Rechercher un administrateur...'}" class="w-full pl-12 pr-4 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:bg-white dark:focus:bg-slate-800 focus:border-brand-500 dark:focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 dark:text-slate-100">
                     </div>
 
                     <!-- User List -->
-                    <div id="user-list" class="bg-slate-50/30 border-2 border-slate-100 rounded-2xl max-h-48 overflow-y-auto space-y-1 p-2">
+                    <div id="user-list" class="bg-slate-50/30 dark:bg-slate-800/30 border-2 border-slate-100 dark:border-slate-700/50 rounded-2xl max-h-48 overflow-y-auto space-y-1 p-2">
                         <div class="text-center py-8 text-slate-400">
                             <i data-lucide="users-2" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
                             <p class="text-sm">Chargement...</p>
@@ -1013,15 +1013,15 @@ function injectCreateModal() {
                     </div>
 
                     <!-- Selected User Badge -->
-                    <div id="selected-user-badge" class="hidden mt-3 p-3 bg-gradient-to-r from-brand-50 to-blue-50 border-2 border-brand-200 rounded-xl flex items-center justify-between">
+                    <div id="selected-user-badge" class="hidden mt-3 p-3 bg-gradient-to-r from-brand-50 to-blue-50 dark:from-brand-900/50 dark:to-blue-900/50 border-2 border-brand-200 dark:border-brand-800 rounded-xl flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <div id="selected-user-avatar" class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-sm flex items-center justify-center"></div>
+                            <div id="selected-user-avatar" class="w-8 h-8 rounded-full bg-slate-800 dark:bg-slate-600 text-white font-bold text-sm flex items-center justify-center"></div>
                             <div>
-                                <p id="selected-user-name" class="font-semibold text-sm text-slate-800"></p>
-                                <p id="selected-user-email" class="text-xs text-slate-500"></p>
+                                <p id="selected-user-name" class="font-semibold text-sm text-slate-800 dark:text-slate-100"></p>
+                                <p id="selected-user-email" class="text-xs text-slate-500 dark:text-slate-400"></p>
                             </div>
                         </div>
-                        <button type="button" id="clear-user" class="w-6 h-6 rounded-full hover:bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                        <button type="button" id="clear-user" class="w-6 h-6 rounded-full hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -1031,24 +1031,25 @@ function injectCreateModal() {
 
                 <!-- Subject -->
                 <div>
-                    <label class="text-sm font-bold text-slate-700 mb-2 block uppercase tracking-wide">Sujet</label>
-                    <input name="subject" placeholder="Ex: Besoin d'info, Problème technique..." class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 focus:bg-white" required>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 block uppercase tracking-wide">Sujet</label>
+                    <input name="subject" placeholder="Ex: Besoin d'info, Problème technique..." class="w-full px-4 py-3 bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-brand-500 dark:focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 dark:text-slate-100" required>
                 </div>
 
                 <!-- Message -->
                 <div>
-                    <label class="text-sm font-bold text-slate-700 mb-2 block uppercase tracking-wide">Message</label>
-                    <textarea name="content" placeholder="Écrivez votre message ici... (Markdown supporté)" class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 resize-none" rows="5" required></textarea>
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 block uppercase tracking-wide">Message</label>
+                    <textarea name="content" placeholder="Écrivez votre message ici... (Markdown supporté)" class="w-full px-4 py-3 bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-brand-500 dark:focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all duration-200 placeholder:text-slate-400 resize-none dark:text-slate-100" rows="5" required></textarea>
                     <p class="text-xs text-slate-500 mt-2">💡 Conseil: Utilisez **gras** ou *italique* pour mettre en évidence</p>
                 </div>
             </form>
 
             <!-- Footer / Actions (Fixed) -->
-            <div class="relative z-10 p-6 pt-4 border-t border-slate-100 flex-shrink-0 bg-white rounded-b-3xl">
+            <div class="relative z-10 p-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-800/90 rounded-b-3xl">
                 <div class="flex gap-3 justify-end">
-                    <button type="button" id="cancel-modal" class="px-6 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-all duration-200 active:scale-95">
+                    <button type="button" id="cancel-modal" class="px-6 py-2.5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 active:scale-95">
                         Annuler
                     </button>
+
                     <button type="submit" form="create-form" class="px-6 py-2.5 bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 active:scale-95 flex items-center gap-2">
                         <i data-lucide="send" class="w-4 h-4"></i>
                         Envoyer

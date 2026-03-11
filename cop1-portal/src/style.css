@@ -2242,19 +2242,15 @@ input:-webkit-autofill:active {
 }
 
 /* --- 5. Empty States & Scrollbars (Lisibilité) --- */
-/* Icônes géantes décoratives */
-.dark .text-slate-200 {
-    color: #2d333b !important;
+/* Icônes géantes décoratives et icônes SVG: Assombrir UNIQUEMENT les SVGs/Icônes 
+   pour qu'elles restent discrètes en fond, sans affecter le texte (p, span, h3) */
+.dark svg.text-slate-200, .dark i.text-slate-200, .dark .text-slate-200 > svg,
+.dark svg.text-slate-300, .dark i.text-slate-300, .dark .text-slate-300 > svg {
+    color: #475569 !important; /* slate-600 */
 }
 
-/* Moins agressif que le texte normal */
-.dark .text-slate-300 {
-    color: #3a3f44 !important;
-}
-
-.dark .text-slate-400 {
-    color: #64748b !important;
-}
+/* Le texte redevient lisible naturellement avec les couleurs Tailwind de base 
+   (#cbd5e1 pour slate-300, #94a3b8 pour slate-400) */
 
 /* Placeholder override */
 
@@ -2339,87 +2335,35 @@ input:-webkit-autofill:active {
 
 /* slate-100 */
 
-/* --- 4. Pastel Badges & Focus (Opacité vs Couleur pleine) --- */
-.dark .bg-emerald-50 {
-    background-color: rgba(52, 211, 153, 0.15) !important;
-    border-color: rgba(52, 211, 153, 0.2) !important;
-}
+/* --- 4. Pastel Badges & Alertes (Opacité vs Couleur pleine) --- */
+/* Emerald */
+.dark .bg-emerald-50, .dark .bg-emerald-50\/50 { background-color: rgba(52, 211, 153, 0.15) !important; border-color: rgba(52, 211, 153, 0.2) !important; }
+.dark .text-emerald-900, .dark .text-emerald-800, .dark .text-emerald-800\/80, .dark .text-emerald-700, .dark .text-emerald-600 { color: #34d399 !important; }
 
-.dark .text-emerald-700,
-.dark .text-emerald-600 {
-    color: #34d399 !important;
-}
+/* Amber */
+.dark .bg-amber-50, .dark .bg-amber-50\/50 { background-color: rgba(251, 191, 36, 0.15) !important; border-color: rgba(251, 191, 36, 0.2) !important; }
+.dark .text-amber-900, .dark .text-amber-800, .dark .text-amber-800\/80, .dark .text-amber-700, .dark .text-amber-600 { color: #fbbf24 !important; }
 
-/* emerald-400 */
+/* Orange */
+.dark .bg-orange-50, .dark .bg-orange-50\/50 { background-color: rgba(251, 146, 60, 0.15) !important; border-color: rgba(251, 146, 60, 0.2) !important; }
+.dark .text-orange-900, .dark .text-orange-800, .dark .text-orange-800\/80, .dark .text-orange-700, .dark .text-orange-600 { color: #fb923c !important; }
 
-.dark .bg-amber-50 {
-    background-color: rgba(251, 191, 36, 0.15) !important;
-    border-color: rgba(251, 191, 36, 0.2) !important;
-}
+/* Red */
+.dark .bg-red-50, .dark .bg-red-50\/50 { background-color: rgba(248, 113, 113, 0.15) !important; border-color: rgba(248, 113, 113, 0.2) !important; }
+.dark .text-red-900, .dark .text-red-800, .dark .text-red-800\/80, .dark .text-red-700, .dark .text-red-600 { color: #f87171 !important; }
 
-.dark .text-amber-700,
-.dark .text-amber-600 {
-    color: #fbbf24 !important;
-}
+/* Blue */
+.dark .bg-blue-50, .dark .bg-blue-50\/50 { background-color: rgba(96, 165, 250, 0.15) !important; border-color: rgba(96, 165, 250, 0.2) !important; }
+.dark .text-blue-900, .dark .text-blue-800, .dark .text-blue-800\/80, .dark .text-blue-700, .dark .text-blue-600 { color: #60a5fa !important; }
 
-/* amber-400 */
+/* Indigo */
+.dark .bg-indigo-50, .dark .bg-indigo-50\/50 { background-color: rgba(129, 140, 248, 0.15) !important; border-color: rgba(129, 140, 248, 0.2) !important; }
+.dark .text-indigo-900, .dark .text-indigo-800, .dark .text-indigo-800\/80, .dark .text-indigo-700, .dark .text-indigo-600 { color: #818cf8 !important; }
 
-.dark .bg-red-50 {
-    background-color: rgba(248, 113, 113, 0.15) !important;
-    border-color: rgba(248, 113, 113, 0.2) !important;
-}
+/* Purple */
+.dark .bg-purple-50, .dark .bg-purple-50\/50 { background-color: rgba(167, 139, 250, 0.15) !important; border-color: rgba(167, 139, 250, 0.2) !important; }
+.dark .text-purple-900, .dark .text-purple-800, .dark .text-purple-800\/80, .dark .text-purple-700, .dark .text-purple-600 { color: #a78bfa !important; }
 
-.dark .text-red-700,
-.dark .text-red-600 {
-    color: #f87171 !important;
-}
-
-/* red-400 */
-
-.dark .bg-blue-50 {
-    background-color: rgba(96, 165, 250, 0.15) !important;
-    border-color: rgba(96, 165, 250, 0.2) !important;
-}
-
-.dark .text-blue-700,
-.dark .text-blue-600 {
-    color: #60a5fa !important;
-}
-
-/* blue-400 */
-
-.dark .bg-indigo-50 {
-    background-color: rgba(129, 140, 248, 0.15) !important;
-    border-color: rgba(129, 140, 248, 0.2) !important;
-}
-
-.dark .text-indigo-700,
-.dark .text-indigo-600 {
-    color: #818cf8 !important;
-}
-
-/* indigo-400 */
-
-.dark .bg-purple-50 {
-    background-color: rgba(167, 139, 250, 0.15) !important;
-    border-color: rgba(167, 139, 250, 0.2) !important;
-}
-
-.dark .text-purple-700,
-.dark .text-purple-600 {
-    color: #a78bfa !important;
-}
-
-/* purple-400 */
-
-.dark .bg-rose-50 {
-    background-color: rgba(251, 113, 133, 0.15) !important;
-    border-color: rgba(251, 113, 133, 0.2) !important;
-}
-
-.dark .text-rose-700,
-.dark .text-rose-600 {
-    color: #fb7185 !important;
-}
-
-/* rose-400 */
+/* Rose */
+.dark .bg-rose-50, .dark .bg-rose-50\/50 { background-color: rgba(251, 113, 133, 0.15) !important; border-color: rgba(251, 113, 133, 0.2) !important; }
+.dark .text-rose-900, .dark .text-rose-800, .dark .text-rose-800\/80, .dark .text-rose-700, .dark .text-rose-600 { color: #fb7185 !important; }
